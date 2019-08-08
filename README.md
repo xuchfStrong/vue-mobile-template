@@ -10,7 +10,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/IvanStrong/vue-mobile-template.git
+git clone https://github.com/xuchfStrong/vue-mobile-template.git
 
 # 进入项目目录
 cd vue-mobile-template
