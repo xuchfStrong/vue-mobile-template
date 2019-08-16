@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Vue Mobile Template',
+  title: '古代战争辅助',
 
   /**
    * @type {boolean} true | false

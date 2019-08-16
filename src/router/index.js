@@ -64,7 +64,7 @@ export const constantRoutes = [
       name: 'home',
       component: () => import('@/views/home/index'),
       meta: {
-        title: '阿玻罗金融科技'
+        title: '主页'
       }
     },
     {
