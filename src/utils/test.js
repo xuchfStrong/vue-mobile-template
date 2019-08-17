@@ -1,15 +1,6 @@
-const moment = require('moment')
+const parse = require('./response-parse')
 
-moment().format('YYYY-MM-DD HH:mm:ss') // 当前时间
-moment().add(9, 'hours').format('YYYY-MM-DD HH:mm:ss') // 9小时后
-moment().add(7, 'days').format('YYYY-MM-DD HH:mm:ss') // 7天后
-moment().add(-7, 'days').format('YYYY-MM-DD HH:mm:ss') // 7天前
-moment().format('d') // 今天星期几
-moment().format('X') // unix时间戳
-moment('20120620', 'YYYYMMDD').fromNow() // 相对当前是多久前
-moment().day(0).format('YYYY-MM-DD') // 获取本周第6天
-moment().weekday(5).format('YYYY-MM-DD HH:mm:ss') // 获取本周5
-moment().weekday(-6).format('YYYY-MM-DD') // 获取上周一
-console.log(
-  moment().endOf('day').fromNow()
-)
+const obj = { 'pd': 1088, 'buywlTimes': 0, 'sqLevel': 0, 'wlTimes': 3, 'wlLevel': 0, 'buyjgTimes': 3, 'jgTimes': 0, 'sqTimes': 3, 'jgLevel': 2, 'buysqTimes': 0, 'rId': 0 }
+// const str = '32s|0|1404'
+const res = parse.emmFubenInfo(obj)
+console.log(res)
