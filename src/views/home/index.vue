@@ -128,6 +128,20 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
+          <div>血战竞技</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>剩余{{ taskInfo.xuezhanRemainTime }}次</span>
+          <van-stepper v-model="attackTime.xuezhanjingjiTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.xuezhanjingjiFlag" type="info" size="small" @click="startXuezhan">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopXuezhan">停止</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
           <div>金币商店</div>
         </van-col>
         <van-col span="8" class="center">
@@ -137,13 +151,6 @@
           <van-button type="info" size="small" @click="buyAll">全买</van-button>
         </van-col>
       </van-row>
-
-      <div class="flex-center-wrapper">
-        <div>
-          <!-- <van-button type="info" size="small" @click="startall">开始全部</van-button> -->
-          <!-- <van-button type="info" size="small" @click="clearLog">清理日志</van-button> -->
-        </div>
-      </div>
 
       <van-divider>
         <van-button type="default" size="small" @click="clearLog">清理日志</van-button>
@@ -175,7 +182,8 @@ export default {
         tuituFlag: false,
         wujinFlag: false,
         emeFubenFlag: false,
-        meiriFubenFlag: false
+        meiriFubenFlag: false,
+        xuezhanjingjiFlag: false
       },
       roleInfo: {
         name: '',
@@ -184,15 +192,20 @@ export default {
         level: '', // 等级
         zuanshi: '',
         xuejing: ''
+
       },
       shopInfo: { // 夏洛克商店信息
         jinbiShuaXin: 0 // 金币商店刷新价格
+      },
+      taskInfo: { // 每天的各种任务信息
+        xuezhanRemainTime: 0 // 血战竞技剩余次数
       },
       attackTime: {
         bossTime: 1,
         wujinTime: 1,
         emeTime: 1,
-        meiriTime: 1
+        meiriTime: 1,
+        xuezhanjingjiTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -200,7 +213,8 @@ export default {
         wujinTimer: null,
         emeTimer: null,
         meiriTimer: null,
-        buyJinbiShopTimer: null
+        buyJinbiShopTimer: null,
+        xuezhanjingjiTimer: null
       },
       logs: [],
       userInfo: {
@@ -285,7 +299,7 @@ export default {
       setGameLoginInfo(gameLoginInfo)
     },
 
-    //
+    // 让日志框的滚动条一直在底部
     scrollToBottom: function() {
       this.$nextTick(function() {
         const div = document.getElementById('log-textarea')
@@ -358,43 +372,72 @@ export default {
         this.roleInfo.wujinLevelId = redata.level
       }
 
-      // const nolog_list = [1005, 1011, 1085]
-      // if (nolog_list.indexOf(redata.pd) === -1) {
-      //   console.log('responses', redata)
-      // }
-
-      // 推图结果
-      if (redata.pd === 1004 && redata.d === 5) {
-        const log = boss(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 无尽结果
-      if (redata.pd === 1004 && redata.d === 244) {
-        const log = wujin(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 每日副本
-      if (redata.pd === 1004 && redata.d === 243) {
-        const log = meiriFuben(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 恶魔巢穴
-      if (redata.pd === 1004 && redata.d === 259) {
-        const log = emeFuben(redata.c)
-        this.recordLogs(log)
-      }
-
       // 商店信息
       if (redata.pd === 1052) {
         this.shopInfo.jinbiShuaXin = redata.jinbiShuaXin
       }
 
+      // 血战竞技信息
+      if (redata.pd === 1100) {
+        this.taskInfo.xuezhanRemainTime = redata.battleTime
+      }
+
       // 恶魔巢穴难度等信息
       // if (redata.pd === 1088) {
       //   const log = parse.emmFubenInfo(redata)
+      //   this.recordLogs(log)
+      // }
+
+      // const nolog_list = [1005, 1011, 1085]
+      // if (nolog_list.indexOf(redata.pd) === -1) {
+      //   console.log('responses', redata)
+      // }
+
+      // 攻击结果
+      if (redata.pd === 1004) {
+        const d = redata.d
+        let log = ''
+        switch (d) {
+          case 5:
+            log = boss(redata.c) // 推图结果
+            this.recordLogs(log)
+            break
+          case 243:
+            log = meiriFuben(redata.c) // 每日副本
+            this.recordLogs(log)
+            break
+          case 244:
+            log = wujin(redata.c) // 无尽结果
+            this.recordLogs(log)
+            break
+          case 259:
+            log = emeFuben(redata.c) // 恶魔巢穴
+            this.recordLogs(log)
+            break
+        }
+      }
+
+      // // 推图结果
+      // if (redata.pd === 1004 && redata.d === 5) {
+      //   const log = boss(redata.c)
+      //   this.recordLogs(log)
+      // }
+
+      // // 无尽结果
+      // if (redata.pd === 1004 && redata.d === 244) {
+      //   const log = wujin(redata.c)
+      //   this.recordLogs(log)
+      // }
+
+      // // 每日副本
+      // if (redata.pd === 1004 && redata.d === 243) {
+      //   const log = meiriFuben(redata.c)
+      //   this.recordLogs(log)
+      // }
+
+      // // 恶魔巢穴
+      // if (redata.pd === 1004 && redata.d === 259) {
+      //   const log = emeFuben(redata.c)
       //   this.recordLogs(log)
       // }
     },
@@ -689,6 +732,42 @@ export default {
         }
         i++
       }, 100)
+    },
+
+    // 血战竞技发包
+    sendXuezhan() {
+      const xuezhanPacket = this.gen_base_json(270)
+      xuezhanPacket.operate = 1
+      xuezhanPacket.nowState = 0
+      this.websocketsend(xuezhanPacket)
+      this.sendGeneric()
+      this.recordLogs('挑战血战竞技')
+    },
+
+    // 开始血战竞技
+    startXuezhan() {
+      if (this.taskInfo.xuezhanRemainTime === 0) {
+        this.$toast.fail('血战竞技没次数了')
+        return
+      }
+      this.flag.xuezhanjingjiFlag = true
+      let i = 1
+      const xuezhanTime = this.attackTime.xuezhanjingjiTime
+      const self = this
+      self.timer.xuezhanjingjiTimer = setInterval(function() {
+        self.sendXuezhan()
+        i++
+        if (i > xuezhanTime) {
+          self.stopXuezhan()
+        }
+      }, 1000)
+    },
+
+    // 停止血战竞技
+    stopXuezhan() {
+      clearInterval(this.timer.xuezhanjingjiTimer)
+      this.flag.xuezhanjingjiFlag = false
+      this.recordLogs('停止挑战血战竞技')
     }
   }
 }

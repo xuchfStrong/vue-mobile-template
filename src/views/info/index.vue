@@ -12,8 +12,14 @@
         申请
       </template>
     </Header>
-    <div class="content">
+    <div class="content-container">
       产品申请
+      <input v-model="selectVal" class="browsers" list="browsers">
+      <datalist id="browsers">browsers
+        <option v-for="item in list" :key="item.id" :value="item.text" />
+      </datalist>
+      <div>{{ selectVal }}</div>
+      <van-button type="info" size="mini" @click="showme">点击</van-button>
     </div>
   </div>
 </template>
@@ -27,6 +33,14 @@ export default {
   },
   data() {
     return {
+      selectVal: '',
+      list: [
+        { id: 1, text: '清醒' },
+        { id: 2, text: '嗜睡' },
+        { id: 3, text: '烦躁' },
+        { id: 4, text: '昏迷' },
+        { id: 5, text: '迷题' }
+      ]
     }
   },
 
@@ -38,7 +52,11 @@ export default {
 
   mounted() {},
 
-  methods: {}
+  methods: {
+    showme() {
+
+    }
+  }
 }
 
 </script>
