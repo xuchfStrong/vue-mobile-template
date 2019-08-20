@@ -141,14 +141,12 @@
       <div class="flex-center-wrapper">
         <div>
           <!-- <van-button type="info" size="small" @click="startall">开始全部</van-button> -->
-          <!-- <van-button type="info" size="small" @click="clearLog">清理日志</van-button> -->
+          <van-button type="info" size="small" @click="clearLog">清理日志</van-button>
         </div>
       </div>
 
-      <van-divider>
-        <van-button type="default" size="small" @click="clearLog">清理日志</van-button>
-      </van-divider>
-      <textarea id="log-textarea" v-model="guajiLog" rows="20" readonly />
+      <van-divider>挂机日志</van-divider>
+      <textarea v-model="guajiLog" rows="20" readonly />
     </div>
   </div>
 </template>
@@ -159,7 +157,7 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import Header from '@/components/Header'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben } from '@/utils/response-parse'
+const parse = require('@/utils/response-parse')
 export default {
 
   components: {
@@ -231,16 +229,12 @@ export default {
       const yu = (this.roleInfo.levelId - 1) % 200 + 1
       const str = mo + '-' + yu
       return str
-    },
-    attackWujinLevelId() {
-      return this.roleInfo.wujinLevelId + 1
     }
   },
 
   watch: {
     logs(newVal) {
       this.changeGuajiLog(newVal)
-      this.scrollToBottom()
     }
   },
 
@@ -285,17 +279,9 @@ export default {
       setGameLoginInfo(gameLoginInfo)
     },
 
-    //
-    scrollToBottom: function() {
-      this.$nextTick(function() {
-        const div = document.getElementById('log-textarea')
-        div.scrollTop = div.scrollHeight
-      })
-    },
-
     genKey() {
-      // const keytime = new Date().getTime()
-      const keytime = Date.parse(new Date()) / 1000
+      const keytime = new Date().getTime()
+      // const keytime = Date.parse(new Date()) / 1000
       const str = 'askj8789kldksiewkszkm2323lkkl' + keytime
       const key = SHA1(str).toUpperCase().substr(0, 6)
       return {
@@ -317,10 +303,6 @@ export default {
     },
 
     initWebSocket() { // 初始化weosocket
-      if (!this.userInfo.username || !this.userInfo.password) {
-        this.$toast('请输入用户名和密码')
-        return
-      }
       const wsuri = this.userInfo.server // ws地址
       this.websock = new WebSocket(wsuri)
       this.websock.onopen = this.websocketonopen
@@ -341,6 +323,9 @@ export default {
     },
     websocketonmessage(e) { // 数据接收
       const redata = JSON.parse(e.data)
+      // 注意：长连接我们是后台直接1秒推送一条数据，
+      // 但是点击某个列表时，会发送给后台一个标识，后台根据此标识返回相对应的数据，
+      // 这个时候数据就只能从一个出口出，所以让后台加了一个键，例如键为1时，是每隔1秒推送的数据，为2时是发送标识后再推送的数据，以作区分
       // console.log('response', redata)
       if (redata.pd === 1000) {
         this.roleInfo.name = redata.roleName
@@ -365,25 +350,25 @@ export default {
 
       // 推图结果
       if (redata.pd === 1004 && redata.d === 5) {
-        const log = boss(redata.c)
+        const log = parse.boss(redata.c)
         this.recordLogs(log)
       }
 
       // 无尽结果
       if (redata.pd === 1004 && redata.d === 244) {
-        const log = wujin(redata.c)
+        const log = parse.wujin(redata.c)
         this.recordLogs(log)
       }
 
       // 每日副本
       if (redata.pd === 1004 && redata.d === 243) {
-        const log = meiriFuben(redata.c)
+        const log = parse.meiriFuben(redata.c)
         this.recordLogs(log)
       }
 
       // 恶魔巢穴
       if (redata.pd === 1004 && redata.d === 259) {
-        const log = emeFuben(redata.c)
+        const log = parse.emeFuben(redata.c)
         this.recordLogs(log)
       }
 
@@ -471,7 +456,7 @@ export default {
     recordLogs(log) {
       // const d = new Date().toLocaleString()
       const d = moment().format('YYYY-MM-DD HH:mm:ss')
-      if (this.logs.length > 300) {
+      if (this.logs.length > 100) {
         this.logs.shift()
       }
       this.logs.push('\n' + d + ':' + log)
@@ -548,8 +533,9 @@ export default {
       let i = 1
       const wujinTime = this.attackTime.wujinTime
       const self = this
+      const tiaozhanLevel = this.roleInfo.wujinLevelId + 1
       self.timer.wujinTimer = setInterval(function() {
-        self.recordLogs('挑战无尽炼狱第' + self.attackWujinLevelId + '关')
+        self.recordLogs('挑战无尽炼狱第' + tiaozhanLevel + '关')
         self.sendWujin()
         i++
         if (i > wujinTime) {
@@ -728,7 +714,6 @@ export default {
 textarea {
   width: 100%;
   margin-bottom: 50px;
-  padding-bottom: 30px;
 }
 .right {
   text-align: end;

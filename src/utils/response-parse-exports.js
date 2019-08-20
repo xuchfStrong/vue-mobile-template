@@ -1,5 +1,5 @@
 // 解析角色信息
-export function getRoleInfo(obj) {
+const getRoleInfo = function(obj) {
   const rolename = obj['c']
   const rolelevel = obj['h']
   const tuituguanka = obj['k']
@@ -35,7 +35,7 @@ export function getRoleInfo(obj) {
 }
 
 // 解析无尽炼狱结果
-export function wujin(str) {
+const wujin = function(str) {
   const yaoshuiType = {
     4000005: '力量药水',
     4000006: '智力药水',
@@ -55,7 +55,7 @@ export function wujin(str) {
 }
 
 // 解析推图结果
-export function boss(str) {
+const boss = function(str) {
   const strList = str.split('#')
   const length = strList.length
   const zuanshi = strList[length - 1].split('|')[2]
@@ -66,7 +66,7 @@ export function boss(str) {
 }
 
 // 解析每日副本
-export function meiriFuben(str) {
+const meiriFuben = function(str) {
   const fubenType = {
     1: '金币',
     5: '药草',
@@ -102,7 +102,7 @@ function parseJingyanshu(jingyanshu) {
   return { 'name': name, 'num': num }
 }
 
-export function emeFuben(str) {
+const emeFuben = function(str) {
   let res = ''
   const strList = str.split('|')
   const fubenId = strList[0]
@@ -140,7 +140,7 @@ export function emeFuben(str) {
  *
  * @param {*} obj  返回的消息
  */
-export function emeFubenInfo(obj) {
+const emmFubenInfo = function(obj) {
   // 美女副本信息
   const buyjgTimes = obj['buyjgTimes']
   const jgLevel = obj['jgLevel']
@@ -162,7 +162,17 @@ export function emeFubenInfo(obj) {
 }
 
 // 解析商店信息
-export function shop(obj) {
+const shop = function(obj) {
   const jinbiShuaXin = obj.jinbiShuaXin
   return jinbiShuaXin
+}
+
+module.exports = {
+  getRoleInfo,
+  wujin,
+  boss,
+  meiriFuben,
+  emeFuben,
+  emmFubenInfo,
+  shop
 }
