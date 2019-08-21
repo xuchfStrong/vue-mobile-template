@@ -34,14 +34,14 @@
       </van-row>
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="9">
-          <van-field v-model="userInfo.username" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
+          <van-field v-model="userInfo.usernamePlatForm" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
         </van-col>
         <van-col span="9">
           <van-field v-model="userInfo.passwordPlatForm" input-align="center" type="password" class="input-wrap" placeholder="密码" />
         </van-col>
         <van-col span="4" class="right">
           <van-button v-if="flag.loginFlag" type="danger" size="small" @click="logout">退出</van-button>
-          <van-button v-else type="info" size="small" @click="initWebSocket">登录</van-button>
+          <van-button v-else type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
         </van-col>
       </van-row>
 
@@ -167,6 +167,7 @@ import { mapGetters, mapActions } from 'vuex'
 import Header from '@/components/Header'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben } from '@/utils/response-parse'
+import { loginPlatform } from '@/api/game'
 export default {
 
   components: {
@@ -218,14 +219,15 @@ export default {
       },
       logs: [],
       userInfo: {
-        username: '',
+        username: '', // 登录游戏用的，是由平台返回的
         password: 'ljs', // 登录游戏服务器的密码，websocket连接使用
+        usernamePlatForm: '', // 平台的用户名
         passwordPlatForm: '', // 平台的密码
-        platform: 1,
+        platform: 'taptap_mobile',
         server: 'ws://tapandroid4.maobugames.com:35001/'
       },
       platformOption: [
-        { text: 'TapTap', value: 1 }
+        { text: 'TapTap', value: 'taptap_mobile' }
       ],
       serverOption: [
         { text: '天启位面', value: 'ws://xgm.xiaomaoqipai.cn:35001/' },
@@ -277,13 +279,41 @@ export default {
       'changeGuajiLog'
     ]),
 
+    // 登录平台
+    handleLoginPlatForm() {
+      if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
+        this.$toast('请输入用户名和密码')
+        return
+      }
+      const param = {
+        platform: this.userInfo.platform,
+        username: this.userInfo.usernamePlatForm,
+        password: this.userInfo.passwordPlatForm
+      }
+      loginPlatform(param).then(res => {
+        if (res === 'error') {
+          this.$toast.fail('登录失败')
+          return
+        } else if (res === 'notime') {
+          this.$toast.fail('辅助时间到期，请充值后登录！')
+          return
+        } else {
+          this.saveLogInfo()
+          this.userInfo.username = res
+          this.initWebSocket()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
     // 读取记住的登录信息
     loadLoginInfo() {
       const gameLoginInfo = getGameLoginInfo()
       if (gameLoginInfo) {
         this.userInfo.platform = gameLoginInfo.platform
         this.userInfo.server = gameLoginInfo.server
-        this.userInfo.username = gameLoginInfo.username
+        this.userInfo.usernamePlatForm = gameLoginInfo.usernamePlatForm
         this.userInfo.passwordPlatForm = gameLoginInfo.passwordPlatForm
       }
     },
@@ -293,7 +323,7 @@ export default {
       const gameLoginInfo = {
         platform: this.userInfo.platform,
         server: this.userInfo.server,
-        username: this.userInfo.username,
+        usernamePlatForm: this.userInfo.usernamePlatForm,
         passwordPlatForm: this.userInfo.passwordPlatForm
       }
       setGameLoginInfo(gameLoginInfo)
@@ -331,8 +361,8 @@ export default {
     },
 
     initWebSocket() { // 初始化weosocket
-      if (!this.userInfo.username || !this.userInfo.password) {
-        this.$toast('请输入用户名和密码')
+      if (!this.userInfo.username) {
+        this.$toast('没获取到登录用户ID')
         return
       }
       const wsuri = this.userInfo.server // ws地址
@@ -346,6 +376,7 @@ export default {
     websocketonopen(e) {
       // console.log('WebSocket连接成功', e)
       this.recordLogs('登录成功')
+      this.$toast('登录成功')
       this.flag.loginFlag = true
       this.login(this.userInfo.username, this.userInfo.password)
     },
@@ -453,14 +484,17 @@ export default {
     },
 
     login(username, password) {
-      this.saveLogInfo()
       this.websocketsend(this.gen_base_json(-1))
       // 第一个包
       const login_packet = this.gen_base_json(0)
       login_packet.userName = username
       login_packet.password = password
       login_packet.plat = 0
-      login_packet.youke = false
+      if (/^mao.*bu$/.test(username)) {
+        login_packet.youke = true
+      } else {
+        login_packet.youke = false
+      }
       login_packet.idfa = ''
       // 第二个包
       const login_packet1 = this.gen_base_json(260)
