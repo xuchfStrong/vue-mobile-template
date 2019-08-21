@@ -416,30 +416,6 @@ export default {
             break
         }
       }
-
-      // // 推图结果
-      // if (redata.pd === 1004 && redata.d === 5) {
-      //   const log = boss(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 无尽结果
-      // if (redata.pd === 1004 && redata.d === 244) {
-      //   const log = wujin(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 每日副本
-      // if (redata.pd === 1004 && redata.d === 243) {
-      //   const log = meiriFuben(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 恶魔巢穴
-      // if (redata.pd === 1004 && redata.d === 259) {
-      //   const log = emeFuben(redata.c)
-      //   this.recordLogs(log)
-      // }
     },
 
     websocketsend(data) { // 数据发送
@@ -460,7 +436,11 @@ export default {
       login_packet.userName = username
       login_packet.password = password
       login_packet.plat = 0
-      login_packet.youke = false
+      if (/^mao.*bu$/.test(username)) {
+        login_packet.youke = true
+      } else {
+        login_packet.youke = false
+      }
       login_packet.idfa = ''
       // 第二个包
       const login_packet1 = this.gen_base_json(260)
