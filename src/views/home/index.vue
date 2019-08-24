@@ -162,7 +162,9 @@
 
 <script>
 import SHA1 from 'js-sha1'
+import axios from 'axios'
 import moment from 'moment'
+import CryptoJS from 'crypto-js'
 import { mapGetters, mapActions } from 'vuex'
 import Header from '@/components/Header'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
@@ -178,6 +180,11 @@ export default {
       name: '',
       websock: null,
       pIn: 0,
+      secretKey: 'sjsdofjdf2849skd',
+      timeDiff: 0,
+      url: {
+        serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
+      },
       flag: {
         loginFlag: false,
         tuituFlag: false,
@@ -272,6 +279,7 @@ export default {
 
   mounted() {
     this.loadLoginInfo()
+    this.getServerTIme()
   },
 
   methods: {
@@ -285,22 +293,32 @@ export default {
         this.$toast('请输入用户名和密码')
         return
       }
+      const cipherPwd = CryptoJS.AES.encrypt(this.userInfo.passwordPlatForm, CryptoJS.enc.Utf8.parse(this.secretKey), {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      }).toString()
       const param = {
         platform: this.userInfo.platform,
         username: this.userInfo.usernamePlatForm,
-        password: this.userInfo.passwordPlatForm
+        password: cipherPwd
       }
       loginPlatform(param).then(res => {
-        if (res === 'error') {
-          this.$toast.fail('登录失败')
+        if (res.code === 401) {
+          this.$toast.fail('用户名密码错误')
           return
-        } else if (res === 'notime') {
+        } else if (res.code === 403) {
           this.$toast.fail('辅助时间到期，请充值后登录！')
           return
-        } else {
+        } else if (res.code === 200) {
           this.saveLogInfo()
-          this.userInfo.username = res
+          const userId = res.userId
+          this.userInfo.username = CryptoJS.AES.decrypt(userId, CryptoJS.enc.Utf8.parse(this.secretKey), {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+          }).toString(CryptoJS.enc.Utf8)
           this.initWebSocket()
+        } else {
+          console.log('1')
         }
       }).catch(err => {
         console.log(err)
@@ -337,9 +355,19 @@ export default {
       })
     },
 
+    getServerTIme() {
+      axios.get(this.url.serverTimeUrl).then(res => {
+        const serverTime = res.data.serverTime
+        const localTime = new Date().getTime()
+        this.timeDiff = serverTime - localTime
+      })
+    },
+
     genKey() {
-      // const keytime = new Date().getTime()
-      const keytime = Date.parse(new Date()) / 1000
+      // const keytime = Date.parse(new Date()) / 1000
+      const localTime = new Date().getTime()
+      const correctTime = localTime + this.timeDiff
+      const keytime = parseInt(correctTime / 1000)
       const str = 'askj8789kldksiewkszkm2323lkkl' + keytime
       const key = SHA1(str).toUpperCase().substr(0, 6)
       return {
@@ -447,30 +475,6 @@ export default {
             break
         }
       }
-
-      // // 推图结果
-      // if (redata.pd === 1004 && redata.d === 5) {
-      //   const log = boss(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 无尽结果
-      // if (redata.pd === 1004 && redata.d === 244) {
-      //   const log = wujin(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 每日副本
-      // if (redata.pd === 1004 && redata.d === 243) {
-      //   const log = meiriFuben(redata.c)
-      //   this.recordLogs(log)
-      // }
-
-      // // 恶魔巢穴
-      // if (redata.pd === 1004 && redata.d === 259) {
-      //   const log = emeFuben(redata.c)
-      //   this.recordLogs(log)
-      // }
     },
 
     websocketsend(data) { // 数据发送
