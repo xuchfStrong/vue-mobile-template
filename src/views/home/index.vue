@@ -4,12 +4,23 @@
     <div>
       <Header>
         <template slot="left" />
-        <template slot="right" />
+        <template slot="right">
+          <van-icon name="arrow" @click="showHelp()" />
+        </template>
         <template>
           <span class="title">古代战争-同肝</span>
         </template>
       </Header>
     </div>
+
+    <van-popup
+      v-model="show.helpInfo"
+      position="top"
+      :style="{ height: '40%' }"
+    >
+      <help />
+    </van-popup>
+
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
         <!-- <van-col span="3">
@@ -57,7 +68,7 @@
           <span>{{ roleInfo.level }}</span>
         </van-col>
         <van-col span="8">
-          <span>推图：</span>
+          <span>推图关卡：</span>
           <span>{{ levelIdStr }}</span>
         </van-col>
       </van-row>
@@ -71,8 +82,36 @@
           <span>{{ roleInfo.zuanshi }}</span>
         </van-col>
         <van-col span="8">
-          <span>无尽：</span>
+          <span>无尽关卡：</span>
           <span>{{ roleInfo.wujinLevelId }}</span>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="8">
+          <span>金币：</span>
+          <span>{{ jinbiFormat }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>无尽币：</span>
+          <span>{{ roleInfo.wujingbi }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>神器碎片：</span>
+          <span>{{ roleInfo.shenqisuipian }}</span>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="8">
+          <span>熔炼：</span>
+          <span>{{ roleInfo.ronglian }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>远征币：</span>
+          <span>{{ roleInfo.yuanzhengbi }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>套装碎片：</span>
+          <span>{{ roleInfo.taozhuangsuipian }}</span>
         </van-col>
       </van-row>
 
@@ -166,14 +205,16 @@ import axios from 'axios'
 import moment from 'moment'
 import CryptoJS from 'crypto-js'
 import { mapGetters, mapActions } from 'vuex'
-import Header from '@/components/Header'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben } from '@/utils/response-parse'
 import { loginPlatform } from '@/api/game'
+import Header from '@/components/Header'
+import Help from './components/Help'
 export default {
 
   components: {
-    Header
+    Header,
+    Help
   },
   data() {
     return {
@@ -182,6 +223,9 @@ export default {
       pIn: 0,
       secretKey: 'sjsdofjdf2849skd',
       timeDiff: 0,
+      show: {
+        helpInfo: false
+      },
       url: {
         serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
       },
@@ -199,8 +243,13 @@ export default {
         wujinLevelId: 0,
         level: '', // 等级
         zuanshi: '',
-        xuejing: ''
-
+        xuejing: '',
+        jinbi: '',
+        wujingbi: '',
+        shenqisuipian: '',
+        ronglian: '',
+        yuanzhengbi: '',
+        taozhuangsuipian: ''
       },
       shopInfo: { // 夏洛克商店信息
         jinbiShuaXin: 0 // 金币商店刷新价格
@@ -257,6 +306,14 @@ export default {
     },
     attackWujinLevelId() {
       return this.roleInfo.wujinLevelId + 1
+    },
+    jinbiFormat() {
+      if (this.roleInfo.jinbi) {
+        const jinbi = this.roleInfo.jinbi
+        return (jinbi / 100000000).toFixed(2) + '亿'
+      } else {
+        return ''
+      }
     }
   },
 
@@ -286,6 +343,10 @@ export default {
     ...mapActions('game', [
       'changeGuajiLog'
     ]),
+
+    showHelp() {
+      this.show.helpInfo = true
+    },
 
     // 登录平台
     handleLoginPlatForm() {
@@ -423,6 +484,12 @@ export default {
         this.roleInfo.level = redata.h
         this.roleInfo.zuanshi = redata.f
         this.roleInfo.xuejing = redata.xuejing
+        this.roleInfo.jinbi = redata.g
+        this.roleInfo.wujingbi = redata.wujingbi
+        this.roleInfo.shenqisuipian = redata.shenqiSuiPian
+        this.roleInfo.ronglian = redata.ronglian
+        this.roleInfo.yuanzhengbi = redata.yuanzhengBi
+        this.roleInfo.taozhuangsuipian = redata.tzSuiPian
       }
       if (redata.pd === 1008) {
         this.roleInfo.levelId = redata.openLevel
@@ -584,7 +651,17 @@ export default {
       this.websocketsend(fuben_packet)
     },
 
+    checkLoginStatus() {
+      if (this.flag.loginFlag) {
+        return true
+      } else {
+        this.$toast.fail({ duration: 1000, message: '请先登录' })
+        return false
+      }
+    },
+
     startFubenBoss() {
+      if (!this.checkLoginStatus()) return
       if (this.roleInfo.levelId === 0) {
         this.$toast.fail('等待获取当前关卡数')
         return
@@ -620,6 +697,7 @@ export default {
 
     // 开始无尽炼狱
     startWujin() {
+      if (!this.checkLoginStatus()) return
       if (this.roleInfo.wujinLevelId === 0) {
         this.sendWujin()
         this.$toast.fail('等待获取当前关卡信息')
@@ -659,6 +737,7 @@ export default {
 
     // 开始恶魔副本
     startEme() {
+      if (!this.checkLoginStatus()) return
       this.flag.emeFubenFlag = true
       let i = 1
       const emeTime = this.attackTime.emeTime
@@ -702,6 +781,7 @@ export default {
 
     // 开始每日副本
     startMeiriFuben() {
+      if (!this.checkLoginStatus()) return
       this.flag.meiriFubenFlag = true
       const dayNum = parseInt(moment().format('d'))
       let intervalTime = 0
@@ -755,6 +835,7 @@ export default {
       this.sendJinbiShop(2, 0, 0)
     },
     buyAll() {
+      if (!this.checkLoginStatus()) return
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
@@ -784,6 +865,7 @@ export default {
 
     // 开始血战竞技
     startXuezhan() {
+      if (!this.checkLoginStatus()) return
       if (this.taskInfo.xuezhanRemainTime === 0) {
         this.$toast.fail('血战竞技没次数了')
         return

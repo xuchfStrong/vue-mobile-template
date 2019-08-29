@@ -1,18 +1,17 @@
 <template>
   <div>
     <app-main />
-    <foot />
+    <!-- <foot /> -->
   </div>
 </template>
 
 <script>
-import { AppMain, Foot } from './components'
+import { AppMain } from './components'
 
 export default {
   name: 'Layout',
   components: {
-    AppMain,
-    Foot
+    AppMain
   },
   computed: {
   },
