@@ -166,3 +166,14 @@ export function shop(obj) {
   const jinbiShuaXin = obj.jinbiShuaXin
   return jinbiShuaXin
 }
+
+// 解析挂机信息
+export function guaji(obj) {
+  const str = obj.c
+  let res = ''
+  const strList = str.split('#')
+  const jinbi = strList[strList.length - 2].split('|')[2]
+  const jingyan = strList[strList.length - 1].split('|')[2]
+  res = '挂机获得：金币' + jinbi + ',经验' + jingyan
+  return res
+}

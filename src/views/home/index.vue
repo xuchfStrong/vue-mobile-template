@@ -206,7 +206,7 @@ import moment from 'moment'
 import CryptoJS from 'crypto-js'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben } from '@/utils/response-parse'
+import { wujin, boss, meiriFuben, emeFuben, guaji } from '@/utils/response-parse'
 import { loginPlatform } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
@@ -223,6 +223,7 @@ export default {
       pIn: 0,
       secretKey: 'sjsdofjdf2849skd',
       timeDiff: 0,
+      vip: true,
       show: {
         helpInfo: false
       },
@@ -271,7 +272,8 @@ export default {
         emeTimer: null,
         meiriTimer: null,
         buyJinbiShopTimer: null,
-        xuezhanjingjiTimer: null
+        xuezhanjingjiTimer: null,
+        attackXiaoguaiTimer: null
       },
       logs: [],
       userInfo: {
@@ -490,6 +492,7 @@ export default {
         this.roleInfo.ronglian = redata.ronglian
         this.roleInfo.yuanzhengbi = redata.yuanzhengBi
         this.roleInfo.taozhuangsuipian = redata.tzSuiPian
+        // this.recordLogs('当前经验：' + redata.i)
       }
       if (redata.pd === 1008) {
         this.roleInfo.levelId = redata.openLevel
@@ -526,6 +529,10 @@ export default {
         switch (d) {
           case 5:
             log = boss(redata.c) // 推图结果
+            this.recordLogs(log)
+            break
+          case 17:
+            log = guaji(redata) // 挂机信息
             this.recordLogs(log)
             break
           case 243:
@@ -604,12 +611,18 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet5) }, 700)
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
+      setTimeout(function() { self.sendGeneric() }, 950)
+      if (!this.vip) {
+        setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
+      }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
+      // this.timer.attackXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10590)
     },
 
     logout() {
       this.recordLogs('退出登录')
       clearInterval(this.timer.heartBeatTimer)
+      // clearInterval(this.timer.attackXiaoguaiTimer)
       this.websock.close()
       this.flag.loginFlag = false
       this.pIn = 0
