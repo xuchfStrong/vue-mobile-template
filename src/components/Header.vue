@@ -7,7 +7,7 @@
       </van-col>
       <van-col span="12">
         <van-row type="flex" justify="center" align="center">
-          <van-col><slot>Mobile Template</slot></van-col>
+          <van-col><div class="header-middle"><slot>Mobile Template</slot></div></van-col>
         </van-row>
       </van-col>
       <van-col span="6">
@@ -50,6 +50,9 @@ export default {
 }
 .header-left {
   padding-left: 10px;
+}
+.header-middle {
+  font-size: 16px;
 }
 .header-right {
   float: right;

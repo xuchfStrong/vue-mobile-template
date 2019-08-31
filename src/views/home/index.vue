@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span class="title">古代战争-同肝</span>
+          <span>古代战争-同肝</span>
         </template>
       </Header>
     </div>
@@ -23,25 +23,17 @@
 
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
-        <!-- <van-col span="3">
-          <div>平台:</div>
-        </van-col> -->
         <van-col span="9">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="userInfo.platform" :options="platformOption" />
+            <van-dropdown-item v-model="userInfo.platform" :options="platformOption" @change="changePlatform" />
           </van-dropdown-menu>
         </van-col>
-        <!-- <van-col span="4">
-          <div>服务器:</div>
-        </van-col> -->
         <van-col span="9">
           <van-dropdown-menu>
             <van-dropdown-item v-model="userInfo.server" :options="serverOption" />
           </van-dropdown-menu>
         </van-col>
-        <van-col span="4">
-          <!-- <div>服务器:</div> -->
-        </van-col>
+        <van-col span="4" />
       </van-row>
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="9">
@@ -114,6 +106,20 @@
           <span>{{ roleInfo.taozhuangsuipian }}</span>
         </van-col>
       </van-row>
+      <van-row class="row-wrap">
+        <van-col span="8">
+          <span>羁绊：</span>
+          <span>{{ roleInfo.jiban }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>竞技币：</span>
+          <span>{{ roleInfo.rongyu }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>蜡像币：</span>
+          <span>{{ roleInfo.laxiangbi }}</span>
+        </van-col>
+      </van-row>
 
       <van-divider>挂机设置</van-divider>
       <van-row class="row-wrap" type="flex" align="center">
@@ -181,6 +187,34 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
+          <div>蜡像馆</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>剩余{{ laxiangguanInfo.canAttackTime }}次</span>
+          <span>{{ laxiangguanLevel }}</span>
+          <van-stepper v-model="attackTime.laxiangguanTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.laxiangguanFlag" type="info" size="small" @click="startLaxiangguan">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopLaxiangguan">停止</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>蜡像馆购买</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>已买{{ laxiangguanInfo.buyTime }}次</span>
+          <van-stepper v-model="buyTime.laxiangguanBuyTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyLaxiangguan">开始</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
           <div>金币商店</div>
         </van-col>
         <van-col span="8" class="center">
@@ -206,8 +240,8 @@ import moment from 'moment'
 import CryptoJS from 'crypto-js'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben, guaji } from '@/utils/response-parse'
-import { loginPlatform } from '@/api/game'
+import { wujin, boss, meiriFuben, emeFuben, guaji, shop } from '@/utils/response-parse'
+import { loginPlatform, getServer } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
 export default {
@@ -224,6 +258,11 @@ export default {
       secretKey: 'sjsdofjdf2849skd',
       timeDiff: 0,
       vip: true,
+      ut: { // 用户类型
+        f: true, // 完整版
+        v: false, // vip版本
+        sv: false // 超级VIP
+      },
       show: {
         helpInfo: false
       },
@@ -236,7 +275,8 @@ export default {
         wujinFlag: false,
         emeFubenFlag: false,
         meiriFubenFlag: false,
-        xuezhanjingjiFlag: false
+        xuezhanjingjiFlag: false,
+        laxiangguanFlag: false
       },
       roleInfo: {
         name: '',
@@ -250,7 +290,16 @@ export default {
         shenqisuipian: '',
         ronglian: '',
         yuanzhengbi: '',
-        taozhuangsuipian: ''
+        taozhuangsuipian: '',
+        rongyu: '', // 竞技荣誉
+        jiban: '',
+        laxiangbi: '' // 蜡像币
+      },
+      laxiangguanInfo: { // 蜡像馆信息
+        difficulty: 0,
+        level: 0,
+        buyTime: 0,
+        canAttackTime: 0
       },
       shopInfo: { // 夏洛克商店信息
         jinbiShuaXin: 0 // 金币商店刷新价格
@@ -258,12 +307,16 @@ export default {
       taskInfo: { // 每天的各种任务信息
         xuezhanRemainTime: 0 // 血战竞技剩余次数
       },
+      buyTime: {
+        laxiangguanBuyTime: 1
+      },
       attackTime: {
         bossTime: 1,
         wujinTime: 1,
         emeTime: 1,
         meiriTime: 1,
-        xuezhanjingjiTime: 1
+        xuezhanjingjiTime: 1,
+        laxiangguanTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -271,9 +324,12 @@ export default {
         wujinTimer: null,
         emeTimer: null,
         meiriTimer: null,
-        buyJinbiShopTimer: null,
+        buyJinbiShopTimerYaocao: null,
+        buyJinbiShopTimerHero: null,
         xuezhanjingjiTimer: null,
-        attackXiaoguaiTimer: null
+        attackXiaoguaiTimer: null,
+        laxiangguanTimer: null,
+        laxiangguanBuyTimer: null
       },
       logs: [],
       userInfo: {
@@ -281,18 +337,12 @@ export default {
         password: 'ljs', // 登录游戏服务器的密码，websocket连接使用
         usernamePlatForm: '', // 平台的用户名
         passwordPlatForm: '', // 平台的密码
-        platform: 'taptap_mobile',
-        server: 'ws://tapandroid4.maobugames.com:35001/'
+        platform: '',
+        server: ''
       },
-      platformOption: [
-        { text: 'TapTap', value: 'taptap_mobile' }
-      ],
-      serverOption: [
-        { text: '天启位面', value: 'ws://xgm.xiaomaoqipai.cn:35001/' },
-        { text: '费伦位面', value: 'ws://tapandroid2.maobugames.com:35001/' },
-        { text: '费伦子位面', value: 'ws://tapandroid3.maobugames.com:35003/' },
-        { text: '天启子位面', value: 'ws://tapandroid4.maobugames.com:35001/' }
-      ]
+      platformOption: [],
+      serverObj: {},
+      serverOption: []
     }
   },
 
@@ -316,6 +366,18 @@ export default {
       } else {
         return ''
       }
+    },
+    platform() {
+      return this.userInfo.platform
+    },
+    // 蜡像馆难度
+    laxiangguanLevel() {
+      const difficultyMap = { 1: '初级', 2: '中级', 3: '高级' }
+      if (this.laxiangguanInfo.difficulty) {
+        return difficultyMap[this.laxiangguanInfo.difficulty] + '难度' + this.laxiangguanInfo.level
+      } else {
+        return ''
+      }
     }
   },
 
@@ -323,6 +385,11 @@ export default {
     logs(newVal) {
       this.changeGuajiLog(newVal)
       this.scrollToBottom()
+    },
+
+    // 当选择平台的时候更新对应的服务器列表
+    platform(newVal) {
+      this.serverOption = this.serverObj[newVal]
     }
   },
 
@@ -337,8 +404,8 @@ export default {
   },
 
   mounted() {
-    this.loadLoginInfo()
-    this.getServerTIme()
+    this.getServerTime()
+    this.getServerInfo()
   },
 
   methods: {
@@ -418,12 +485,27 @@ export default {
       })
     },
 
-    getServerTIme() {
+    // 获取服务器时间用于校对
+    getServerTime() {
       axios.get(this.url.serverTimeUrl).then(res => {
         const serverTime = res.data.serverTime
         const localTime = new Date().getTime()
         this.timeDiff = serverTime - localTime
       })
+    },
+
+    // 获取服务器信息
+    async getServerInfo() {
+      const res = await getServer()
+      this.platformOption = res.platform
+      this.serverObj = res.server
+      this.loadLoginInfo()
+    },
+
+    // 选择平台
+    changePlatform(platForm) {
+      this.serverOption = this.serverObj[platForm]
+      this.userInfo.server = this.serverOption[0]['value']
     },
 
     genKey() {
@@ -492,6 +574,9 @@ export default {
         this.roleInfo.ronglian = redata.ronglian
         this.roleInfo.yuanzhengbi = redata.yuanzhengBi
         this.roleInfo.taozhuangsuipian = redata.tzSuiPian
+        this.roleInfo.rongyu = redata.rongyu
+        this.roleInfo.jiban = redata.jiban
+        this.roleInfo.laxiangbi = redata.o
         // this.recordLogs('当前经验：' + redata.i)
       }
       if (redata.pd === 1008) {
@@ -509,6 +594,14 @@ export default {
       // 血战竞技信息
       if (redata.pd === 1100) {
         this.taskInfo.xuezhanRemainTime = redata.battleTime
+      }
+
+      // 蜡像馆信息
+      if (redata.pd === 1093) {
+        this.laxiangguanInfo.difficulty = redata.difficulty
+        this.laxiangguanInfo.level = redata.level
+        this.laxiangguanInfo.buyTime = redata.buyTime
+        this.laxiangguanInfo.canAttackTime = redata.canAttackTime
       }
 
       // 恶魔巢穴难度等信息
@@ -838,11 +931,15 @@ export default {
      * @param {Number} num 购买的数量，为固定的1或者5，不购买的操作num为0
      */
     sendJinbiShop(operate, id, num) {
+      console.log('id', id)
       const packet = this.gen_base_json(32)
       packet.id = id
       packet.operate = operate
       packet.num = num
       this.websocketsend(packet)
+      if (operate === 1) {
+        this.recordLogs('购买商品:' + shop(id) + '*' + num)
+      }
     },
     flushShop() {
       this.sendJinbiShop(2, 0, 0)
@@ -852,18 +949,32 @@ export default {
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
-      self.timer.buyJinbiShopTimer = setInterval(function() {
+      self.timer.buyJinbiShopTimerHero = setInterval(function() {
         if (i > 115) {
-          clearInterval(self.timer.buyJinbiShopTimer)
+          clearInterval(self.timer.buyJinbiShopTimerHero)
         } else if (i > 110) {
           self.sendJinbiShop(1, i, 5)
-          self.recordLogs('购买商品' + i)
         } else {
           self.sendJinbiShop(1, i, 1)
-          self.recordLogs('购买商品' + i)
         }
         i++
       }, 100)
+      // let h = 110
+      // self.timer.buyJinbiShopTimerYaocao = setInterval(function() {
+      //   console.log('h', h)
+      //   if (h > 114) {
+      //     console.log('stop-h', h)
+      //     clearInterval(self.timer.buyJinbiShopTimerYaocao)
+      //   } else {
+      //     console.log('buy-h', h)
+      //     setTimeout(function() { self.sendJinbiShop(1, h, 1) }, 100)
+      //     setTimeout(function() { self.sendJinbiShop(1, h, 1) }, 200)
+      //     setTimeout(function() { self.sendJinbiShop(1, h, 1) }, 300)
+      //     setTimeout(function() { self.sendJinbiShop(1, h, 1) }, 400)
+      //     setTimeout(function() { self.sendJinbiShop(1, h, 1) }, 500)
+      //   }
+      //   h++
+      // }, 1000)
     },
 
     // 血战竞技发包
@@ -881,6 +992,11 @@ export default {
       if (!this.checkLoginStatus()) return
       if (this.taskInfo.xuezhanRemainTime === 0) {
         this.$toast.fail('血战竞技没次数了')
+        return
+      }
+      const dayNum = parseInt(moment().format('d'))
+      if (dayNum === 5 || dayNum === 6 || dayNum === 0) {
+        this.$toast.fail('今天不能打血战竞技')
         return
       }
       this.flag.xuezhanjingjiFlag = true
@@ -901,6 +1017,68 @@ export default {
       clearInterval(this.timer.xuezhanjingjiTimer)
       this.flag.xuezhanjingjiFlag = false
       this.recordLogs('停止挑战血战竞技')
+    },
+
+    // 开始蜡像馆
+    startLaxiangguan() {
+      if (!this.checkLoginStatus()) return
+      if (this.laxiangguanInfo.canAttackTime === 0) {
+        this.$toast.fail('蜡像馆没次数了')
+        return
+      }
+      this.flag.laxiangguanFlag = true
+      let i = 1
+      const lxgTime = this.attackTime.laxiangguanTime
+      const self = this
+      self.timer.laxiangguanTimer = setInterval(function() {
+        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level)
+        i++
+        if (i > lxgTime) {
+          self.stopLaxiangguan()
+        }
+      }, 1000)
+    },
+
+    // 蜡像馆发包
+    sendLaxiangguan(difficulty, operate, level) {
+      const lxgPacket = this.gen_base_json(264)
+      lxgPacket.difficulty = difficulty
+      lxgPacket.operate = operate
+      lxgPacket.level = level
+      lxgPacket.taskId = 0
+      this.websocketsend(lxgPacket)
+      this.sendGeneric()
+      if (operate === 2) {
+        this.recordLogs('挑战蜡像馆')
+      } else if (operate === 2) {
+        this.recordLogs('购买蜡像馆1次')
+      }
+    },
+
+    // 停止蜡像馆
+    stopLaxiangguan() {
+      clearInterval(this.timer.laxiangguanTimer)
+      this.flag.laxiangguanFlag = false
+      this.recordLogs('停止挑战蜡像馆')
+    },
+
+    // 购买蜡像馆次数
+    buyLaxiangguan() {
+      if (!this.checkLoginStatus()) return
+      if (this.laxiangguanInfo.buyTime === 3) {
+        this.$toast.fail('蜡像馆已经购买3次')
+        return
+      }
+      let i = 1
+      const lxgBuyTime = this.buyTime.laxiangguanBuyTime
+      const self = this
+      self.timer.laxiangguanBuyTimer = setInterval(function() {
+        self.sendLaxiangguan(0, 1, 0)
+        i++
+        if (i > lxgBuyTime) {
+          clearInterval(self.timer.laxiangguanBuyTimer)
+        }
+      }, 500)
     }
   }
 }
@@ -928,9 +1106,6 @@ export default {
 </style>
 
 <style lang='scss' scoped>
-.title {
-  font-size: 16px;
-}
 .row-wrap {
   margin: 10px 0;
 }

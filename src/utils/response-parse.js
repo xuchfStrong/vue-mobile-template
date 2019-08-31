@@ -162,9 +162,25 @@ export function emeFubenInfo(obj) {
 }
 
 // 解析商店信息
-export function shop(obj) {
-  const jinbiShuaXin = obj.jinbiShuaXin
-  return jinbiShuaXin
+export function shop(id) {
+  const goods = {
+    101: '哥布林勇士',
+    102: '骷髅射手',
+    103: '骷髅法师',
+    104: '沼泽巨鳄',
+    105: '腐化怒熊',
+    106: '狼人勇士',
+    107: '吸血蝙蝠',
+    108: '哥布林',
+    109: '骷髅兵',
+    110: '魔狼',
+    111: '力量药草',
+    112: '智力药草',
+    113: '敏捷药草',
+    114: '体质药草',
+    115: '韧性药草'
+  }
+  return goods[id]
 }
 
 // 解析挂机信息
@@ -177,3 +193,4 @@ export function guaji(obj) {
   res = '挂机获得：金币' + jinbi + ',经验' + jingyan
   return res
 }
+

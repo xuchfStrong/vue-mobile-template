@@ -16,6 +16,13 @@
       </van-tabbar-item>
       <van-tabbar-item
         replace
+        to="/description"
+        icon="description"
+      >
+        购买说明
+      </van-tabbar-item>
+      <!-- <van-tabbar-item
+        replace
         to="/info"
         icon="friends-o"
       >
@@ -23,18 +30,11 @@
       </van-tabbar-item>
       <van-tabbar-item
         replace
-        to="/search"
-        icon="search"
-      >
-        查询
-      </van-tabbar-item>
-      <van-tabbar-item
-        replace
         to="/user"
         icon="setting-o"
       >
         设置
-      </van-tabbar-item>
+      </van-tabbar-item> -->
     </van-tabbar>
   </div>
 </template>

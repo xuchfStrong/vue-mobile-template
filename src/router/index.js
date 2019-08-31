@@ -66,6 +66,14 @@ export const constantRoutes = [
       meta: {
         title: '主页'
       }
+    },
+    {
+      path: '/description',
+      name: 'description',
+      component: () => import('@/views/description/index'),
+      meta: {
+        title: '进度查询'
+      }
     }
     // {
     //   path: '/user',
@@ -82,15 +90,7 @@ export const constantRoutes = [
     //   meta: {
     //     title: '产品申请'
     //   }
-    // },
-    // {
-    //   path: '/search',
-    //   name: 'search',
-    //   component: () => import('@/views/search/index'),
-    //   meta: {
-    //     title: '进度查询'
-    //   }
-    // },
+    // }
     // {
     //   path: '/waitPay',
     //   name: 'waitPay',
