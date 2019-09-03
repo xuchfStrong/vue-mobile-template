@@ -1,10 +1,10 @@
 import request from '@/utils/request-game'
 
-export function loginPlatform(params) {
+export function loginPlatform(data) {
   return request({
     url: '/gdzz/servers_login.php',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 

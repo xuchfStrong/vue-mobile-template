@@ -238,6 +238,7 @@ import SHA1 from 'js-sha1'
 import axios from 'axios'
 import moment from 'moment'
 import CryptoJS from 'crypto-js'
+import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben, guaji, shop } from '@/utils/response-parse'
@@ -259,7 +260,7 @@ export default {
       timeDiff: 0,
       vip: true,
       ut: { // 用户类型
-        f: true, // 完整版
+        f: false, // 完整版
         v: false, // vip版本
         sv: false // 超级VIP
       },
@@ -419,36 +420,48 @@ export default {
 
     // 登录平台
     handleLoginPlatForm() {
+      this.secretKey = randomWord(false, 16)
       if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
         this.$toast('请输入用户名和密码')
         return
       }
+      const cipherUsername = CryptoJS.AES.encrypt(this.userInfo.usernamePlatForm, CryptoJS.enc.Utf8.parse(this.secretKey), {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      }).toString()
       const cipherPwd = CryptoJS.AES.encrypt(this.userInfo.passwordPlatForm, CryptoJS.enc.Utf8.parse(this.secretKey), {
         mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7
       }).toString()
       const param = {
         platform: this.userInfo.platform,
-        username: this.userInfo.usernamePlatForm,
-        password: cipherPwd
+        u: cipherUsername, // 用户名
+        p: cipherPwd, // 密码
+        k: encrypt(this.secretKey) // ase的密钥
       }
       loginPlatform(param).then(res => {
-        if (res.code === 401) {
+        const resPlain = CryptoJS.AES.decrypt(res, CryptoJS.enc.Utf8.parse(this.secretKey), {
+          mode: CryptoJS.mode.ECB,
+          padding: CryptoJS.pad.Pkcs7
+        }).toString(CryptoJS.enc.Utf8)
+        const resObj = JSON.parse(resPlain)
+        if (resObj.r === 401) {
           this.$toast.fail('用户名密码错误')
           return
-        } else if (res.code === 403) {
+        } else if (resObj.r === 403) {
           this.$toast.fail('辅助时间到期，请充值后登录！')
           return
-        } else if (res.code === 200) {
+        } else if (resObj.r === 200) {
+          if (resObj.l === 2) {
+            this.ut.f = true
+          } else if (resObj.l === 3) {
+            this.ut.v = true
+          } else if (resObj.l === 4) {
+            this.ut.sv = true
+          }
           this.saveLogInfo()
-          const userId = res.userId
-          this.userInfo.username = CryptoJS.AES.decrypt(userId, CryptoJS.enc.Utf8.parse(this.secretKey), {
-            mode: CryptoJS.mode.ECB,
-            padding: CryptoJS.pad.Pkcs7
-          }).toString(CryptoJS.enc.Utf8)
+          this.userInfo.username = resObj.i
           this.initWebSocket()
-        } else {
-          console.log('1')
         }
       }).catch(err => {
         console.log(err)
