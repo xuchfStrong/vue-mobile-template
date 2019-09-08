@@ -161,8 +161,8 @@ export function emeFubenInfo(obj) {
   return res
 }
 
-// 解析商店信息
-export function shop(id) {
+// 解析金币商店物品ID信息
+export function jinbiShop(id) {
   const goods = {
     101: '哥布林勇士',
     102: '骷髅射手',
@@ -191,6 +191,23 @@ export function guaji(obj) {
   const jinbi = strList[strList.length - 2].split('|')[2]
   const jingyan = strList[strList.length - 1].split('|')[2]
   res = '挂机获得：金币' + jinbi + ',经验' + jingyan
+  return res
+}
+
+// 解析商店已经购买信息
+export function hadBuyInfo(obj) {
+  const res = {
+    hadBuyJinbi: false
+  }
+  const hadBuys = obj.hadBuys
+  const jinbiShopIds = [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+  for (let i = 0; i < jinbiShopIds.length; i++) {
+    const id = jinbiShopIds[i]
+    if (hadBuys.indexOf(id) !== -1) {
+      res.hadBuyJinbi = true
+      break
+    }
+  }
   return res
 }
 

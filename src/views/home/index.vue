@@ -21,6 +21,14 @@
       <help />
     </van-popup>
 
+    <van-popup
+      v-model="show.remoteGuajiLog"
+      position="bottom"
+      :style="{ height: '60%' }"
+    >
+      <textarea id="remotelog-textarea" v-model="remoteGuajiLog" rows="20" readonly />
+    </van-popup>
+
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
         <van-col span="9">
@@ -47,6 +55,17 @@
           <van-button v-else type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
         </van-col>
       </van-row>
+
+      <div class="endtiem-wrap">
+        辅助到期时间: {{ userInfo.endTime }}
+      </div>
+
+      <van-divider>云挂机</van-divider>
+      <div class="vip-wrap">
+        <van-button v-if="!yunguaji" type="info" size="small" @click="handleStartguaji">开始云挂机</van-button>
+        <van-button v-if="yunguaji" type="danger" size="small" @click="handleStopguaji">停止云挂机</van-button>
+        <van-button type="info" size="small" @click="handleGetGuajiLog">查询挂机信息</van-button>
+      </div>
 
       <van-divider>角色信息</van-divider>
 
@@ -124,7 +143,7 @@
       <van-divider>挂机设置</van-divider>
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>推图副本</div>
+          <div>推图副本挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <van-stepper v-model="attackTime.bossTime" button-size="20px" />
@@ -136,7 +155,7 @@
       </van-row>
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>无尽炼狱</div>
+          <div>无尽炼狱挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <van-stepper v-model="attackTime.wujinTime" button-size="20px" />
@@ -148,7 +167,7 @@
       </van-row>
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>恶魔巢穴</div>
+          <div>恶魔巢穴挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <van-stepper v-model="attackTime.emeTime" button-size="20px" />
@@ -160,7 +179,7 @@
       </van-row>
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>每日副本</div>
+          <div>每日副本挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <van-stepper v-model="attackTime.meiriTime" button-size="20px" />
@@ -173,7 +192,7 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>血战竞技</div>
+          <div>血战竞技挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <span>剩余{{ taskInfo.xuezhanRemainTime }}次</span>
@@ -187,7 +206,7 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
-          <div>蜡像馆</div>
+          <div>蜡像馆挑战</div>
         </van-col>
         <van-col span="8" class="center">
           <span>剩余{{ laxiangguanInfo.canAttackTime }}次</span>
@@ -206,14 +225,14 @@
         </van-col>
         <van-col span="8" class="center">
           <span>已买{{ laxiangguanInfo.buyTime }}次</span>
-          <van-stepper v-model="buyTime.laxiangguanBuyTime" button-size="20px" />
+          <van-stepper v-model="buyInfo.laxiangguanBuyTime" button-size="20px" />
         </van-col>
         <van-col span="8" class="right">
-          <van-button type="info" size="small" @click="buyLaxiangguan">开始</van-button>
+          <van-button type="info" size="small" @click="buyLaxiangguan">购买</van-button>
         </van-col>
       </van-row>
 
-      <van-row class="row-wrap" type="flex" align="center">
+      <van-row v-if="userRole.goldShop" class="row-wrap" type="flex" align="center">
         <van-col span="8">
           <div>金币商店</div>
         </van-col>
@@ -222,6 +241,62 @@
         </van-col>
         <van-col span="8" class="right">
           <van-button type="info" size="small" @click="buyAll">全买</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>无尽商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.wujingId" :options="shopInfo.wujingShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyWujingShop">购买</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>竞技商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.jingjiId" :options="shopInfo.jingjiShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyJingjiShop">购买</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>套装商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.taozhuangId" :options="shopInfo.taozhuangShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyTaozhuangShop">购买</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>远征商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.yuanzhengId" :options="shopInfo.yuanzhengShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyYuanzhengShop">购买</van-button>
         </van-col>
       </van-row>
 
@@ -241,8 +316,9 @@ import CryptoJS from 'crypto-js'
 import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben, guaji, shop } from '@/utils/response-parse'
-import { loginPlatform, getServer } from '@/api/game'
+import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
+import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
+import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
 export default {
@@ -256,16 +332,21 @@ export default {
       name: '',
       websock: null,
       pIn: 0,
-      secretKey: 'sjsdofjdf2849skd',
+      secretKey: '',
       timeDiff: 0,
       vip: true,
-      ut: { // 用户类型
-        f: false, // 完整版
+      yunguaji: false,
+      userRole: { // 用户类型
         v: false, // vip版本
-        sv: false // 超级VIP
+        h: false, // 黑科技
+        vh: false, // 黑科技+vip
+        userLevelId: 1, // 1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
+        goldShop: true, // 是否显示金币商店
+        otherShop: true // 其他商店跨等级买东西
       },
       show: {
-        helpInfo: false
+        helpInfo: false,
+        remoteGuajiLog: false
       },
       url: {
         serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
@@ -303,13 +384,22 @@ export default {
         canAttackTime: 0
       },
       shopInfo: { // 夏洛克商店信息
-        jinbiShuaXin: 0 // 金币商店刷新价格
+        jinbiShuaXin: 0, // 金币商店刷新价格
+        hadBuyJinbi: false, // 金币商店是否已经买了
+        wujingShop: [], // 无尽商店
+        jingjiShop: [], // 竞技商店
+        taozhuangShop: [], // 套装商店
+        yuanzhengShop: [] // 远征商店
       },
       taskInfo: { // 每天的各种任务信息
         xuezhanRemainTime: 0 // 血战竞技剩余次数
       },
-      buyTime: {
-        laxiangguanBuyTime: 1
+      buyInfo: {
+        laxiangguanBuyTime: 1, // 蜡像馆的购买次数
+        wujingId: 0, // 购买无尽商店的物品ID
+        jingjiId: 0, // 购买竞技商店的物品ID
+        taozhuangId: 0, // 购买套装商店的物品ID
+        yuanzhengId: 0 // 购买远征商店的物品ID
       },
       attackTime: {
         bossTime: 1,
@@ -333,13 +423,15 @@ export default {
         laxiangguanBuyTimer: null
       },
       logs: [],
+      remoteGuajiLog: '',
       userInfo: {
         username: '', // 登录游戏用的，是由平台返回的
         password: 'ljs', // 登录游戏服务器的密码，websocket连接使用
         usernamePlatForm: '', // 平台的用户名
         passwordPlatForm: '', // 平台的密码
         platform: '',
-        server: ''
+        server: '',
+        endTime: '' // 辅助到期时间
       },
       platformOption: [],
       serverObj: {},
@@ -407,6 +499,10 @@ export default {
   mounted() {
     this.getServerTime()
     this.getServerInfo()
+    this.handleGetWujingShop()
+    this.handleGetJingjiShop()
+    this.handleGetTaozhuangShop()
+    this.handleGetYuanzhengShop()
   },
 
   methods: {
@@ -444,6 +540,7 @@ export default {
           mode: CryptoJS.mode.ECB,
           padding: CryptoJS.pad.Pkcs7
         }).toString(CryptoJS.enc.Utf8)
+        console.log('resPlain', resPlain)
         const resObj = JSON.parse(resPlain)
         if (resObj.r === 401) {
           this.$toast.fail('用户名密码错误')
@@ -453,19 +550,118 @@ export default {
           return
         } else if (resObj.r === 200) {
           if (resObj.l === 2) {
-            this.ut.f = true
+            this.userRole.v = true
           } else if (resObj.l === 3) {
-            this.ut.v = true
+            this.userRole.v = true
+            this.userRole.h = true
           } else if (resObj.l === 4) {
-            this.ut.sv = true
+            this.userRole.v = true
+            this.userRole.h = true
+            this.userRole.vh = true
+          }
+          this.userRole.userLevelId = resObj.l
+          this.userInfo.endTime = moment(resObj.t * 1000).format('YYYY-MM-DD HH:mm:ss')
+          this.userInfo.username = resObj.i
+          if (resObj.g === 1) {
+            this.userRole.goldShop = true
+          }
+          if (resObj.s === 1) {
+            this.userRole.otherShop = true
           }
           this.saveLogInfo()
-          this.userInfo.username = resObj.i
+          this.handleGetGuajiStatus()
           this.initWebSocket()
         }
       }).catch(err => {
         console.log(err)
       })
+    },
+
+    // 开始云挂机
+    handleStartguaji() {
+      const base64Server = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.server))
+      const base64Username = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.username))
+      const params = {
+        server: base64Server,
+        id: base64Username
+      }
+      startGuaji(params).then(res => {
+        const code = res.code
+        switch (code) {
+          case 200:
+            this.$toast({ duration: 1000, message: '挂机成功' })
+            break
+          case 401:
+            this.$toast({ duration: 1000, message: '用户名密码错误' })
+            break
+          case 403:
+            this.$toast({ duration: 1000, message: '只有VIP用户才能云挂机' })
+            break
+          case 404:
+            this.$toast({ duration: 1000, message: '云端错误，请联系管理员' })
+            break
+          case 500:
+            this.$toast({ duration: 1000, message: '请求有误，请联系管理员' })
+            break
+        }
+        this.handleGetGuajiStatus()
+      })
+    },
+
+    // 停止云挂机
+    handleStopguaji() {
+      const base64Username = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.username))
+      const base64Password = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.passwordPlatForm))
+      const params = {
+        id: base64Username,
+        pass: base64Password
+      }
+      stopGuaji(params).then(res => {
+        const code = res.code
+        switch (code) {
+          case 200:
+            this.$toast({ duration: 1000, message: '停止挂机成功' })
+            break
+          case 401:
+            this.$toast({ duration: 1000, message: '用户名密码错误' })
+            break
+          case 403:
+            this.$toast({ duration: 1000, message: '只有VIP用户才能云挂机' })
+            break
+          case 404:
+            this.$toast({ duration: 1000, message: '云端错误，请联系管理员' })
+            break
+          case 500:
+            this.$toast({ duration: 1000, message: '请求有误，请联系管理员' })
+            break
+        }
+        this.handleGetGuajiStatus()
+      })
+    },
+
+    // 查询挂机日志
+    async handleGetGuajiLog() {
+      const base64Username = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.username))
+      const params = {
+        id: base64Username
+      }
+      const res = await getGuajiLog(params)
+      this.remoteGuajiLog = res
+      this.show.remoteGuajiLog = true
+    },
+
+    // 查询挂机状态
+    async handleGetGuajiStatus() {
+      const base64Username = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(this.userInfo.username))
+      const params = {
+        id: base64Username
+      }
+      const res = await getGuajiStatus(params) // 0表示停止，1表示开启
+      if (res === 1) {
+        this.yunguaji = true
+      } else {
+        this.yunguaji = false
+      }
     },
 
     // 读取记住的登录信息
@@ -476,6 +672,8 @@ export default {
         this.userInfo.server = gameLoginInfo.server
         this.userInfo.usernamePlatForm = gameLoginInfo.usernamePlatForm
         this.userInfo.passwordPlatForm = gameLoginInfo.passwordPlatForm
+        this.userInfo.username = gameLoginInfo.username
+        this.handleGetGuajiStatus()
       }
     },
 
@@ -485,7 +683,8 @@ export default {
         platform: this.userInfo.platform,
         server: this.userInfo.server,
         usernamePlatForm: this.userInfo.usernamePlatForm,
-        passwordPlatForm: this.userInfo.passwordPlatForm
+        passwordPlatForm: this.userInfo.passwordPlatForm,
+        username: this.userInfo.username
       }
       setGameLoginInfo(gameLoginInfo)
     },
@@ -513,6 +712,26 @@ export default {
       this.platformOption = res.platform
       this.serverObj = res.server
       this.loadLoginInfo()
+    },
+
+    // 获取无尽商店信息
+    async handleGetWujingShop() {
+      this.shopInfo.wujingShop = await getWujingShop()
+    },
+
+    // 获取竞技商店信息
+    async handleGetJingjiShop() {
+      this.shopInfo.jingjiShop = await getJingjiShop()
+    },
+
+    // 获取套装商店信息
+    async handleGetTaozhuangShop() {
+      this.shopInfo.taozhuangShop = await getTaozhuangShop()
+    },
+
+    // 获取远征商店信息
+    async handleGetYuanzhengShop() {
+      this.shopInfo.yuanzhengShop = await getYuanzhengShop()
     },
 
     // 选择平台
@@ -602,6 +821,7 @@ export default {
       // 商店信息
       if (redata.pd === 1052) {
         this.shopInfo.jinbiShuaXin = redata.jinbiShuaXin
+        this.shopInfo.hadBuyJinbi = hadBuyInfo(redata).hadBuyJinbi
       }
 
       // 血战竞技信息
@@ -718,7 +938,7 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
       setTimeout(function() { self.sendGeneric() }, 950)
-      if (!this.vip) {
+      if (this.userRole.userLevelId === 1) {
         setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
@@ -738,7 +958,7 @@ export default {
     recordLogs(log) {
       // const d = new Date().toLocaleString()
       const d = moment().format('YYYY-MM-DD HH:mm:ss')
-      if (this.logs.length > 300) {
+      if (this.logs.length > 1000) {
         this.logs.shift()
       }
       this.logs.push('\n' + d + ':' + log)
@@ -944,14 +1164,13 @@ export default {
      * @param {Number} num 购买的数量，为固定的1或者5，不购买的操作num为0
      */
     sendJinbiShop(operate, id, num) {
-      console.log('id', id)
       const packet = this.gen_base_json(32)
       packet.id = id
       packet.operate = operate
       packet.num = num
       this.websocketsend(packet)
       if (operate === 1) {
-        this.recordLogs('购买商品:' + shop(id) + '*' + num)
+        this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
       }
     },
     flushShop() {
@@ -959,6 +1178,10 @@ export default {
     },
     buyAll() {
       if (!this.checkLoginStatus()) return
+      if (this.shopInfo.hadBuyJinbi) {
+        this.$toast.fail({ duration: 1000, message: '已经购买过了，可以刷新后购买' })
+        return
+      }
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
@@ -1063,7 +1286,7 @@ export default {
       this.sendGeneric()
       if (operate === 2) {
         this.recordLogs('挑战蜡像馆')
-      } else if (operate === 2) {
+      } else if (operate === 1) {
         this.recordLogs('购买蜡像馆1次')
       }
     },
@@ -1083,7 +1306,7 @@ export default {
         return
       }
       let i = 1
-      const lxgBuyTime = this.buyTime.laxiangguanBuyTime
+      const lxgBuyTime = this.buyInfo.laxiangguanBuyTime
       const self = this
       self.timer.laxiangguanBuyTimer = setInterval(function() {
         self.sendLaxiangguan(0, 1, 0)
@@ -1092,6 +1315,77 @@ export default {
           clearInterval(self.timer.laxiangguanBuyTimer)
         }
       }, 500)
+    },
+
+    /**
+     * 商店购买发包
+     * @param {Number} operate 0为获取信息，1为购买, 2为刷新，这里固定为1
+     * @param {Number} id 购买的商品
+     * @param {String} name 购买的商品名称
+     * @param {Number} num 购买的数量，不购买的操作num为0，这里固定为1
+     */
+    sendOtherShop(id, name) {
+      if (id === 0) {
+        this.$toast.fail({ duration: 1000, message: '请选择购买商品' })
+        return
+      }
+      this.$dialog.confirm({
+        title: '',
+        message: '确认购买 ' + name + '?'
+      }).then(() => {
+        const packet = this.gen_base_json(32)
+        packet.id = id
+        packet.operate = 1
+        packet.num = 1
+        // console.log(packet)
+        this.websocketsend(packet)
+        this.recordLogs('购买商品: ' + name)
+      }).catch(() => {
+        // on cancel
+      })
+    },
+
+    // 根据ID解析商品名称
+    getNameById(array, id) {
+      const res = {
+        name: ''
+      }
+      for (let i = 0; i < array.length; i++) {
+        const value = array[i].value
+        if (value === id) {
+          res.name = array[i].text
+          break
+        }
+      }
+      return res.name
+    },
+
+    // 购买无尽商店
+    buyWujingShop() {
+      if (!this.checkLoginStatus()) return
+      const name = this.getNameById(this.shopInfo.wujingShop, this.buyInfo.wujingId)
+      this.sendOtherShop(this.buyInfo.wujingId, name)
+    },
+
+    // 购买竞技商店
+    buyJingjiShop() {
+      if (!this.checkLoginStatus()) return
+      const name = this.getNameById(this.shopInfo.jingjiShop, this.buyInfo.jingjiId)
+      this.sendOtherShop(this.buyInfo.jingjiId, name)
+    },
+
+    // 购买套装商店
+    buyTaozhuangShop() {
+      if (!this.checkLoginStatus()) return
+      const name = this.getNameById(this.shopInfo.taozhuangShop, this.buyInfo.taozhuangId)
+      this.sendOtherShop(this.buyInfo.taozhuangId, name)
+    },
+
+    // 购买远征商店
+    buyYuanzhengShop() {
+      if (!this.checkLoginStatus()) return
+      const name = this.getNameById(this.shopInfo.yuanzhengShop, this.buyInfo.yuanzhengId)
+      this.sendOtherShop(this.buyInfo.yuanzhengId, name)
     }
   }
 }
@@ -1135,6 +1429,12 @@ textarea {
 }
 .center {
   text-align: center;
+}
+.vip-wrap {
+  text-align: center;
+}
+.endtiem-wrap {
+  margin-top: 15px;
 }
 
 </style>

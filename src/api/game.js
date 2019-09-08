@@ -39,3 +39,67 @@ export function getHelp(params) {
   })
 }
 
+export function startGuaji(data) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/start_guaji.php',
+    method: 'post',
+    data
+  })
+}
+
+export function stopGuaji(data) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/stop_guaji.php',
+    method: 'post',
+    data
+  })
+}
+
+export function getGuajiLog(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/get_guaji_log.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getGuajiStatus(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/check_guaji_status.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getWujingShop(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/wujingShop.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getJingjiShop(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/jingjiShop.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getTaozhuangShop(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/taozhuangShop.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getYuanzhengShop(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/yuanzhengShop.php',
+    method: 'get',
+    params
+  })
+}
+

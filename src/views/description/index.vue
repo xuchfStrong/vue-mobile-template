@@ -28,17 +28,7 @@
             <p v-for="item in desc.normalVersion.description" :key="item">{{ item }}</p>
           </div>
         </van-collapse-item>
-        <van-collapse-item title="完整版说明" name="2">
-          <div class="item-name">价格：</div>
-          <p>{{ desc.fullVersion.price }}</p>
-          <div class="item-name">功能：</div>
-          <p v-for="item in desc.fullVersion.features" :key="item">{{ item }}</p>
-          <div v-if="desc.fullVersion.description">
-            <div class="item-name">说明：</div>
-            <p v-for="item in desc.fullVersion.description" :key="item">{{ item }}</p>
-          </div>
-        </van-collapse-item>
-        <van-collapse-item title="VIP版说明" name="3">
+        <van-collapse-item title="VIP版说明" name="2">
           <div class="item-name">价格：</div>
           <p>{{ desc.vipVersion.price }}</p>
           <div class="item-name">功能：</div>
@@ -46,16 +36,6 @@
           <div v-if="desc.vipVersion.description">
             <div class="item-name">说明：</div>
             <p v-for="item in desc.vipVersion.description" :key="item">{{ item }}</p>
-          </div>
-        </van-collapse-item>
-        <van-collapse-item title="超级VIP版说明" name="4">
-          <div class="item-name">价格：</div>
-          <p>{{ desc.superVipVersion.price }}</p>
-          <div class="item-name">功能：</div>
-          <p v-for="item in desc.superVipVersion.features" :key="item">{{ item }}</p>
-          <div v-if="desc.superVipVersion.description">
-            <div class="item-name">说明：</div>
-            <p v-for="item in desc.superVipVersion.description" :key="item">{{ item }}</p>
           </div>
         </van-collapse-item>
       </van-collapse>
