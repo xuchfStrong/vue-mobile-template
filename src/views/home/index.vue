@@ -221,6 +221,19 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
+          <div>蜡像馆低一级挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.laxiangguanLowTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.laxiangguanLowFlag" type="info" size="small" @click="startLaxiangguanLow">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopLaxiangguanLow">停止</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
           <div>蜡像馆购买</div>
         </van-col>
         <van-col span="8" class="center">
@@ -341,8 +354,8 @@ export default {
         h: false, // 黑科技
         vh: false, // 黑科技+vip
         userLevelId: 1, // 1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
-        goldShop: true, // 是否显示金币商店
-        otherShop: true // 其他商店跨等级买东西
+        goldShop: false, // 是否显示金币商店
+        otherShop: false // 其他商店跨等级买东西
       },
       show: {
         helpInfo: false,
@@ -358,7 +371,8 @@ export default {
         emeFubenFlag: false,
         meiriFubenFlag: false,
         xuezhanjingjiFlag: false,
-        laxiangguanFlag: false
+        laxiangguanFlag: false,
+        laxiangguanLowFlag: false
       },
       roleInfo: {
         name: '',
@@ -407,7 +421,8 @@ export default {
         emeTime: 1,
         meiriTime: 1,
         xuezhanjingjiTime: 1,
-        laxiangguanTime: 1
+        laxiangguanTime: 1,
+        laxiangguanLowTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -420,6 +435,7 @@ export default {
         xuezhanjingjiTimer: null,
         attackXiaoguaiTimer: null,
         laxiangguanTimer: null,
+        laxiangguanLowTimer: null,
         laxiangguanBuyTimer: null
       },
       logs: [],
@@ -540,7 +556,7 @@ export default {
           mode: CryptoJS.mode.ECB,
           padding: CryptoJS.pad.Pkcs7
         }).toString(CryptoJS.enc.Utf8)
-        console.log('resPlain', resPlain)
+        // console.log('resPlain', resPlain)
         const resObj = JSON.parse(resPlain)
         if (resObj.r === 401) {
           this.$toast.fail('用户名密码错误')
@@ -938,7 +954,7 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
       setTimeout(function() { self.sendGeneric() }, 950)
-      if (this.userRole.userLevelId === 1) {
+      if (this.userRole.userLevelId <= 2) {
         setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
@@ -1275,6 +1291,26 @@ export default {
       }, 1000)
     },
 
+    // 开始蜡像馆低一级
+    startLaxiangguanLow() {
+      if (!this.checkLoginStatus()) return
+      if (this.laxiangguanInfo.canAttackTime === 0) {
+        this.$toast.fail('蜡像馆没次数了')
+        return
+      }
+      this.flag.laxiangguanLowFlag = true
+      let i = 1
+      const lxgTime = this.attackTime.laxiangguanLowTime
+      const self = this
+      self.timer.laxiangguanLowTimer = setInterval(function() {
+        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level - 1)
+        i++
+        if (i > lxgTime) {
+          self.stopLaxiangguanLow()
+        }
+      }, 1000)
+    },
+
     // 蜡像馆发包
     sendLaxiangguan(difficulty, operate, level) {
       const lxgPacket = this.gen_base_json(264)
@@ -1295,6 +1331,13 @@ export default {
     stopLaxiangguan() {
       clearInterval(this.timer.laxiangguanTimer)
       this.flag.laxiangguanFlag = false
+      this.recordLogs('停止挑战蜡像馆')
+    },
+
+    // 停止蜡像馆低一级
+    stopLaxiangguanLow() {
+      clearInterval(this.timer.laxiangguanLowTimer)
+      this.flag.laxiangguanLowFlag = false
       this.recordLogs('停止挑战蜡像馆')
     },
 
