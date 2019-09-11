@@ -56,12 +56,20 @@ export function wujin(str) {
 
 // 解析推图结果
 export function boss(str) {
+  let res = ''
   const strList = str.split('#')
   const length = strList.length
-  const zuanshi = strList[length - 1].split('|')[2]
-  const jinbi = strList[length - 2].split('|')[2]
-  const jingyan = strList[length - 3].split('|')[2]
-  const res = '推图击杀BOSS获得奖励: 金币' + jinbi + '，经验' + jingyan + '，钻石' + zuanshi
+  const lastItem = strList[length - 1].split('|')[2]
+  if (parseInt(lastItem) <= 50) {
+    const zuanshi = strList[length - 1].split('|')[2]
+    const jinbi = strList[length - 2].split('|')[2]
+    const jingyan = strList[length - 3].split('|')[2]
+    res = '推图击杀BOSS获得奖励: 金币' + jinbi + '，经验' + jingyan + '，钻石' + zuanshi
+  } else {
+    const jinbi = strList[length - 2].split('|')[2]
+    const jingyan = strList[length - 1].split('|')[2]
+    res = '离线获得: 金币' + jinbi + '，经验' + jingyan
+  }
   return res
 }
 
