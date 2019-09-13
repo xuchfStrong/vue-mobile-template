@@ -414,10 +414,6 @@
             </van-col>
           </van-row>
         </van-tab>
-
-        <van-tab title="攻略">
-          <GongLue />
-        </van-tab>
       </van-tabs>
 
       <van-divider>
@@ -442,13 +438,11 @@ import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiS
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
-import GongLue from './components/GongLue'
 export default {
 
   components: {
     Header,
-    Help,
-    GongLue
+    Help
   },
   data() {
     return {

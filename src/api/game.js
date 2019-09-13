@@ -103,3 +103,11 @@ export function getYuanzhengShop(params) {
   })
 }
 
+export function gonglue(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/gdzz/gonglue.php',
+    method: 'get',
+    params
+  })
+}
+
