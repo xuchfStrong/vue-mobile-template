@@ -241,7 +241,7 @@
               <div>世界BOSS挑战</div>
             </van-col>
             <van-col span="8" class="center">
-              <span>已经挑战{{ taskInfo.bossAttackTime }}次</span>
+              <span>剩余{{ taskInfo.bossCanAttackTime }}次</span>
               <van-stepper v-model="attackTime.shijieBossTime" button-size="20px" />
             </van-col>
             <van-col span="8" class="right">
@@ -269,7 +269,7 @@
               <div>酒馆十连抽</div>
             </van-col>
             <van-col span="8" class="center">
-              <span>剩余钻石{{ roleInfo.zuanshi }}</span>
+              <van-stepper v-model="attackTime.shilianchouTime" button-size="20px" />
             </van-col>
             <van-col span="8" class="right">
               <van-button type="info" size="small" @click="startShilianchou">开始</van-button>
@@ -537,9 +537,9 @@ export default {
         taozhuangShop: [], // 套装商店
         yuanzhengShop: [], // 远征商店
         emeFuben: [
-          { 'text': '美女副本', 'value': 1 },
-          { 'text': '亡灵副本', 'value': 2 },
-          { 'text': '恶魔副本', 'value': 3 }
+          { 'text': '美女副本-经验书', 'value': 1 },
+          { 'text': '亡灵副本-套装碎片', 'value': 2 },
+          { 'text': '恶魔副本-神器碎片', 'value': 3 }
         ],
         meiriFuben: [
           { 'text': '金币副本', 'value': 1 },
@@ -552,7 +552,8 @@ export default {
       },
       taskInfo: { // 每天的各种任务信息
         xuezhanRemainTime: 0, // 血战竞技剩余次数
-        bossAttackTime: 0 // 世界BOSS攻击次数
+        bossAttackTime: 0, // 世界BOSS攻击次数
+        bossCanAttackTime: 0 // 世界BOSS剩余次数
       },
       buyInfo: {
         laxiangguanBuyTime: 1, // 蜡像馆的购买次数
@@ -572,7 +573,8 @@ export default {
         xuezhanjingjiFlag: false,
         laxiangguanFlag: false,
         laxiangguanLowFlag: false,
-        shijieBossFlag: false
+        shijieBossFlag: false,
+        shilianchouFlag: false
       },
       attackTime: {
         bossTime: 1,
@@ -582,7 +584,8 @@ export default {
         xuezhanjingjiTime: 1,
         laxiangguanTime: 1,
         laxiangguanLowTime: 1,
-        shijieBossTime: 1
+        shijieBossTime: 1,
+        shilianchouTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -597,7 +600,8 @@ export default {
         laxiangguanTimer: null,
         laxiangguanLowTimer: null,
         laxiangguanBuyTimer: null,
-        shijieBossTimer: null
+        shijieBossTimer: null,
+        shilianchouTimer: null
       },
       logs: [],
       remoteGuajiLog: '',
@@ -1066,6 +1070,7 @@ export default {
 
       if (redata.pd === 1023) { // 世界BOSS攻击次数
         this.taskInfo.bossAttackTime = redata.todayAttackTimes
+        this.taskInfo.bossCanAttackTime = 3 - redata.todayAttackTimes
       }
 
       // 商店信息
@@ -1918,20 +1923,41 @@ export default {
     /**
      * 十连抽发包
      */
+    sendShilianchou() {
+      const shilianchouPacket = this.gen_base_json(6)
+      shilianchouPacket.id = 2
+      this.websocketsend(shilianchouPacket)
+      this.recordLogs('酒馆十连抽')
+    },
     startShilianchou() {
       if (!this.checkLoginStatus()) return
       this.$dialog.confirm({
         title: '',
-        message: '确认购买酒馆十连抽?'
+        message: '确认开始酒馆十连抽?'
       }).then(() => {
-        const shilianchouPacket = this.gen_base_json(6)
-        shilianchouPacket.id = 2
-        this.websocketsend(shilianchouPacket)
-        this.recordLogs('酒馆十连抽')
+        this.flag.shilianchouFlag = true
+        let i = 1
+        const slcTime = this.attackTime.shilianchouTime
+        const self = this
+        self.timer.shilianchouTimer = setInterval(function() {
+          self.sendShilianchou()
+          i++
+          if (i > slcTime) {
+            self.stopShilianchou()
+          }
+        }, 1000)
       }).catch(() => {
         // on cancel
       })
+    },
+
+    // 停止十连抽
+    stopShilianchou() {
+      clearInterval(this.timer.shilianchouTimer)
+      this.flag.shilianchouFlag = false
+      this.recordLogs('停止酒馆十连抽')
     }
+
   }
 }
 
