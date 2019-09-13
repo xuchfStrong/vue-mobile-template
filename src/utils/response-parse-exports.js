@@ -35,7 +35,8 @@ const getRoleInfo = function(obj) {
 }
 
 // 解析无尽炼狱结果
-const wujin = function(str) {
+const wujin = function(obj) {
+  const str = obj.c
   const yaoshuiType = {
     4000005: '力量药水',
     4000006: '智力药水',
@@ -43,14 +44,27 @@ const wujin = function(str) {
     4000008: '体质药水',
     4000020: '韧性药水'
   }
-  const strList = str.split('#')
-  const jinbi = strList[0].split('|')[2]
-  const jingyan = strList[1].split('|')[2]
-  const yaoshui = yaoshuiType[strList[2].split('|')[1]]
-  const yaoshuiNum = strList[2].split('|')[2]
-  const wujinbi = strList[3].split('|')[2]
-  const res = '挑战无尽炼狱获得奖励: 金币' + jinbi + '，经验' + jingyan +
-              '，' + yaoshui + '*' + yaoshuiNum + '，无尽币' + wujinbi
+  const b = obj.b // 1为挑战，2为扫荡
+  let res = ''
+  if (b === 1) {
+    const strList = str.split('#')
+    const jinbi = strList[0].split('|')[2]
+    const jingyan = strList[1].split('|')[2]
+    const yaoshui = yaoshuiType[strList[2].split('|')[1]]
+    const yaoshuiNum = strList[2].split('|')[2]
+    const wujinbi = strList[3].split('|')[2]
+    res = '挑战无尽炼狱获得奖励: 金币' + jinbi + '，经验' + jingyan +
+                '，' + yaoshui + '*' + yaoshuiNum + '，无尽币' + wujinbi
+  } else if (b === 2) {
+    const strList = str.split('#')
+    const length = strList.length
+    const yaocaiNum = strList[1].split('|')[2]
+    const jinbi = strList[0].split('|')[2]
+    const wujinbi = strList[length - 1].split('|')[2]
+    res = '扫荡无尽炼狱获得：金币' + jinbi + '，无尽币' + wujinbi +
+          ',力量药材*' + yaocaiNum + ',智力药材*' + yaocaiNum + '敏捷药材*' + yaocaiNum +
+          ',体质药材*' + yaocaiNum + ',韧性药材*' + yaocaiNum
+  }
   return res
 }
 
@@ -66,7 +80,7 @@ const boss = function(str) {
 }
 
 // 解析每日副本
-const meiriFuben = function(str) {
+const meiriFuben = function(obj) {
   const fubenType = {
     1: '金币',
     5: '药草',
@@ -75,17 +89,23 @@ const meiriFuben = function(str) {
     18: '羁绊',
     19: '血精石'
   }
+  const str = obj.c
+  const b = obj.b // 1为挑战奖励，4为扫荡奖励
   let res = ''
-  const strList = str.split('|')
-  const fubenId = strList[0]
-  const fubenName = fubenType[fubenId]
-  if (fubenId !== '5') {
-    const reward = strList[2]
-    res = '击杀' + fubenName + '副本奖励：' + fubenName + '*' + reward
-  } else {
-    const yaocaoNum = str.split('#')[0].split('|')[2]
-    res = '击杀' + fubenName + '副本奖励：' + '力量药草*' + yaocaoNum + ',智力药草*' + yaocaoNum +
-    '敏捷药草*' + yaocaoNum + '体质药草*' + yaocaoNum + '韧性药草*' + yaocaoNum
+  if (b === 1) {
+    const strList = str.split('|')
+    const fubenId = strList[0]
+    const fubenName = fubenType[fubenId]
+    if (fubenId !== '5') {
+      const reward = strList[2]
+      res = '击杀' + fubenName + '副本奖励：' + fubenName + '*' + reward
+    } else {
+      const yaocaoNum = str.split('#')[0].split('|')[2]
+      res = '击杀' + fubenName + '副本奖励：' + '力量药草*' + yaocaoNum + ',智力药草*' + yaocaoNum +
+      '敏捷药草*' + yaocaoNum + '体质药草*' + yaocaoNum + '韧性药草*' + yaocaoNum
+    }
+  } else if (b === 4) {
+    res = '扫荡每日副本成功'
   }
   return res
 }
@@ -102,35 +122,41 @@ function parseJingyanshu(jingyanshu) {
   return { 'name': name, 'num': num }
 }
 
-const emeFuben = function(str) {
+const emeFuben = function(obj) {
+  const str = obj.c
+  const b = obj.b // 4为全部扫荡，2为挑战和单次扫荡(需要确认)
   let res = ''
-  const strList = str.split('|')
-  const fubenId = strList[0]
-  if (fubenId === '5') { // 5表示美女副本，32表示恶魔副本
-    const meinvRewardList = str.split('#')
-    const rewardSize = meinvRewardList.length
-    if (rewardSize === 1) {
-      const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
-      res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num
-    } else if (rewardSize === 2) {
-      const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
-      const middleJingyanshu = parseJingyanshu(meinvRewardList[1])
-      res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num + ',' +
-            middleJingyanshu.name + '*' + middleJingyanshu.num
-    } else {
-      const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
-      const middleJingyanshu = parseJingyanshu(meinvRewardList[1])
-      const bigJingyanshu = parseJingyanshu(meinvRewardList[2])
-      res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num + ',' +
-            middleJingyanshu.name + '*' + middleJingyanshu.num + ',' +
-            bigJingyanshu.name + '*' + bigJingyanshu.num
-    }
-  } else if (fubenId === '32') {
-    const rewardNum = strList[2]
-    res = '击杀恶魔巢穴恶魔副本奖励：神器碎片*' + rewardNum
+  if (b === 4) {
+    res = '扫荡恶魔巢穴成功'
   } else {
-    const rewardNum = strList[2]
-    res = '击杀恶魔巢穴亡灵副本奖励：套装碎片*' + rewardNum
+    const strList = str.split('|')
+    const fubenId = strList[0]
+    if (fubenId === '5') { // 5表示美女副本，32表示恶魔副本
+      const meinvRewardList = str.split('#')
+      const rewardSize = meinvRewardList.length
+      if (rewardSize === 1) {
+        const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
+        res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num
+      } else if (rewardSize === 2) {
+        const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
+        const middleJingyanshu = parseJingyanshu(meinvRewardList[1])
+        res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num + ',' +
+              middleJingyanshu.name + '*' + middleJingyanshu.num
+      } else {
+        const smallJingyanshu = parseJingyanshu(meinvRewardList[0])
+        const middleJingyanshu = parseJingyanshu(meinvRewardList[1])
+        const bigJingyanshu = parseJingyanshu(meinvRewardList[2])
+        res = '击杀恶魔巢穴美女副本奖励：' + smallJingyanshu.name + '*' + smallJingyanshu.num + ',' +
+              middleJingyanshu.name + '*' + middleJingyanshu.num + ',' +
+              bigJingyanshu.name + '*' + bigJingyanshu.num
+      }
+    } else if (fubenId === '32') {
+      const rewardNum = strList[2]
+      res = '击杀恶魔巢穴恶魔副本奖励：神器碎片*' + rewardNum
+    } else {
+      const rewardNum = strList[2]
+      res = '击杀恶魔巢穴亡灵副本奖励：套装碎片*' + rewardNum
+    }
   }
   return res
 }
@@ -167,6 +193,19 @@ const shop = function(obj) {
   return jinbiShuaXin
 }
 
+const laxiangguan = function(obj) {
+  const str = obj.c
+  let laxiangbi = 0
+  const strList = str.split('#')
+  const length = strList.length
+  for (let i = 0; i < length; i++) {
+    const lxb = parseInt(strList[i].split('|')[2])
+    laxiangbi += lxb
+  }
+  const res = '获得蜡像币：' + laxiangbi
+  return res
+}
+
 module.exports = {
   getRoleInfo,
   wujin,
@@ -174,5 +213,6 @@ module.exports = {
   meiriFuben,
   emeFuben,
   emmFubenInfo,
-  shop
+  shop,
+  laxiangguan
 }

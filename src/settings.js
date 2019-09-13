@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '古代战争辅助',
+  title: '古代战争火箭辅助',
 
   /**
    * @type {boolean} true | false

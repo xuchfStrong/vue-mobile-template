@@ -141,280 +141,177 @@
       </van-row>
 
       <van-divider>挂机设置</van-divider>
-      <van-tabs v-model="tabActive" type="card" color="#1989fa">
-        <van-tab title="挑战">
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>推图副本挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-stepper v-model="attackTime.bossTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.tuituFlag" type="info" size="small" @click="startFubenBoss">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopFubenBoss">停止</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>无尽炼狱挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-stepper v-model="attackTime.wujinTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.wujinFlag" type="info" size="small" @click="startWujin">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopWujin">停止</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>恶魔巢穴挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>剩余美女{{ emeFubenInfo.jgTimes }}次,亡灵{{ emeFubenInfo.wlTimes }}次,恶魔{{ emeFubenInfo.sqTimes }}次</span>
-              <van-stepper v-model="attackTime.emeTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.emeFubenFlag" type="info" size="small" @click="startEme">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopEme">停止</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>每日副本挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>{{ meiriFuebnAttackTimes }}</span>
-              <van-stepper v-model="attackTime.meiriTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.meiriFubenFlag" type="info" size="small" @click="startMeiriFuben">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopMeiriFuben">停止</van-button>
-            </van-col>
-          </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>推图副本挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.bossTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.tuituFlag" type="info" size="small" @click="startFubenBoss">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopFubenBoss">停止</van-button>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>无尽炼狱挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.wujinTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.wujinFlag" type="info" size="small" @click="startWujin">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopWujin">停止</van-button>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>恶魔巢穴挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.emeTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.emeFubenFlag" type="info" size="small" @click="startEme">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopEme">停止</van-button>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>每日副本挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.meiriTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.meiriFubenFlag" type="info" size="small" @click="startMeiriFuben">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopMeiriFuben">停止</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>血战竞技挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>剩余{{ taskInfo.xuezhanRemainTime }}次</span>
-              <van-stepper v-model="attackTime.xuezhanjingjiTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.xuezhanjingjiFlag" type="info" size="small" @click="startXuezhan">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopXuezhan">停止</van-button>
-            </van-col>
-          </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>血战竞技挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>剩余{{ taskInfo.xuezhanRemainTime }}次</span>
+          <van-stepper v-model="attackTime.xuezhanjingjiTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.xuezhanjingjiFlag" type="info" size="small" @click="startXuezhan">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopXuezhan">停止</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>蜡像馆挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>剩余{{ laxiangguanInfo.canAttackTime }}次</span>
-              <span>{{ laxiangguanLevel }}</span>
-              <van-stepper v-model="attackTime.laxiangguanTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.laxiangguanFlag" type="info" size="small" @click="startLaxiangguan">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopLaxiangguan">停止</van-button>
-            </van-col>
-          </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>蜡像馆挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>剩余{{ laxiangguanInfo.canAttackTime }}次</span>
+          <span>{{ laxiangguanLevel }}</span>
+          <van-stepper v-model="attackTime.laxiangguanTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.laxiangguanFlag" type="info" size="small" @click="startLaxiangguan">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopLaxiangguan">停止</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>蜡像馆低一级挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-stepper v-model="attackTime.laxiangguanLowTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.laxiangguanLowFlag" type="info" size="small" @click="startLaxiangguanLow">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopLaxiangguanLow">停止</van-button>
-            </van-col>
-          </van-row>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>蜡像馆低一级挑战</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-stepper v-model="attackTime.laxiangguanLowTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.laxiangguanLowFlag" type="info" size="small" @click="startLaxiangguanLow">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopLaxiangguanLow">停止</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>世界BOSS挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>已经挑战{{ taskInfo.bossAttackTime }}次</span>
-              <van-stepper v-model="attackTime.shijieBossTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.shijieBossFlag" type="info" size="small" @click="startShiJieBOSS">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopShiJieBOSS">停止</van-button>
-            </van-col>
-          </van-row>
-        </van-tab>
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>蜡像馆购买</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>已买{{ laxiangguanInfo.buyTime }}次</span>
+          <van-stepper v-model="buyInfo.laxiangguanBuyTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyLaxiangguan">购买</van-button>
+        </van-col>
+      </van-row>
 
-        <van-tab title="购买">
-          <van-row v-if="userRole.goldShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>金币商店</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-button type="default" size="small" @click="flushShop">{{ shopInfo.jinbiShuaXin }}钻石刷新</van-button>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyAll">全买</van-button>
-            </van-col>
-          </van-row>
+      <van-row v-if="userRole.goldShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>金币商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-button type="default" size="small" @click="flushShop">{{ shopInfo.jinbiShuaXin }}钻石刷新</van-button>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyAll">全买</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>酒馆十连抽</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>剩余钻石{{ roleInfo.zuanshi }}</span>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="startShilianchou">开始</van-button>
-            </van-col>
-          </van-row>
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>无尽商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.wujingId" :options="shopInfo.wujingShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyWujingShop">购买</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>恶魔巢穴</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>已买美女{{ emeFubenInfo.buyjgTimes }}次,亡灵{{ emeFubenInfo.buywlTimes }}次,恶魔{{ emeFubenInfo.buysqTimes }}次</span>
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.emeFubenType" :options="shopInfo.emeFuben" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyEme(buyInfo.emeFubenType)">购买</van-button>
-            </van-col>
-          </van-row>
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>竞技商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.jingjiId" :options="shopInfo.jingjiShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyJingjiShop">购买</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>每日副本</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>{{ meiriFubenBuyTimes }}</span>
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.meiriFubenType" :options="shopInfo.meiriFuben" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyMeiriFuben(buyInfo.meiriFubenType)">购买</van-button>
-            </van-col>
-          </van-row>
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>套装商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.taozhuangId" :options="shopInfo.taozhuangShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyTaozhuangShop">购买</van-button>
+        </van-col>
+      </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>蜡像馆购买</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>已买{{ laxiangguanInfo.buyTime }}次</span>
-              <van-stepper v-model="buyInfo.laxiangguanBuyTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyLaxiangguan">购买</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>无尽商店</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.wujingId" :options="shopInfo.wujingShop" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyWujingShop">购买</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>竞技商店</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.jingjiId" :options="shopInfo.jingjiShop" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyJingjiShop">购买</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>套装商店</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.taozhuangId" :options="shopInfo.taozhuangShop" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyTaozhuangShop">购买</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>远征商店</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-dropdown-menu>
-                <van-dropdown-item v-model="buyInfo.yuanzhengId" :options="shopInfo.yuanzhengShop" />
-              </van-dropdown-menu>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyYuanzhengShop">购买</van-button>
-            </van-col>
-          </van-row>
-        </van-tab>
-
-        <van-tab title="扫荡">
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>每日副本</div>
-            </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="saodangMeiriFuben">扫荡</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>无尽炼狱</div>
-            </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="saodangWujin">扫荡</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>恶魔巢穴</div>
-            </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="saodangEme">扫荡</van-button>
-            </van-col>
-          </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>蜡像馆</div>
-            </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="saodangLaxiangguan">扫荡</van-button>
-            </van-col>
-          </van-row>
-        </van-tab>
-      </van-tabs>
+      <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
+        <van-col span="8">
+          <div>远征商店</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="buyInfo.yuanzhengId" :options="shopInfo.yuanzhengShop" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button type="info" size="small" @click="buyYuanzhengShop">购买</van-button>
+        </van-col>
+      </van-row>
 
       <van-divider>
         <van-button type="default" size="small" @click="clearLog">清理日志</van-button>
@@ -433,7 +330,6 @@ import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
-import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
@@ -453,7 +349,6 @@ export default {
       timeDiff: 0,
       vip: true,
       yunguaji: false,
-      tabActive: 0, // Tab默认页面
       userRole: { // 用户类型
         v: false, // vip版本
         h: false, // 黑科技
@@ -468,6 +363,16 @@ export default {
       },
       url: {
         serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
+      },
+      flag: {
+        loginFlag: false,
+        tuituFlag: false,
+        wujinFlag: false,
+        emeFubenFlag: false,
+        meiriFubenFlag: false,
+        xuezhanjingjiFlag: false,
+        laxiangguanFlag: false,
+        laxiangguanLowFlag: false
       },
       roleInfo: {
         name: '',
@@ -492,81 +397,23 @@ export default {
         buyTime: 0,
         canAttackTime: 0
       },
-      emeFubenInfo: { // 恶魔巢穴信息
-        buyjgTimes: 0, // 美女副本购买次数
-        jgLevel: 0, // 美女副本级别
-        jgTimes: 0, // 美女副本可打次数
-        buywlTimes: 0, // 亡灵副本购买次数
-        wlLevel: 0, // 亡灵副本级别
-        wlTimes: 0, // 亡灵副本可打次数
-        buysqTimes: 0, // 恶魔副本购买次数
-        sqLevel: 0, // 恶魔副本级别
-        sqTimes: 0 // 恶魔副本可打次数
-      },
-      meiriFubenInfo: {
-        buyjinbiTimes: 0, // 金币副本购买次数
-        jinbiLevel: 0, // 金币副本级别
-        jinbiTimes: 0, // 金币副本可打次数
-        buyexpTimes: 0, // 经验副本购买次数
-        expLevel: 0, // 经验副本级别
-        expTimes: 0, // 经验副本可打次数
-        buyjibanTimes: 0, // 羁绊副本购买次数
-        jibanLevel: 0, // 羁绊副本级别
-        jibanTimes: 0, // 羁绊副本可打次数
-        buyronglianTimes: 0, // 熔炼副本购买次数
-        ronglianLevel: 0, // 熔炼副本级别
-        ronglianTimes: 0, // 熔炼副本可打次数
-        buyyaocaiTimes: 0, // 药草副本购买次数
-        yaocaiLevel: 0, // 药草副本级别
-        yaocaiTimes: 0, // 药草副本可打次数
-        buyxuejingshiTimes: 0, // 血精副本购买次数
-        xuejingshiLevel: 0, // 血精副本级别
-        xuejingshiTimes: 0 // 血精副本可打次数
-      },
       shopInfo: { // 夏洛克商店信息
         jinbiShuaXin: 0, // 金币商店刷新价格
         hadBuyJinbi: false, // 金币商店是否已经买了
         wujingShop: [], // 无尽商店
         jingjiShop: [], // 竞技商店
         taozhuangShop: [], // 套装商店
-        yuanzhengShop: [], // 远征商店
-        emeFuben: [
-          { 'text': '美女副本', 'value': 1 },
-          { 'text': '亡灵副本', 'value': 2 },
-          { 'text': '恶魔副本', 'value': 3 }
-        ],
-        meiriFuben: [
-          { 'text': '金币副本', 'value': 1 },
-          { 'text': '经验副本', 'value': 2 },
-          { 'text': '羁绊副本', 'value': 3 },
-          { 'text': '熔炼副本', 'value': 4 },
-          { 'text': '药材副本', 'value': 5 },
-          { 'text': '血精副本', 'value': 6 }
-        ]
+        yuanzhengShop: [] // 远征商店
       },
       taskInfo: { // 每天的各种任务信息
-        xuezhanRemainTime: 0, // 血战竞技剩余次数
-        bossAttackTime: 0 // 世界BOSS攻击次数
+        xuezhanRemainTime: 0 // 血战竞技剩余次数
       },
       buyInfo: {
         laxiangguanBuyTime: 1, // 蜡像馆的购买次数
         wujingId: 0, // 购买无尽商店的物品ID
         jingjiId: 0, // 购买竞技商店的物品ID
         taozhuangId: 0, // 购买套装商店的物品ID
-        yuanzhengId: 0, // 购买远征商店的物品ID
-        emeFubenType: 1, // 恶魔巢穴副本类型
-        meiriFubenType: 1 // 每日副本类型
-      },
-      flag: {
-        loginFlag: false,
-        tuituFlag: false,
-        wujinFlag: false,
-        emeFubenFlag: false,
-        meiriFubenFlag: false,
-        xuezhanjingjiFlag: false,
-        laxiangguanFlag: false,
-        laxiangguanLowFlag: false,
-        shijieBossFlag: false
+        yuanzhengId: 0 // 购买远征商店的物品ID
       },
       attackTime: {
         bossTime: 1,
@@ -575,8 +422,7 @@ export default {
         meiriTime: 1,
         xuezhanjingjiTime: 1,
         laxiangguanTime: 1,
-        laxiangguanLowTime: 1,
-        shijieBossTime: 1
+        laxiangguanLowTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -590,8 +436,7 @@ export default {
         attackXiaoguaiTimer: null,
         laxiangguanTimer: null,
         laxiangguanLowTimer: null,
-        laxiangguanBuyTimer: null,
-        shijieBossTimer: null
+        laxiangguanBuyTimer: null
       },
       logs: [],
       remoteGuajiLog: '',
@@ -642,78 +487,6 @@ export default {
       } else {
         return ''
       }
-    },
-    // 每日副本购买次数
-    meiriFubenBuyTimes() {
-      const dayNum = parseInt(moment().format('d'))
-      const fubenType = { 1: '金币', 2: '经验', 3: '羁绊', 4: '熔炼', 5: '药材', 6: '血精' }
-      let res = ''
-      if (dayNum === 0) {
-        res = '已买金币' + this.meiriFubenInfo.buyjinbiTimes + '次,' +
-                    '经验' + this.meiriFubenInfo.buyexpTimes + '次,' +
-                    '羁绊' + this.meiriFubenInfo.buyjibanTimes + '次,' +
-                    '熔炼' + this.meiriFubenInfo.buyronglianTimes + '次,' +
-                    '药草' + this.meiriFubenInfo.buyyaocaiTimes + '次,' +
-                    '血精' + this.meiriFubenInfo.buyxuejingshiTimes + '次'
-      } else {
-        switch (dayNum) {
-          case 1:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyjinbiTimes + '次'
-            break
-          case 2:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyexpTimes + '次'
-            break
-          case 3:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyjibanTimes + '次'
-            break
-          case 4:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyronglianTimes + '次'
-            break
-          case 5:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyyaocaiTimes + '次'
-            break
-          case 6:
-            res = '已买' + fubenType[dayNum] + this.meiriFubenInfo.buyxuejingshiTimes + '次'
-            break
-        }
-      }
-      return res
-    },
-    // 每日副本挑战次数
-    meiriFuebnAttackTimes() {
-      const dayNum = parseInt(moment().format('d'))
-      const fubenType = { 1: '金币', 2: '经验', 3: '羁绊', 4: '熔炼', 5: '药材', 6: '血精' }
-      let res = ''
-      if (dayNum === 0) {
-        res = '剩余金币' + this.meiriFubenInfo.jinbiTimes + '次,' +
-                    '经验' + this.meiriFubenInfo.expTimes + '次,' +
-                    '羁绊' + this.meiriFubenInfo.jibanTimes + '次,' +
-                    '熔炼' + this.meiriFubenInfo.ronglianTimes + '次,' +
-                    '药草' + this.meiriFubenInfo.yaocaiTimes + '次,' +
-                    '血精' + this.meiriFubenInfo.xuejingshiTimes + '次'
-      } else {
-        switch (dayNum) {
-          case 1:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.jinbiTimes + '次'
-            break
-          case 2:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.expTimes + '次'
-            break
-          case 3:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.jibanTimes + '次'
-            break
-          case 4:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.ronglianTimes + '次'
-            break
-          case 5:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.yaocaiTimes + '次'
-            break
-          case 6:
-            res = '剩余' + fubenType[dayNum] + this.meiriFubenInfo.xuejingshiTimes + '次'
-            break
-        }
-      }
-      return res
     }
   },
 
@@ -1057,9 +830,8 @@ export default {
       if (redata.pd === 1008) {
         this.roleInfo.levelId = redata.openLevel
       }
-
-      if (redata.pd === 1023) { // 世界BOSS攻击次数
-        this.taskInfo.bossAttackTime = redata.todayAttackTimes
+      if (redata.pd === 1080) {
+        this.roleInfo.wujinLevelId = redata.level
       }
 
       // 商店信息
@@ -1068,44 +840,9 @@ export default {
         this.shopInfo.hadBuyJinbi = hadBuyInfo(redata).hadBuyJinbi
       }
 
-      // 每日副本信息
-      if (redata.pd === 1079) {
-        this.meiriFubenInfo.buyjinbiTimes = redata.buyjinbiTimes
-        this.meiriFubenInfo.jinbiLevel = redata.jinbiLevel
-        this.meiriFubenInfo.jinbiTimes = redata.jinbiTimes
-        this.meiriFubenInfo.buyexpTimes = redata.buyexpTimes
-        this.meiriFubenInfo.expLevel = redata.expLevel
-        this.meiriFubenInfo.expTimes = redata.expTimes
-        this.meiriFubenInfo.buyjibanTimes = redata.buyjibanTimes
-        this.meiriFubenInfo.jibanLevel = redata.jibanLevel
-        this.meiriFubenInfo.jibanTimes = redata.jibanTimes
-        this.meiriFubenInfo.buyronglianTimes = redata.buyzuanshiTimes
-        this.meiriFubenInfo.ronglianLevel = redata.zuanshiLevel
-        this.meiriFubenInfo.ronglianTimes = redata.zuanshiTimes
-        this.meiriFubenInfo.buyyaocaiTimes = redata.buyyaocaiTimes
-        this.meiriFubenInfo.yaocaiLevel = redata.yaocaiLevel
-        this.meiriFubenInfo.yaocaiTimes = redata.yaocaiTimes
-        this.meiriFubenInfo.buyxuejingshiTimes = redata.buyxuejingshiTimes
-        this.meiriFubenInfo.xuejingshiLevel = redata.xuejingshiLevel
-        this.meiriFubenInfo.xuejingshiTimes = redata.xuejingshiTimes
-      }
-
-      // 无尽炼狱信息
-      if (redata.pd === 1080) {
-        this.roleInfo.wujinLevelId = redata.level
-      }
-
-      // 恶魔巢穴信息
-      if (redata.pd === 1088) {
-        this.emeFubenInfo.buyjgTimes = redata.buyjgTimes
-        this.emeFubenInfo.jgLevel = redata.jgLevel
-        this.emeFubenInfo.jgTimes = redata.jgTimes
-        this.emeFubenInfo.buywlTimes = redata.buywlTimes
-        this.emeFubenInfo.wlLevel = redata.wlLevel
-        this.emeFubenInfo.wlTimes = redata.wlTimes
-        this.emeFubenInfo.buysqTimes = redata.buysqTimes
-        this.emeFubenInfo.sqLevel = redata.sqLevel
-        this.emeFubenInfo.sqTimes = redata.sqTimes
+      // 血战竞技信息
+      if (redata.pd === 1100) {
+        this.taskInfo.xuezhanRemainTime = redata.battleTime
       }
 
       // 蜡像馆信息
@@ -1114,11 +851,6 @@ export default {
         this.laxiangguanInfo.level = redata.level
         this.laxiangguanInfo.buyTime = redata.buyTime
         this.laxiangguanInfo.canAttackTime = redata.canAttackTime
-      }
-
-      // 血战竞技信息
-      if (redata.pd === 1100) {
-        this.taskInfo.xuezhanRemainTime = redata.battleTime
       }
 
       // 恶魔巢穴难度等信息
@@ -1138,23 +870,7 @@ export default {
         let log = ''
         switch (d) {
           case 5:
-            log = boss(redata) // 推图结果
-            this.recordLogs(log)
-            break
-          case 6:
-            log = shilianchou(redata) // 十连抽结果
-            this.recordLogs(log)
-            break
-          case 7:
-            log = xuezhan(redata) // 血战领奖
-            this.recordLogs(log)
-            break
-          case 10:
-            log = shijieboss(redata) // 世界BOSS结果
-            this.recordLogs(log)
-            break
-          case 16:
-            log = laxiangguanTaskReward(redata) // 蜡像馆任务奖励
+            log = boss(redata.c) // 推图结果
             this.recordLogs(log)
             break
           case 17:
@@ -1162,19 +878,15 @@ export default {
             this.recordLogs(log)
             break
           case 243:
-            log = meiriFuben(redata) // 每日副本
+            log = meiriFuben(redata.c) // 每日副本
             this.recordLogs(log)
             break
           case 244:
-            log = wujin(redata) // 无尽结果
+            log = wujin(redata.c) // 无尽结果
             this.recordLogs(log)
             break
           case 259:
-            log = emeFuben(redata) // 恶魔巢穴
-            this.recordLogs(log)
-            break
-          case 264:
-            log = laxiangguan(redata) // 蜡像馆获得
+            log = emeFuben(redata.c) // 恶魔巢穴
             this.recordLogs(log)
             break
         }
@@ -1331,28 +1043,18 @@ export default {
     },
 
     // 无尽炼狱发包
-    sendWujin(operate) {
+    sendWujin() {
       const wujinPacket = this.gen_base_json(244)
-      wujinPacket.operate = operate
+      wujinPacket.operate = 2
       this.websocketsend(wujinPacket)
-      if (operate === 2) {
-        this.sendGeneric()
-      } else if (operate === 3) {
-        this.recordLogs('扫荡无尽炼狱')
-      }
-    },
-
-    // 扫荡无尽炼狱
-    saodangWujin() {
-      if (!this.checkLoginStatus()) return
-      this.sendWujin(3)
+      this.sendGeneric()
     },
 
     // 开始无尽炼狱
     startWujin() {
       if (!this.checkLoginStatus()) return
       if (this.roleInfo.wujinLevelId === 0) {
-        this.sendWujin(2)
+        this.sendWujin()
         this.$toast.fail('等待获取当前关卡信息')
         return
       }
@@ -1377,52 +1079,18 @@ export default {
       this.recordLogs('停止挑战无尽炼狱')
     },
 
-    /**
-     * 恶魔副本发包
-     * @param {Number} operate 1为购买, 2为挑战
-     * @param {Number} fbType 1: '美女副本', 2: '亡灵副本', 3: '恶魔副本'
-     */
+    // 恶魔副本发包
     sendEme(fbType, operate) {
       const fubenType = { 1: '美女副本', 2: '亡灵副本', 3: '恶魔副本' }
       const emePacket = this.gen_base_json(259)
       emePacket.operate = operate
       emePacket.fbType = fbType
       this.websocketsend(emePacket)
-      if (operate === 2) {
-        this.sendGeneric()
-        this.recordLogs('挑战恶魔巢穴-' + fubenType[fbType])
-      } else if (operate === 1) {
-        this.recordLogs('购买恶魔巢穴-' + fubenType[fbType] + '一次')
-      } else if (operate === 4) {
-        this.recordLogs('扫荡恶魔巢穴')
-      }
+      this.sendGeneric()
+      this.recordLogs('挑战恶魔巢穴-' + fubenType[fbType])
     },
 
-    // 购买恶魔巢穴
-    buyEme(fbType) {
-      if (!this.checkLoginStatus()) return
-      if (fbType === 1 && this.emeFubenInfo.buyjgTimes === 3) {
-        this.$toast.fail('美女副本已经购买3次')
-        return
-      }
-      if (fbType === 2 && this.emeFubenInfo.buywlTimes === 3) {
-        this.$toast.fail('亡灵副本已经购买3次')
-        return
-      }
-      if (fbType === 3 && this.emeFubenInfo.buysqTimes === 3) {
-        this.$toast.fail('恶魔副本已经购买3次')
-        return
-      }
-      this.sendEme(fbType, 1)
-    },
-
-    // 扫荡恶魔巢穴
-    saodangEme() {
-      if (!this.checkLoginStatus()) return
-      this.sendEme(0, 4)
-    },
-
-    // 开始恶魔巢穴
+    // 开始恶魔副本
     startEme() {
       if (!this.checkLoginStatus()) return
       this.flag.emeFubenFlag = true
@@ -1448,85 +1116,22 @@ export default {
       }, 3000)
     },
 
-    // 停止恶魔巢穴
+    // 停止恶魔副本
     stopEme() {
       clearInterval(this.timer.emeTimer)
       this.flag.emeFubenFlag = false
       this.recordLogs('停止恶魔副本')
     },
 
-    /**
-     * 每日副本发包
-     * @param {Number} operate 1为购买, 2为挑战,3为单次扫荡，4为全部扫荡
-     * @param {Number} fbType 1: '金币副本', 2: '经验副本', 3: '羁绊副本', 4: '熔炼副本', 5: '药材副本', 6: '血精石副本'
-     */
-    sendMeiriFuben(fbType, operate) {
-      const fubenType = { 1: '金币副本', 2: '经验副本', 3: '羁绊副本', 4: '熔炼副本', 5: '药材副本', 6: '血精石副本' }
+    // 每日副本发包
+    sendMeiriFuben(dayNum, operate) {
+      const fubenType = { 1: '金币副本', 2: '经验副本', 3: '羁绊副本', 4: '熔炼副本', 5: '药草副本', 6: '血精石副本' }
       const meiriPacket = this.gen_base_json(243)
       meiriPacket.operate = operate
-      meiriPacket.fbType = fbType
+      meiriPacket.fbType = dayNum
       this.websocketsend(meiriPacket)
-      if (operate === 2) {
-        this.sendGeneric()
-        this.recordLogs('挑战每日副本-' + fubenType[fbType])
-      } else if (operate === 1) {
-        this.recordLogs('购买每日副本-' + fubenType[fbType] + '一次')
-      } else if (operate === 4) {
-        this.recordLogs('扫荡每日副本')
-      }
-    },
-
-    // 购买每日副本
-    buyMeiriFuben(fbType) {
-      if (!this.checkLoginStatus()) return
-      const dayNum = parseInt(moment().format('d'))
-      if (dayNum !== 0) {
-        if (dayNum !== fbType) {
-          this.$toast.fail('今日不能挑战该副本')
-          return
-        }
-      }
-      if (fbType === 1 && this.meiriFubenInfo.buyjinbiTimes === 3) {
-        this.$toast.fail('金币副本已经购买3次')
-        return
-      }
-      if (fbType === 2 && this.meiriFubenInfo.buyexpTimes === 3) {
-        this.$toast.fail('经验副本已经购买3次')
-        return
-      }
-      if (fbType === 3 && this.meiriFubenInfo.buyjibanTimes === 3) {
-        this.$toast.fail('羁绊副本已经购买3次')
-        return
-      }
-      if (fbType === 4 && this.meiriFubenInfo.buyronglianTimes === 3) {
-        this.$toast.fail('熔炼副本已经购买3次')
-        return
-      }
-      if (fbType === 5 && this.meiriFubenInfo.buyyaocaiTimes === 3) {
-        this.$toast.fail('药材副本已经购买3次')
-        return
-      }
-      if (fbType === 6 && this.meiriFubenInfo.buyxuejingshiTimes === 3) {
-        this.$toast.fail('血精石副本已经购买3次')
-        return
-      }
-      this.sendMeiriFuben(fbType, 1)
-    },
-
-    // 扫荡每日副本
-    saodangMeiriFuben() {
-      if (!this.checkLoginStatus()) return
-      const dayNum = parseInt(moment().format('d'))
-      if (dayNum !== 0) {
-        this.sendMeiriFuben(dayNum, 4)
-      } else {
-        this.sendMeiriFuben(1, 4)
-        setTimeout(function() { this.sendMeiriFuben(2, 4) }, 100)
-        setTimeout(function() { this.sendMeiriFuben(3, 4) }, 200)
-        setTimeout(function() { this.sendMeiriFuben(4, 4) }, 300)
-        setTimeout(function() { this.sendMeiriFuben(5, 4) }, 400)
-        setTimeout(function() { this.sendMeiriFuben(6, 4) }, 500)
-      }
+      this.sendGeneric()
+      this.recordLogs('挑战每日副本-' + fubenType[dayNum])
     },
 
     // 开始每日副本
@@ -1624,19 +1229,14 @@ export default {
       // }, 1000)
     },
 
-    /**
-     * 血战竞技发包
-     * @param {Number} operate 1为挑战, 2为领奖
-     */
-    sendXuezhan(operate) {
+    // 血战竞技发包
+    sendXuezhan() {
       const xuezhanPacket = this.gen_base_json(270)
-      xuezhanPacket.operate = operate
+      xuezhanPacket.operate = 1
       xuezhanPacket.nowState = 0
       this.websocketsend(xuezhanPacket)
-      if (operate === 1) {
-        this.sendGeneric()
-        this.recordLogs('挑战血战竞技')
-      }
+      this.sendGeneric()
+      this.recordLogs('挑战血战竞技')
     },
 
     // 开始血战竞技
@@ -1647,28 +1247,17 @@ export default {
         return
       }
       const dayNum = parseInt(moment().format('d'))
-      if (dayNum === 6 || dayNum === 0) {
+      if (dayNum === 5 || dayNum === 6 || dayNum === 0) {
         this.$toast.fail('今天不能打血战竞技')
         return
-      }
-      if (dayNum === 5) {
-        const todayThreeClock = new Date(new Date().toLocaleDateString()).getTime() + 15 * 60 * 60 * 1000 // 当天15点的时间戳
-        const nowTimeStamp = Date.now()
-        if (nowTimeStamp >= todayThreeClock) {
-          this.$toast.fail('现在不能打血战竞技')
-          return
-        }
       }
       this.flag.xuezhanjingjiFlag = true
       let i = 1
       const xuezhanTime = this.attackTime.xuezhanjingjiTime
       const self = this
       self.timer.xuezhanjingjiTimer = setInterval(function() {
-        self.sendXuezhan(1)
+        self.sendXuezhan()
         i++
-        if (self.taskInfo.xuezhanRemainTime === 1) {
-          self.sendXuezhan(2)
-        }
         if (i > xuezhanTime) {
           self.stopXuezhan()
         }
@@ -1680,44 +1269,6 @@ export default {
       clearInterval(this.timer.xuezhanjingjiTimer)
       this.flag.xuezhanjingjiFlag = false
       this.recordLogs('停止挑战血战竞技')
-    },
-
-    /**
-     * 蜡像馆发包
-     * @param {Number} difficulty 难度
-     * @param {Number} operate 1为购买, 2为挑战，3为领奖，4为扫荡
-     * @param {Number} level 级别
-     * @param {Number} taskId 2为领奖，购买，挑战，扫荡都为0
-     */
-    sendLaxiangguan(difficulty, operate, level, taskId) {
-      const lxgPacket = this.gen_base_json(264)
-      lxgPacket.difficulty = difficulty
-      lxgPacket.operate = operate
-      lxgPacket.level = level
-      lxgPacket.taskId = taskId
-      this.websocketsend(lxgPacket)
-      this.sendGeneric()
-      if (operate === 1) {
-        this.recordLogs('购买蜡像馆1次')
-      } else if (operate === 2) {
-        this.recordLogs('挑战蜡像馆')
-      } else if (operate === 3) {
-        this.recordLogs('领取蜡像馆任务奖励')
-      } else if (operate === 4) {
-        this.recordLogs('扫荡蜡像馆')
-      }
-    },
-
-    // 扫荡蜡像馆
-    saodangLaxiangguan() {
-      if (!this.checkLoginStatus()) return
-      this.sendLaxiangguan(0, 4, 0, 0)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 1) }, 1000)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 2) }, 1100)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 3) }, 1200)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 4) }, 1300)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 5) }, 1400)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 6) }, 1500)
     },
 
     // 开始蜡像馆
@@ -1732,7 +1283,7 @@ export default {
       const lxgTime = this.attackTime.laxiangguanTime
       const self = this
       self.timer.laxiangguanTimer = setInterval(function() {
-        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level, 0)
+        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level)
         i++
         if (i > lxgTime) {
           self.stopLaxiangguan()
@@ -1752,12 +1303,28 @@ export default {
       const lxgTime = this.attackTime.laxiangguanLowTime
       const self = this
       self.timer.laxiangguanLowTimer = setInterval(function() {
-        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level - 1, 0)
+        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level - 1)
         i++
         if (i > lxgTime) {
           self.stopLaxiangguanLow()
         }
       }, 1000)
+    },
+
+    // 蜡像馆发包
+    sendLaxiangguan(difficulty, operate, level) {
+      const lxgPacket = this.gen_base_json(264)
+      lxgPacket.difficulty = difficulty
+      lxgPacket.operate = operate
+      lxgPacket.level = level
+      lxgPacket.taskId = 0
+      this.websocketsend(lxgPacket)
+      this.sendGeneric()
+      if (operate === 2) {
+        this.recordLogs('挑战蜡像馆')
+      } else if (operate === 1) {
+        this.recordLogs('购买蜡像馆1次')
+      }
     },
 
     // 停止蜡像馆
@@ -1785,7 +1352,7 @@ export default {
       const lxgBuyTime = this.buyInfo.laxiangguanBuyTime
       const self = this
       self.timer.laxiangguanBuyTimer = setInterval(function() {
-        self.sendLaxiangguan(0, 1, 0, 0)
+        self.sendLaxiangguan(0, 1, 0)
         i++
         if (i > lxgBuyTime) {
           clearInterval(self.timer.laxiangguanBuyTimer)
@@ -1862,69 +1429,6 @@ export default {
       if (!this.checkLoginStatus()) return
       const name = this.getNameById(this.shopInfo.yuanzhengShop, this.buyInfo.yuanzhengId)
       this.sendOtherShop(this.buyInfo.yuanzhengId, name)
-    },
-
-    /**
-     * 世界BOSS发包
-     * @param {Number} operate 1为点开世界BOSS界面，2为确认领取挑战的奖励，3为挑战，4为领奖
-     */
-    sendShijieBoss(operate) {
-      const shijieBOssPacket = this.gen_base_json(10)
-      shijieBOssPacket.operate = operate
-      this.websocketsend(shijieBOssPacket)
-      if (operate === 3) {
-        this.sendGeneric()
-        this.recordLogs('挑战世界BOSS')
-      }
-    },
-
-    // 开始世界BOSS
-    startShiJieBOSS() {
-      if (!this.checkLoginStatus()) return
-      if (this.taskInfo.bossAttackTime === 3) {
-        this.$toast.fail('世界BOSS没次数了')
-        return
-      }
-      this.flag.shijieBossFlag = true
-      let i = 1
-      const lxgTime = this.attackTime.shijieBossTime
-      const self = this
-      self.timer.shijieBossTimer = setInterval(function() {
-        self.sendShijieBoss(1)
-        self.sendShijieBoss(3)
-        self.sendShijieBoss(2)
-        if (self.taskInfo.bossAttackTime === 2) {
-          self.sendShijieBoss(4)
-        }
-        i++
-        if (i > lxgTime) {
-          self.stopShiJieBOSS()
-        }
-      }, 3000)
-    },
-
-    // 停止世界BOSS
-    stopShiJieBOSS() {
-      clearInterval(this.timer.shijieBossTimer)
-      this.flag.shijieBossFlag = false
-    },
-
-    /**
-     * 十连抽发包
-     */
-    startShilianchou() {
-      if (!this.checkLoginStatus()) return
-      this.$dialog.confirm({
-        title: '',
-        message: '确认购买酒馆十连抽?'
-      }).then(() => {
-        const shilianchouPacket = this.gen_base_json(6)
-        shilianchouPacket.id = 2
-        this.websocketsend(shilianchouPacket)
-        this.recordLogs('酒馆十连抽')
-      }).catch(() => {
-        // on cancel
-      })
     }
   }
 }
@@ -1947,9 +1451,6 @@ export default {
   .van-dropdown-menu{
     background-color: #ebedf0;
     height:30px;
-  }
-  .van-tabs--card {
-    padding-top: 0;
   }
 }
 </style>
