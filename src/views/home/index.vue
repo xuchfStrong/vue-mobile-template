@@ -378,38 +378,40 @@
 
         <van-tab title="扫荡">
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
+            <van-col span="6">
               <div>每日副本</div>
             </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
+            <van-col span="12" class="center" />
+            <van-col span="6" class="right">
               <van-button type="info" size="small" @click="saodangMeiriFuben">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
+            <van-col span="6">
               <div>无尽炼狱</div>
             </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
+            <van-col span="12" class="center" />
+            <van-col span="6" class="right">
               <van-button type="info" size="small" @click="saodangWujin">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
+            <van-col span="6">
               <div>恶魔巢穴</div>
             </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
+            <van-col span="12" class="center" />
+            <van-col span="6" class="right">
               <van-button type="info" size="small" @click="saodangEme">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="8">
+            <van-col span="6">
               <div>蜡像馆</div>
             </van-col>
-            <van-col span="8" class="center" />
-            <van-col span="8" class="right">
+            <van-col span="12" class="center">
+              <span>扫荡后自动领任务奖</span>
+            </van-col>
+            <van-col span="6" class="right">
               <van-button type="info" size="small" @click="saodangLaxiangguan">扫荡</van-button>
             </van-col>
           </van-row>
@@ -566,6 +568,7 @@ export default {
       },
       flag: {
         loginFlag: false,
+        logoutFlag: false,
         tuituFlag: false,
         wujinFlag: false,
         emeFubenFlag: false,
@@ -1121,8 +1124,13 @@ export default {
 
       // 蜡像馆信息
       if (redata.pd === 1093) {
-        this.laxiangguanInfo.difficulty = redata.difficulty
-        this.laxiangguanInfo.level = redata.level
+        if (redata.difficulty < 4) {
+          this.laxiangguanInfo.difficulty = redata.difficulty
+          this.laxiangguanInfo.level = redata.level
+        } else {
+          this.laxiangguanInfo.difficulty = parseInt(redata.difficulty) - 1
+          this.laxiangguanInfo.level = 6
+        }
         this.laxiangguanInfo.buyTime = redata.buyTime
         this.laxiangguanInfo.canAttackTime = redata.canAttackTime
       }
@@ -1198,7 +1206,10 @@ export default {
     },
 
     websocketclose(e) { // 关闭
-      this.logout()
+      if (!this.flag.logoutFlag) {
+        this.recordLogs('掉线或者被挤下线')
+      }
+      this.handleLogout()
       console.log('connection closed (' + e + ')')
     },
 
@@ -1257,15 +1268,20 @@ export default {
         setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
-      // this.timer.attackXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10590)
+      this.timer.attackXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10190)
     },
 
     logout() {
+      this.flag.logoutFlag = true
       this.recordLogs('退出登录')
-      clearInterval(this.timer.heartBeatTimer)
-      // clearInterval(this.timer.attackXiaoguaiTimer)
       this.websock.close()
+    },
+
+    handleLogout() {
+      clearInterval(this.timer.heartBeatTimer)
+      clearInterval(this.timer.attackXiaoguaiTimer)
       this.flag.loginFlag = false
+      this.flag.logoutFlag = false
       this.pIn = 0
     },
 
@@ -1706,6 +1722,7 @@ export default {
       lxgPacket.operate = operate
       lxgPacket.level = level
       lxgPacket.taskId = taskId
+      console.log(lxgPacket)
       this.websocketsend(lxgPacket)
       this.sendGeneric()
       if (operate === 1) {
@@ -1723,12 +1740,13 @@ export default {
     saodangLaxiangguan() {
       if (!this.checkLoginStatus()) return
       this.sendLaxiangguan(0, 4, 0, 0)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 1) }, 1000)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 2) }, 1100)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 3) }, 1200)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 4) }, 1300)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 5) }, 1400)
-      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 6) }, 1500)
+      const self = this
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 1) }, 1000)
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 2) }, 1100)
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 3) }, 1200)
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 4) }, 1300)
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 5) }, 1400)
+      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 6) }, 1500)
     },
 
     // 开始蜡像馆
@@ -1761,9 +1779,17 @@ export default {
       this.flag.laxiangguanLowFlag = true
       let i = 1
       const lxgTime = this.attackTime.laxiangguanLowTime
+      let difficulty = this.laxiangguanInfo.difficulty
+      let level = this.laxiangguanInfo.level
+      if (this.laxiangguanInfo.level === 1) {
+        difficulty = difficulty - 1
+        level = 6
+      } else {
+        level = level - 1
+      }
       const self = this
       self.timer.laxiangguanLowTimer = setInterval(function() {
-        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level - 1, 0)
+        self.sendLaxiangguan(difficulty, 2, level, 0)
         i++
         if (i > lxgTime) {
           self.stopLaxiangguanLow()
@@ -1898,7 +1924,7 @@ export default {
       }
       this.flag.shijieBossFlag = true
       let i = 1
-      const lxgTime = this.attackTime.shijieBossTime
+      const sjbTime = this.attackTime.shijieBossTime
       const self = this
       self.timer.shijieBossTimer = setInterval(function() {
         self.sendShijieBoss(1)
@@ -1908,10 +1934,10 @@ export default {
           self.sendShijieBoss(4)
         }
         i++
-        if (i > lxgTime) {
+        if (i > sjbTime) {
           self.stopShiJieBOSS()
         }
-      }, 3000)
+      }, 2000)
     },
 
     // 停止世界BOSS
