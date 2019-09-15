@@ -417,6 +417,10 @@
           </van-row>
         </van-tab>
 
+        <van-tab title="套装">
+          <Taozhuang />
+        </van-tab>
+
         <van-tab title="攻略">
           <GongLue />
         </van-tab>
@@ -445,12 +449,14 @@ import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from
 import Header from '@/components/Header'
 import Help from './components/Help'
 import GongLue from './components/GongLue'
+import Taozhuang from './components/Taozhuang'
 export default {
 
   components: {
     Header,
     Help,
-    GongLue
+    GongLue,
+    Taozhuang
   },
   data() {
     return {
@@ -2008,6 +2014,10 @@ export default {
   }
   .van-tabs--card {
     padding-top: 0;
+  }
+  .van-tabs__wrap--scrollable .van-tab {
+    -webkit-flex: 0 0 20% !important;
+    flex: 0 0 20% !important;
   }
 }
 </style>

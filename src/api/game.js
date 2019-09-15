@@ -111,3 +111,21 @@ export function gonglue(params) {
   })
 }
 
+export function zhuangbei(params) {
+  return request({
+    // url: 'http://127.0.0.1:8000/zhuangbei/',
+    url: 'http://106.54.36.248:9080/gdzz/zhuangbei/',
+    method: 'get',
+    params
+  })
+}
+
+export function taozhuang(data) {
+  return request({
+    // url: 'http://127.0.0.1:8000/taozhuang/',
+    url: 'http://106.54.36.248:9080/gdzz/taozhuang/',
+    method: 'post',
+    data
+  })
+}
+
