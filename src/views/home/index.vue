@@ -1395,7 +1395,7 @@ export default {
       const self = this
       self.timer.wujinTimer = setInterval(function() {
         self.recordLogs('挑战无尽炼狱第' + self.attackWujinLevelId + '关')
-        self.sendWujin()
+        self.sendWujin(2)
         i++
         if (i > wujinTime) {
           self.stopWujin()
