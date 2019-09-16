@@ -249,6 +249,19 @@
               <van-button v-else type="danger" size="small" @click="stopShiJieBOSS">停止</van-button>
             </van-col>
           </van-row>
+
+          <van-row v-if="userRole.sv" class="row-wrap" type="flex" align="center">
+            <van-col span="8">
+              <div>超级探索</div>
+            </van-col>
+            <van-col span="8" class="center">
+              <span>小队ID</span>
+              <van-stepper v-model="tansuoId" button-size="20px" />
+            </van-col>
+            <van-col span="8" class="right">
+              <van-button type="info" size="small" @click="superTansuo">探索</van-button>
+            </van-col>
+          </van-row>
         </van-tab>
 
         <van-tab title="购买">
@@ -467,11 +480,13 @@ export default {
       timeDiff: 0,
       vip: true,
       yunguaji: false,
+      tansuoId: 1,
       tabActive: 0, // Tab默认页面
       userRole: { // 用户类型
         v: false, // vip版本
         h: false, // 黑科技
         vh: false, // 黑科技+vip
+        sv: false, // 超级VIP
         userLevelId: 1, // 1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
         goldShop: false, // 是否显示金币商店
         otherShop: false // 其他商店跨等级买东西
@@ -820,6 +835,11 @@ export default {
             this.userRole.v = true
             this.userRole.h = true
             this.userRole.vh = true
+          } else if (resObj.l === 9) {
+            this.userRole.v = true
+            this.userRole.h = true
+            this.userRole.vh = true
+            this.userRole.sv = true
           }
           this.userRole.userLevelId = resObj.l
           this.userInfo.endTime = moment(resObj.t * 1000).format('YYYY-MM-DD HH:mm:ss')
@@ -1988,8 +2008,17 @@ export default {
       clearInterval(this.timer.shilianchouTimer)
       this.flag.shilianchouFlag = false
       this.recordLogs('停止酒馆十连抽')
-    }
+    },
 
+    // 探索，全主角
+    superTansuo() {
+      const tansuoPacket = this.gen_base_json(262)
+      tansuoPacket.id = this.tansuoId
+      tansuoPacket.operate = 1
+      tansuoPacket.heroIndexs = [1, 1, 1, 1, 1, 1]
+      this.websocketsend(tansuoPacket)
+      this.recordLogs('超级探索')
+    }
   }
 }
 
