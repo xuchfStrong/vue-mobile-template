@@ -155,6 +155,18 @@
               <van-button v-else type="danger" size="small" @click="stopFubenBoss">停止</van-button>
             </van-col>
           </van-row>
+          <van-row v-if="userRole.vh" class="row-wrap" type="flex" align="center">
+            <van-col span="8">
+              <div>推图副本小怪</div>
+            </van-col>
+            <van-col span="8" class="center">
+              <van-stepper v-model="attackTime.xiaoguaiTime" button-size="20px" />
+            </van-col>
+            <van-col span="8" class="right">
+              <van-button v-if="!flag.xiaoguaiFlag" type="info" size="small" @click="startFubenXiaoguai">开始</van-button>
+              <van-button v-else type="danger" size="small" @click="stopFubenXiaoguai">停止</van-button>
+            </van-col>
+          </van-row>
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>无尽炼狱挑战</div>
@@ -255,8 +267,18 @@
               <div>超级探索</div>
             </van-col>
             <van-col span="8" class="center">
-              <span>小队ID</span>
-              <van-stepper v-model="tansuoId" button-size="20px" />
+              <div>
+                <span>小队ID</span>
+                <span>英雄ID</span>
+              </div>
+              <van-row type="flex" justify="space-around" align="center">
+                <van-col span="11">
+                  <van-field v-model="tansuo.xiaoduiId" input-align="center" size="mini" class="input-wrap tansuo-item" placeholder="小队ID" />
+                </van-col>
+                <van-col span="11">
+                  <van-field v-model="tansuo.heroId" input-align="center" size="mini" class="input-wrap tansuo-item" placeholder="英雄ID" />
+                </van-col>
+              </van-row>
             </van-col>
             <van-col span="8" class="right">
               <van-button type="info" size="small" @click="superTansuo">探索</van-button>
@@ -480,7 +502,10 @@ export default {
       timeDiff: 0,
       vip: true,
       yunguaji: false,
-      tansuoId: 1,
+      tansuo: {
+        xiaoduiId: 1,
+        heroId: 0
+      },
       tabActive: 0, // Tab默认页面
       userRole: { // 用户类型
         v: false, // vip版本
@@ -591,6 +616,7 @@ export default {
         loginFlag: false,
         logoutFlag: false,
         tuituFlag: false,
+        xiaoguaiFlag: false,
         wujinFlag: false,
         emeFubenFlag: false,
         meiriFubenFlag: false,
@@ -602,6 +628,7 @@ export default {
       },
       attackTime: {
         bossTime: 1,
+        xiaoguaiTime: 1,
         wujinTime: 1,
         emeTime: 1,
         meiriTime: 1,
@@ -614,13 +641,14 @@ export default {
       timer: {
         heartBeatTimer: null,
         bossTimer: null,
+        xiaoguaiTimer: null,
         wujinTimer: null,
         emeTimer: null,
         meiriTimer: null,
         buyJinbiShopTimerYaocao: null,
         buyJinbiShopTimerHero: null,
         xuezhanjingjiTimer: null,
-        attackXiaoguaiTimer: null,
+        guajiXiaoguaiTimer: null,
         laxiangguanTimer: null,
         laxiangguanLowTimer: null,
         laxiangguanBuyTimer: null,
@@ -1228,7 +1256,7 @@ export default {
 
     websocketsend(data) { // 数据发送
       this.websock.send(JSON.stringify(data))
-      // console.log('send', JSON.stringify(data))
+      console.log('send', JSON.stringify(data))
     },
 
     websocketclose(e) { // 关闭
@@ -1294,7 +1322,7 @@ export default {
         setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
-      this.timer.attackXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10190)
+      this.timer.guajiXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10190)
     },
 
     logout() {
@@ -1304,10 +1332,12 @@ export default {
     },
 
     handleLogout() {
-      clearInterval(this.timer.heartBeatTimer)
-      clearInterval(this.timer.attackXiaoguaiTimer)
-      this.flag.loginFlag = false
-      this.flag.logoutFlag = false
+      for (const key in this.timer) {
+        clearInterval(this.timer[key])
+      }
+      for (const key in this.flag) {
+        this.flag[key] = false
+      }
       this.pIn = 0
     },
 
@@ -1381,6 +1411,30 @@ export default {
       this.flag.tuituFlag = false
       clearInterval(this.timer.bossTimer)
       this.recordLogs('停止推图')
+    },
+
+    // 开始小怪
+    startFubenXiaoguai() {
+      if (!this.checkLoginStatus()) return
+      this.flag.xiaoguaiFlag = true
+      let i = 1
+      const xiaoguaiTime = this.attackTime.xiaoguaiTime
+      const self = this
+      self.timer.xiaoguaiTimer = setInterval(function() {
+        self.recordLogs('攻击小怪')
+        self.fuben(self.roleInfo.levelId, 1, 1)
+        i++
+        if (i > xiaoguaiTime) {
+          self.stopFubenXiaoguai()
+        }
+      }, 1000)
+    },
+
+    // 停止小怪
+    stopFubenXiaoguai() {
+      this.flag.xiaoguaiFlag = false
+      clearInterval(this.timer.xiaoguaiTimer)
+      this.recordLogs('停止打小怪')
     },
 
     // 无尽炼狱发包
@@ -2010,12 +2064,12 @@ export default {
       this.recordLogs('停止酒馆十连抽')
     },
 
-    // 探索，全主角
+    // 超级探索
     superTansuo() {
       const tansuoPacket = this.gen_base_json(262)
-      tansuoPacket.id = this.tansuoId
+      tansuoPacket.id = this.xiaoduiId
       tansuoPacket.operate = 1
-      tansuoPacket.heroIndexs = [1, 1, 1, 1, 1, 1]
+      tansuoPacket.heroIndexs = [this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId]
       this.websocketsend(tansuoPacket)
       this.recordLogs('超级探索')
     }
@@ -2074,6 +2128,9 @@ textarea {
 }
 .endtiem-wrap {
   margin-top: 15px;
+}
+.tansuo-item {
+  line-height: 16px;
 }
 
 </style>
