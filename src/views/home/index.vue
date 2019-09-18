@@ -56,7 +56,10 @@
         </van-col>
       </van-row>
 
-      <div class="endtiem-wrap">
+      <div v-if="userRole.free" class="endtiem-wrap">
+        免费模式，购买后使用更多功能！
+      </div>
+      <div v-else class="endtiem-wrap">
         辅助到期时间: {{ userInfo.endTime }}
       </div>
 
@@ -143,7 +146,7 @@
       <van-divider>挂机设置</van-divider>
       <van-tabs v-model="tabActive" type="card" color="#1989fa">
         <van-tab title="挑战">
-          <van-row class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>推图副本挑战</div>
             </van-col>
@@ -167,7 +170,7 @@
               <van-button v-else type="danger" size="small" @click="stopFubenXiaoguai">停止</van-button>
             </van-col>
           </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>无尽炼狱挑战</div>
             </van-col>
@@ -179,7 +182,7 @@
               <van-button v-else type="danger" size="small" @click="stopWujin">停止</van-button>
             </van-col>
           </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>恶魔巢穴挑战</div>
             </van-col>
@@ -192,7 +195,7 @@
               <van-button v-else type="danger" size="small" @click="stopEme">停止</van-button>
             </van-col>
           </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>每日副本挑战</div>
             </van-col>
@@ -511,6 +514,8 @@ export default {
       },
       tabActive: 0, // Tab默认页面
       userRole: { // 用户类型
+        free: false, // 免费版本
+        normal: false, // 普通版本
         v: false, // vip版本
         h: false, // 黑科技
         vh: false, // 黑科技+vip
@@ -627,7 +632,8 @@ export default {
         laxiangguanFlag: false,
         laxiangguanLowFlag: false,
         shijieBossFlag: false,
-        shilianchouFlag: false
+        shilianchouFlag: false,
+        printJinbiShopLog: true
       },
       attackTime: {
         bossTime: 1,
@@ -869,16 +875,24 @@ export default {
           this.$toast.fail('辅助时间到期，请充值后登录！')
           return
         } else if (resObj.r === 200) {
-          if (resObj.l === 2) {
+          if (resObj.l === 0) {
+            this.userRole.free = true
+          } else if (resObj.l === 1) {
+            this.userRole.normal = true
+          } else if (resObj.l === 2) {
+            this.userRole.normal = true
             this.userRole.v = true
           } else if (resObj.l === 3) {
+            this.userRole.normal = true
             this.userRole.v = true
             this.userRole.h = true
           } else if (resObj.l === 4) {
+            this.userRole.normal = true
             this.userRole.v = true
             this.userRole.h = true
             this.userRole.vh = true
           } else if (resObj.l === 9) {
+            this.userRole.normal = true
             this.userRole.v = true
             this.userRole.h = true
             this.userRole.vh = true
@@ -1280,7 +1294,8 @@ export default {
       }
     },
 
-    websocketsend(data) { // 数据发送
+    // 数据发送
+    websocketsend(data) {
       this.websock.send(JSON.stringify(data))
       // console.log('send', JSON.stringify(data))
     },
@@ -1714,7 +1729,7 @@ export default {
       packet.operate = operate
       packet.num = num
       this.websocketsend(packet)
-      if (operate === 1) {
+      if (operate === 1 && this.flag.printJinbiShopLog) {
         this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
       }
     },
@@ -1725,7 +1740,7 @@ export default {
       if (!this.checkLoginStatus()) return
       if (this.shopInfo.hadBuyJinbi) {
         this.$toast.fail({ duration: 1000, message: '已经购买过了，可以刷新后购买' })
-        return
+        this.flag.printJinbiShopLog = false
       }
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
@@ -1733,6 +1748,7 @@ export default {
       self.timer.buyJinbiShopTimerHero = setInterval(function() {
         if (i > 115) {
           clearInterval(self.timer.buyJinbiShopTimerHero)
+          self.flag.printJinbiShopLog = true
         } else if (i > 110) {
           self.sendJinbiShop(1, i, 5)
         } else {
