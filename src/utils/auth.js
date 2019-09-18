@@ -2,6 +2,7 @@ import LStorage from './LStorage'
 
 const TokenKey = 'x_token'
 const GameLoginInfoKey = 'GameLoginInfoKey'
+const SwitchInfoKey = 'SwitchInfoKey'
 
 export function getToken() {
   return LStorage.getItem(TokenKey)
@@ -25,4 +26,16 @@ export function setGameLoginInfo(GameLoginInfo) {
 
 export function removeGameLoginInfo() {
   return LStorage.removeItem(GameLoginInfoKey)
+}
+
+export function getSwitchInfo() {
+  return LStorage.getItem(SwitchInfoKey)
+}
+
+export function setSwitchInfo(SwitchInfo) {
+  return LStorage.setItem(SwitchInfoKey, SwitchInfo)
+}
+
+export function removeSwitchInfo() {
+  return LStorage.removeItem(SwitchInfoKey)
 }

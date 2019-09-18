@@ -288,14 +288,17 @@
 
         <van-tab title="购买">
           <van-row v-if="userRole.goldShop" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
+            <van-col span="6">
               <div>金币商店</div>
             </van-col>
-            <van-col span="8" class="center">
+            <van-col span="7" class="right">
               <van-button type="default" size="small" @click="flushShop">{{ shopInfo.jinbiShuaXin }}钻石刷新</van-button>
             </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="buyAll">全买</van-button>
+            <van-col span="7" class="left left-padding">
+              <van-switch v-model="switchFlag.autoGlodShop" size="25px" @change="changeAutoGoldShop" />
+            </van-col>
+            <van-col span="4" class="right">
+              <van-button type="info" size="small" @click="goldShopBuyAll">全买</van-button>
             </van-col>
           </van-row>
 
@@ -476,7 +479,7 @@ import moment from 'moment'
 import CryptoJS from 'crypto-js'
 import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
-import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
+import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
@@ -655,6 +658,9 @@ export default {
         shijieBossTimer: null,
         shilianchouTimer: null
       },
+      switchFlag: {
+        autoGlodShop: false
+      },
       logs: [],
       remoteGuajiLog: '',
       userInfo: {
@@ -788,6 +794,14 @@ export default {
     // 当选择平台的时候更新对应的服务器列表
     platform(newVal) {
       this.serverOption = this.serverObj[newVal]
+    },
+
+    // 监控各种开关的变化
+    switchFlag: {
+      handler: function() {
+        this.saveSwitchInfo()
+      },
+      deep: true
     }
   },
 
@@ -808,6 +822,7 @@ export default {
     this.handleGetJingjiShop()
     this.handleGetTaozhuangShop()
     this.handleGetYuanzhengShop()
+    this.loadSwitchInfo()
   },
 
   methods: {
@@ -997,6 +1012,17 @@ export default {
         username: this.userInfo.username
       }
       setGameLoginInfo(gameLoginInfo)
+    },
+
+    // 读取各种开关信息
+    loadSwitchInfo() {
+      const switchInfo = getSwitchInfo()
+      this.switchFlag = { ...switchInfo }
+    },
+
+    // 存储各种开关信息
+    saveSwitchInfo() {
+      setSwitchInfo(this.switchFlag)
     },
 
     // 让日志框的滚动条一直在底部
@@ -1256,7 +1282,7 @@ export default {
 
     websocketsend(data) { // 数据发送
       this.websock.send(JSON.stringify(data))
-      console.log('send', JSON.stringify(data))
+      // console.log('send', JSON.stringify(data))
     },
 
     websocketclose(e) { // 关闭
@@ -1318,6 +1344,7 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
       setTimeout(function() { self.sendGeneric() }, 950)
+      setTimeout(function() { self.autoFunction() }, 1500)
       if (this.userRole.userLevelId <= 2) {
         setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       }
@@ -1694,7 +1721,7 @@ export default {
     flushShop() {
       this.sendJinbiShop(2, 0, 0)
     },
-    buyAll() {
+    goldShopBuyAll() {
       if (!this.checkLoginStatus()) return
       if (this.shopInfo.hadBuyJinbi) {
         this.$toast.fail({ duration: 1000, message: '已经购买过了，可以刷新后购买' })
@@ -1802,7 +1829,6 @@ export default {
       lxgPacket.operate = operate
       lxgPacket.level = level
       lxgPacket.taskId = taskId
-      console.log(lxgPacket)
       this.websocketsend(lxgPacket)
       this.sendGeneric()
       if (operate === 1) {
@@ -1930,7 +1956,6 @@ export default {
         packet.id = id
         packet.operate = 1
         packet.num = 1
-        // console.log(packet)
         this.websocketsend(packet)
         this.recordLogs('购买商品: ' + name)
       }).catch(() => {
@@ -2072,6 +2097,23 @@ export default {
       tansuoPacket.heroIndexs = [this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId]
       this.websocketsend(tansuoPacket)
       this.recordLogs('超级探索')
+    },
+
+    // 改变自动购买金币商店的开关
+    changeAutoGoldShop() {
+      if (this.switchFlag.autoGlodShop) {
+        this.$toast({ duration: 3000, message: '开启登录辅助自动购买金币商店' })
+      } else {
+        this.$toast({ duration: 3000, message: '关闭登录辅助自动购买金币商店' })
+      }
+    },
+
+    // 登录后自动操作的功能
+    autoFunction() {
+      if (this.userRole.goldShop && this.switchFlag.autoGlodShop) {
+        this.recordLogs('自动购买金币商店')
+        this.goldShopBuyAll()
+      }
     }
   }
 }
@@ -2116,6 +2158,12 @@ textarea {
   width: 100%;
   margin-bottom: 50px;
   padding-bottom: 30px;
+}
+.left {
+  text-align: start;
+}
+.left-padding {
+  padding-left: 10px;
 }
 .right {
   text-align: end;
