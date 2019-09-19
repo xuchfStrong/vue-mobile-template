@@ -2,8 +2,8 @@ import request from '@/utils/request-game'
 
 export function loginPlatform(data) {
   return request({
-    // url: '/gdzz/servers_login.php',
-    url: 'http://106.54.36.248:9080/gdzz/login/',
+    url: '/gdzz/servers_login.php',
+    // url: 'http://106.54.36.248:9080/gdzz/login/',
     method: 'post',
     data
   })
@@ -35,8 +35,8 @@ export function getHelp(params) {
 
 export function startGuaji(data) {
   return request({
-    // url: 'http://118.89.219.161:11658/gdzz/start_guaji.php',
-    url: 'http://106.54.36.248:9080/gdzz/start_guaji/',
+    url: 'http://118.89.219.161:11658/gdzz/start_guaji.php',
+    // url: 'http://106.54.36.248:9080/gdzz/start_guaji/',
     method: 'post',
     data
   })
@@ -44,8 +44,8 @@ export function startGuaji(data) {
 
 export function stopGuaji(data) {
   return request({
-    // url: 'http://118.89.219.161:11658/gdzz/stop_guaji.php',
-    url: 'http://106.54.36.248:9080/gdzz/stop_guaji/',
+    url: 'http://118.89.219.161:11658/gdzz/stop_guaji.php',
+    // url: 'http://106.54.36.248:9080/gdzz/stop_guaji/',
     method: 'post',
     data
   })
@@ -53,8 +53,8 @@ export function stopGuaji(data) {
 
 export function getGuajiLog(params) {
   return request({
-    // url: 'http://118.89.219.161:11658/gdzz/get_guaji_log.php',
-    url: 'http://106.54.36.248:9080/gdzz/guaji_log/',
+    url: 'http://118.89.219.161:11658/gdzz/get_guaji_log.php',
+    // url: 'http://106.54.36.248:9080/gdzz/guaji_log/',
     method: 'get',
     params
   })
@@ -62,8 +62,8 @@ export function getGuajiLog(params) {
 
 export function getGuajiStatus(params) {
   return request({
-    // url: 'http://118.89.219.161:11658/gdzz/check_guaji_status.php',
-    url: 'http://106.54.36.248:9080/gdzz/guaji_status/',
+    url: 'http://118.89.219.161:11658/gdzz/check_guaji_status.php',
+    // url: 'http://106.54.36.248:9080/gdzz/guaji_status/',
     method: 'get',
     params
   })

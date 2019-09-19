@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助</span>
+          <span>古代战争火箭辅助V1.4.0</span>
         </template>
       </Header>
     </div>
@@ -520,7 +520,7 @@ export default {
         h: false, // 黑科技
         vh: false, // 黑科技+vip
         sv: false, // 超级VIP
-        userLevelId: 1, // 1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
+        userLevelId: 0, // 0:免费用户，1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
         goldShop: false, // 是否显示金币商店
         otherShop: false // 其他商店跨等级买东西
       },
@@ -1379,6 +1379,13 @@ export default {
       }
       for (const key in this.flag) {
         this.flag[key] = false
+      }
+      for (const key in this.userRole) {
+        if (key === 'userLevelId') {
+          this.userRole[key] = 0
+        } else {
+          this.userRole[key] = false
+        }
       }
       this.pIn = 0
     },

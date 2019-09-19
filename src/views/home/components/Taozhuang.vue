@@ -93,7 +93,14 @@
       </van-col>
     </van-row>
 
-    <van-divider>搭配属性</van-divider>
+    <van-row type="flex" justify="space-around" align="center">
+      <van-col span="10">
+        <van-divider>装备属性</van-divider>
+      </van-col>
+      <van-col span="10">
+        <van-divider>换算属性</van-divider>
+      </van-col>
+    </van-row>
     <div class="shuxing-wrap">
       <div class="shuxing-left">
         <p v-for="item in tzShuxing" :key="item"> {{ item }} </p>
@@ -233,12 +240,12 @@ export default {
   min-height: 40px;
   display: flex;
   .shuxing-left{
-    padding-left: 20px;
+    padding-left: 50px;
     width: 50%;
     border-right: solid 1px #ebedf0;
   }
   .shuxing-right{
-    padding-left: 20px;
+    padding-left: 50px;
     width: 50%;
   }
 }
