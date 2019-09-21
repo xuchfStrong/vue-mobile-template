@@ -209,6 +209,27 @@
             </van-col>
           </van-row>
 
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+            <van-col span="8">
+              <div>竞技场挑战</div>
+            </van-col>
+            <van-col span="8" class="center">
+              <span>已打{{ jjcInfo.todayAttackTimes }}次,剩余{{ jjcInfo.jjcTime }}次,胜{{ jjcInfo.jjcWinTime }}次,输{{ jjcInfo.jjcLoseTime }}次,连胜{{ jjcInfo.jjcLinkWinTime }}次</span>
+              <van-row>
+                <van-col span="18">
+                  <van-stepper v-model="attackTime.zhanliDiscount" :step="10" button-size="20px" />
+                </van-col>
+                <van-col span="6">
+                  <van-button type="default" size="mini" @click="showJJCHelop">帮助</van-button>
+                </van-col>
+              </van-row>
+            </van-col>
+            <van-col span="8" class="right">
+              <van-button v-if="!flag.jjcFlag" type="info" size="small" @click="startJingjichang">开始</van-button>
+              <van-button v-else type="danger" size="small" @click="stopJingjichang">停止</van-button>
+            </van-col>
+          </van-row>
+
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>血战竞技挑战</div>
@@ -485,6 +506,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
+import { calcZhanli, calcJjcInfo } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
@@ -546,7 +568,8 @@ export default {
         taozhuangsuipian: '',
         rongyu: '', // 竞技荣誉
         jiban: '',
-        laxiangbi: '' // 蜡像币
+        laxiangbi: '', // 蜡像币
+        zhanli: 0 // 战力
       },
       laxiangguanInfo: { // 蜡像馆信息
         difficulty: 0,
@@ -564,6 +587,16 @@ export default {
         buysqTimes: 0, // 恶魔副本购买次数
         sqLevel: 0, // 恶魔副本级别
         sqTimes: 0 // 恶魔副本可打次数
+      },
+      jjcInfo: {
+        jjcTime: 0, // 竞技场剩余次数
+        jjcWinTime: 0, // 竞技场胜利次数
+        jjcLoseTime: 0, // 竞技场输的次数
+        jjcLinkWinTime: 0, // 连胜次数
+        todayAttackTimes: 0, // 今天攻击次数
+        winIds: [], // 当前返回的列表中已经打赢的角色
+        roleList: [], // 竞技场角色信息
+        canAttackRole: [] // 可以攻击的角色
       },
       meiriFubenInfo: {
         buyjinbiTimes: 0, // 金币副本购买次数
@@ -633,7 +666,8 @@ export default {
         laxiangguanLowFlag: false,
         shijieBossFlag: false,
         shilianchouFlag: false,
-        printJinbiShopLog: true
+        printJinbiShopLog: true,
+        jjcFlag: false
       },
       attackTime: {
         bossTime: 1,
@@ -645,7 +679,8 @@ export default {
         laxiangguanTime: 1,
         laxiangguanLowTime: 1,
         shijieBossTime: 1,
-        shilianchouTime: 1
+        shilianchouTime: 1,
+        zhanliDiscount: 30
       },
       timer: {
         heartBeatTimer: null,
@@ -662,7 +697,8 @@ export default {
         laxiangguanLowTimer: null,
         laxiangguanBuyTimer: null,
         shijieBossTimer: null,
-        shilianchouTimer: null
+        shilianchouTimer: null,
+        jjcTimer: null
       },
       switchFlag: {
         autoGlodShop: false
@@ -1159,15 +1195,31 @@ export default {
         this.roleInfo.rongyu = redata.rongyu
         this.roleInfo.jiban = redata.jiban
         this.roleInfo.laxiangbi = redata.o
+        this.jjcInfo.jjcTime = redata.jjcTime
         // this.recordLogs('当前经验：' + redata.i)
       }
+
       if (redata.pd === 1008) {
         this.roleInfo.levelId = redata.openLevel
+      }
+
+      if (redata.pd === 1012) { // 计算竞技场的角色信息
+        const res = calcJjcInfo(redata)
+        this.jjcInfo.jjcWinTime = res.jjcWinTime
+        this.jjcInfo.jjcLoseTime = res.jjcLoseTime
+        this.jjcInfo.jjcLinkWinTime = res.jjcLinkWinTime
+        this.jjcInfo.todayAttackTimes = res.todayAttackTimes
+        this.jjcInfo.winIds = res.winIds
+        this.jjcInfo.roleList = res.roleList
       }
 
       if (redata.pd === 1023) { // 世界BOSS攻击次数
         this.taskInfo.bossAttackTime = redata.todayAttackTimes
         this.taskInfo.bossCanAttackTime = 3 - redata.todayAttackTimes
+      }
+
+      if (redata.pd === 1025) { // 上阵英雄战力
+        this.roleInfo.zhanli = calcZhanli(redata)
       }
 
       // 商店信息
@@ -1359,10 +1411,11 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
       setTimeout(function() { self.sendGeneric() }, 950)
+      setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
       setTimeout(function() { self.autoFunction() }, 1500)
-      if (this.userRole.userLevelId <= 2) {
-        setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
-      }
+      // if (this.userRole.userLevelId <= 2) {
+      //   setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
+      // }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
       this.timer.guajiXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10190)
     },
@@ -2137,6 +2190,87 @@ export default {
         this.recordLogs('自动购买金币商店')
         this.goldShopBuyAll()
       }
+    },
+
+    // 竞技场发包
+    sendJingjichang(roleId, operate) {
+      const jjcPacket = this.gen_base_json(7)
+      jjcPacket.roleId = roleId
+      jjcPacket.operate = operate
+      this.websocketsend(jjcPacket)
+      if (operate === 2) {
+        this.sendGeneric()
+        this.recordLogs('挑战竞技场')
+      }
+    },
+
+    // 竞技场可以攻击的角色
+    calcCanAttackRole() {
+      const res = []
+      const attackZhanli = parseInt(this.roleInfo.zhanli * (100 - this.attackTime.zhanliDiscount) / 100)
+      const roleList = this.jjcInfo.roleList
+      roleList.forEach(i => {
+        if (i.zhanli < attackZhanli && this.jjcInfo.winIds.indexOf(i.roleId) === -1) {
+          res.push(i.roleId)
+        }
+      })
+      this.jjcInfo.canAttackRole = res
+    },
+
+    // 开始竞技场
+    startJingjichang() {
+      if (!this.checkLoginStatus()) return
+      if (this.timer.jjcTimer === 0) {
+        this.$toast.fail('没次数了')
+        return
+      }
+      this.recordLogs('开始挑战竞技场')
+      this.flag.jjcFlag = true
+      const self = this
+      const totalTime = this.jjcInfo.todayAttackTimes + this.jjcInfo.jjcTime
+      if (totalTime < 10) {
+        setTimeout(function() { self.sendJingjichang('', 1) }, 100)
+        setTimeout(function() { self.sendJingjichang('', 1) }, 200)
+        setTimeout(function() { self.sendJingjichang('', 1) }, 300)
+        setTimeout(function() { self.sendJingjichang('', 1) }, 400)
+        setTimeout(function() { self.sendJingjichang('', 1) }, 500)
+      }
+      // 先尝试攻击一次,要不然第一共攻击要等到后面的第一次setInterval之后
+      this.sendJingjichang('', 4)
+      this.calcCanAttackRole()
+      if (this.jjcInfo.canAttackRole.length > 0) {
+        this.sendJingjichang(this.jjcInfo.canAttackRole[0], 2)
+        this.jjcInfo.canAttackRole.splice(0, 1)
+      }
+      // 开始循环
+      self.timer.jjcTimer = setInterval(function() {
+        self.sendJingjichang('', 4)
+        self.calcCanAttackRole()
+        const l = self.jjcInfo.canAttackRole.length
+        if (l > 0) {
+          self.sendJingjichang(self.jjcInfo.canAttackRole[0], 2)
+          self.jjcInfo.canAttackRole.splice(0, 1)
+        }
+        if (self.jjcInfo.jjcTime === 0) {
+          self.sendJingjichang('', 6)
+          self.stopJingjichang()
+        }
+      }, 1000 * 60)
+    },
+
+    // 停止竞技场
+    stopJingjichang() {
+      this.flag.jjcFlag = false
+      clearInterval(this.timer.jjcTimer)
+    },
+
+    // 竞技场帮助信息
+    showJJCHelop() {
+      this.$dialog.alert({
+        message: '这里设置的是百分比,默认30%,开始后会先购买次数,然后自动挑战比自己战力低30%的对手,直到次数完毕'
+      }).then(() => {
+        // on confirm
+      })
     }
   }
 }

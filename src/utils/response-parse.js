@@ -76,7 +76,10 @@ export function boss(obj) {
   const strList = str.split('#')
   const length = strList.length
   if (b === 1) {
-    if (length === 2) { // 血战奖励
+    if (length === 1) { // 血战奖励
+      const jingjibi = strList[0].split('|')[2]
+      res = '竞技场获得: 竞技币' + jingjibi
+    } else if (length === 2) { // 血战奖励
       const jinbi = strList[1].split('|')[2]
       const jingjibi = strList[0].split('|')[2]
       res = '血战竞技获得: 金币' + jinbi + '，竞技币' + jingjibi
@@ -257,10 +260,18 @@ export function xuezhan(obj) {
   const str = obj.c
   let res = ''
   const strList = str.split('#')
-  const jinbi = strList[0].split('|')[2]
-  const jingjibi = strList[1].split('|')[2]
-  const jiban = strList[2].split('|')[2]
-  res = '领取血战竞技奖励：金币' + jinbi + ',竞技币' + jingjibi + ',羁绊' + jiban
+  const key = strList[0].split('|')[2]
+  if (key === 1) {
+    const jinbi = strList[0].split('|')[2]
+    const jingjibi = strList[1].split('|')[2]
+    const jiban = strList[2].split('|')[2]
+    res = '领取血战竞技奖励：金币' + jinbi + ',竞技币' + jingjibi + ',羁绊' + jiban
+  } else if (key === 4) {
+    const jingjibi = strList[0].split('|')[2]
+    const zuanshi = strList[1].split('|')[2]
+    const jinbi = strList[2].split('|')[2]
+    res = '领取竞技场奖励：金币' + jinbi + ',竞技币' + jingjibi + ',钻石' + zuanshi
+  }
   return res
 }
 
@@ -343,5 +354,29 @@ export function shilianchou(obj) {
   if (ssHero.length === 0) {
     res = '本次十连抽没有获得ss英雄'
   }
+  return res
+}
+
+// 计算角色战力
+export function calcZhanli(obj) {
+  const heros = obj.heros
+  let zhanli = 0
+  if (heros.length <= 6) {
+    heros.forEach(element => {
+      zhanli += element.zhanli
+    })
+  }
+  return zhanli
+}
+
+// 竞技场信息
+export function calcJjcInfo(obj) {
+  const res = {}
+  res.jjcWinTime = obj.winTime
+  res.jjcLoseTime = obj.loseTime
+  res.jjcLinkWinTime = obj.linkWinTime
+  res.todayAttackTimes = obj.todayAttackTimes
+  res.winIds = obj.winIds
+  res.roleList = obj.roleList
   return res
 }
