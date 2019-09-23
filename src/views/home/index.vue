@@ -380,7 +380,7 @@
               <van-button type="info" size="small" @click="buyLaxiangguan">购买</van-button>
             </van-col>
           </van-row>
-
+          <!--
           <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>无尽商店</div>
@@ -435,13 +435,13 @@
             <van-col span="8" class="right">
               <van-button type="info" size="small" @click="buyYuanzhengShop">购买</van-button>
             </van-col>
-          </van-row>
+          </van-row> -->
         </van-tab>
 
-        <van-tab title="扫荡">
+        <van-tab title="日常">
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="6">
-              <div>每日副本</div>
+              <div>每日副本扫荡</div>
             </van-col>
             <van-col span="12" class="center" />
             <van-col span="6" class="right">
@@ -450,7 +450,7 @@
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="6">
-              <div>无尽炼狱</div>
+              <div>无尽炼狱扫荡</div>
             </van-col>
             <van-col span="12" class="center" />
             <van-col span="6" class="right">
@@ -459,7 +459,7 @@
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="6">
-              <div>恶魔巢穴</div>
+              <div>恶魔巢穴扫荡</div>
             </van-col>
             <van-col span="12" class="center" />
             <van-col span="6" class="right">
@@ -468,13 +468,25 @@
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="6">
-              <div>蜡像馆</div>
+              <div>蜡像馆扫荡</div>
             </van-col>
             <van-col span="12" class="center">
               <span>扫荡后自动领任务奖</span>
             </van-col>
             <van-col span="6" class="right">
               <van-button type="info" size="small" @click="saodangLaxiangguan">扫荡</van-button>
+            </van-col>
+          </van-row>
+          <van-row class="row-wrap" type="flex" align="center">
+            <van-col span="6">
+              <div>装备升级</div>
+            </van-col>
+            <van-col span="12" class="center">
+              <span>装备自动升级，用于做成就</span>
+            </van-col>
+            <van-col span="6" class="right">
+              <van-button v-if="!flag.zbUpdateFlag" type="info" size="small" @click="startZbUpdate">开始</van-button>
+              <van-button v-else type="danger" size="small" @click="stopZbUpdate">停止</van-button>
             </van-col>
           </van-row>
         </van-tab>
@@ -504,9 +516,9 @@ import CryptoJS from 'crypto-js'
 import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
+import { wujin, boss, meiriFuben, emeFuben, guaji, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
-import { calcZhanli, calcJjcInfo } from '@/utils/response-parse'
+import { calcZhanli, calcJjcInfo, calcZhuangbei } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
@@ -569,7 +581,8 @@ export default {
         rongyu: '', // 竞技荣誉
         jiban: '',
         laxiangbi: '', // 蜡像币
-        zhanli: 0 // 战力
+        zhanli: 0, // 战力
+        zhuangbeiList: [] // 计算后的，装备列表，用于升级
       },
       laxiangguanInfo: { // 蜡像馆信息
         difficulty: 0,
@@ -667,7 +680,8 @@ export default {
         shijieBossFlag: false,
         shilianchouFlag: false,
         printJinbiShopLog: true,
-        jjcFlag: false
+        jjcFlag: false,
+        zbUpdateFlag: false
       },
       attackTime: {
         bossTime: 1,
@@ -698,7 +712,8 @@ export default {
         laxiangguanBuyTimer: null,
         shijieBossTimer: null,
         shilianchouTimer: null,
-        jjcTimer: null
+        jjcTimer: null,
+        zbUpdateTimer: null
       },
       switchFlag: {
         autoGlodShop: false
@@ -1197,6 +1212,11 @@ export default {
         this.roleInfo.laxiangbi = redata.o
         this.jjcInfo.jjcTime = redata.jjcTime
         // this.recordLogs('当前经验：' + redata.i)
+      }
+
+      if (redata.pd === 1007) { // 装备列表
+        const res = calcZhuangbei(redata, this.roleInfo.level)
+        this.roleInfo.zhuangbeiList = res
       }
 
       if (redata.pd === 1008) {
@@ -1789,9 +1809,9 @@ export default {
       packet.operate = operate
       packet.num = num
       this.websocketsend(packet)
-      if (operate === 1 && this.flag.printJinbiShopLog) {
-        this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
-      }
+      // if (operate === 1 && this.flag.printJinbiShopLog) {
+      //   this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
+      // }
     },
     flushShop() {
       this.sendJinbiShop(2, 0, 0)
@@ -1808,6 +1828,7 @@ export default {
       self.timer.buyJinbiShopTimerHero = setInterval(function() {
         if (i > 115) {
           clearInterval(self.timer.buyJinbiShopTimerHero)
+          self.recordLogs('金币商店购买完毕')
           self.flag.printJinbiShopLog = true
         } else if (i > 110) {
           self.sendJinbiShop(1, i, 5)
@@ -2267,10 +2288,60 @@ export default {
     // 竞技场帮助信息
     showJJCHelop() {
       this.$dialog.alert({
-        message: '这里设置的是百分比,默认30%,开始后会先购买次数,然后自动挑战比自己战力低30%的对手,直到次数完毕'
+        message: '这里设置的是百分比,默认30%,开始后会先购买次数,然后自动挑战比自己战力低30%的对手，没有就等系统自动刷新,直到次数完毕'
       }).then(() => {
         // on confirm
       })
+    },
+
+    /**
+     * 装备升级发包
+     * @param {Number} equipIndex 装备Index
+     * @param {Number} updateLevel 需要升级的等级数
+     */
+    sendZbUpdate(equipIndex, updateLevel) {
+      const zbUpdatePacket = this.gen_base_json(106)
+      zbUpdatePacket.heroIndex = 0
+      zbUpdatePacket.equipIndex = equipIndex
+      zbUpdatePacket.level = updateLevel
+      this.websocketsend(zbUpdatePacket)
+    },
+
+    // 开始装备升级
+    startZbUpdate() {
+      if (!this.checkLoginStatus()) return
+      if (!this.roleInfo.zhuangbeiList) {
+        this.$toast.fail('没有获取到装备信息，稍等重试')
+        return
+      }
+      this.recordLogs('开始批量升级装备')
+      let i = 0
+      const zbList = [...this.roleInfo.zhuangbeiList]
+      this.flag.zbUpdateFlag = true
+      const self = this
+      self.timer.zbUpdateTimer = setInterval(function() {
+        const equipIndex = zbList[i].equipIndex
+        const updateLevel = zbList[i].updateLevel
+        const h = i + 1
+        if (updateLevel > 0) {
+          self.recordLogs('将第' + h + '件装备升级' + updateLevel + '级')
+        } else {
+          self.recordLogs('第' + h + '件装备无需升级')
+        }
+        self.sendZbUpdate(equipIndex, updateLevel)
+        i++
+        if (i > zbList.length - 1) {
+          self.stopZbUpdate()
+        }
+      }, 100)
+    },
+
+    // 停止装备升级
+    stopZbUpdate() {
+      this.flag.zbUpdateFlag = false
+      this.roleInfo.zhuangbeiList = []
+      clearInterval(this.timer.zbUpdateTimer)
+      this.recordLogs('停止批量升级装备')
     }
   }
 }

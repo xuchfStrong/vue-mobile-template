@@ -1,7 +1,7 @@
-const parse = require('./response-parse-exports')
-const obj = {'a':1,'b':2,'c':'5|4000021|233#5|4000022|62','pd':1004,'d':259,'rId':0}
-const res = parse.emeFuben(obj)
-console.log(res)
+// const parse = require('./response-parse-exports')
+// const obj = { 'a': 1, 'b': 2, 'c': '5|4000021|233#5|4000022|62', 'pd': 1004, 'd': 259, 'rId': 0 }
+// const res = parse.emeFuben(obj)
+// console.log(res)
 
 // Rsa测试
 // const rsa = require('js-rsa')
@@ -25,3 +25,14 @@ console.log(res)
 // const moment = require('moment')
 // const str = moment(1568126489000).format('YYYY-MM-DD HH:mm:ss')
 // console.log(str)
+
+// 测试间隔遍历数组
+const arr = [1, 2, 3, 4, 5, 6]
+let i = 0 // 在外面定义一个变量作为判断的标准
+const timer = setInterval(function() {
+  console.log(arr[i])
+  i++
+  if (i > arr.length - 1) { // 因为i++的原因，所以当i的值大于数组的长度-1的时候，清除定时器
+    clearInterval(timer)
+  }
+}, 1000)

@@ -380,3 +380,20 @@ export function calcJjcInfo(obj) {
   res.roleList = obj.roleList
   return res
 }
+
+/**
+  * 计算需要升级的装备信息,需要返回的数据包括装备Index和需要升级的等级数量['equipIndex': 82, "updateLevel": 8]
+  * @param {Object} obj 服务器返回的数据
+  * @param {Number} level 角色等级
+  */
+export function calcZhuangbei(obj, level) {
+  const res = []
+  const zbOrgi = obj.b
+  zbOrgi.forEach(i => {
+    const equipIndex = i.a
+    const updateLevel = level - i.e
+    const oneZb = { 'equipIndex': equipIndex, 'updateLevel': updateLevel }
+    res.push(oneZb)
+  })
+  return res
+}
