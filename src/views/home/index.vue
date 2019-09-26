@@ -29,6 +29,17 @@
       <textarea id="remotelog-textarea" v-model="remoteGuajiLog" rows="20" readonly />
     </van-popup>
 
+    <van-dialog
+      v-model="show.yzmgHelp"
+    >
+      <div style="padding-left:20px;padding-right:20px; font-size:14px;">
+        <p>1.配置两个英雄，保证能正常打过。一般主角+血狮或者主角+正义</p>
+        <p>2.主角技能修改为奶，这里配置保存后，外面主角技能可以随便改</p>
+        <p>3.配置完毕后，之后每天直接用辅助打迷宫就可以了</p>
+        <p>4.如果遇到连续打一个关卡10次以上，请手动停止，然后进游戏处理</p>
+      </div>
+    </van-dialog>
+
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
         <van-col span="9">
@@ -575,7 +586,8 @@ export default {
       },
       show: {
         helpInfo: false,
-        remoteGuajiLog: false
+        remoteGuajiLog: false,
+        yzmgHelp: false
       },
       url: {
         serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
@@ -2569,11 +2581,7 @@ export default {
 
     // 远征迷宫帮助
     showYZMGHelp() {
-      this.$dialog.alert({
-        message: '配置两个英雄，确保能打过关卡，主角和正义或者血狮，然后每天就可以辅助里直接打'
-      }).then(() => {
-        // on confirm
-      })
+      this.show.yzmgHelp = true
     }
   }
 }
