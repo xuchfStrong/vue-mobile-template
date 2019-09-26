@@ -230,6 +230,20 @@
             </van-col>
           </van-row>
 
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+            <van-col span="8">
+              <div>远征迷宫</div>
+            </van-col>
+            <van-col span="8" class="center">
+              <span>剩余{{ yzmgInfo.remainTimes }}次</span>
+              <van-button type="default" size="mini" @click="showYZMGHelp">帮助</van-button>
+            </van-col>
+            <van-col span="8" class="right">
+              <van-button v-if="!flag.yzmgFlag" type="info" size="small" @click="startYZMG">开始</van-button>
+              <van-button v-else type="danger" size="small" @click="stopYZMG">停止</van-button>
+            </van-col>
+          </van-row>
+
           <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>血战竞技挑战</div>
@@ -512,13 +526,14 @@
 import SHA1 from 'js-sha1'
 import axios from 'axios'
 import moment from 'moment'
+import deepClone from '@jsbits/deep-clone'
 import CryptoJS from 'crypto-js'
 import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { wujin, boss, meiriFuben, emeFuben, guaji, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
-import { calcZhanli, calcJjcInfo, calcZhuangbei } from '@/utils/response-parse'
+import { calcZhanli, calcJjcInfo, calcZhuangbei, yzmgAddWeight, yzmgCalcPos, yzmgCalcParams, yzmgUpdateLineMaps } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
@@ -611,6 +626,15 @@ export default {
         roleList: [], // 竞技场角色信息
         canAttackRole: [] // 可以攻击的角色
       },
+      yzmgInfo: { // 远征迷宫信息
+        zhenrong: [], // 可以布阵的英雄
+        remainTimes: 0, // 剩余次数
+        shouldStop: false, // 因为死亡英雄过多，不能开始
+        moheZhandou: false, // 魔盒是否遭遇战斗
+        lineMaps: [], // 线路图
+        pos: 0, // 选择的目标位置
+        packetParams: { evtId: 0, param: 9 } // 这里设置为9只是为了和实际值不同
+      },
       meiriFubenInfo: {
         buyjinbiTimes: 0, // 金币副本购买次数
         jinbiLevel: 0, // 金币副本级别
@@ -681,7 +705,8 @@ export default {
         shilianchouFlag: false,
         printJinbiShopLog: true,
         jjcFlag: false,
-        zbUpdateFlag: false
+        zbUpdateFlag: false,
+        yzmgFlag: false
       },
       attackTime: {
         bossTime: 1,
@@ -713,7 +738,8 @@ export default {
         shijieBossTimer: null,
         shilianchouTimer: null,
         jjcTimer: null,
-        zbUpdateTimer: null
+        zbUpdateTimer: null,
+        yzmgTimer: null
       },
       switchFlag: {
         autoGlodShop: false
@@ -1231,6 +1257,87 @@ export default {
         this.jjcInfo.todayAttackTimes = res.todayAttackTimes
         this.jjcInfo.winIds = res.winIds
         this.jjcInfo.roleList = res.roleList
+      }
+
+      /**
+       * 远征迷宫解析
+       * 根据lineMaps数组中的元素数量进行区别。
+       * 如果只有一个元素，则用于解析下一次攻击的参数，其中根据"h":0和"c":false这两个来判断
+       * 这表示是需要进行解析的，"a":14和lineMaps中的元素中的"a":14应该是一样的。
+       *
+       * 如果有两个元素，那这个数据包中包含了上次攻击目标的行和更新的行，需要把更新的行数据添加到this.yzmgInfo.lineMaps
+       * 区别在于其中的一个"c":false另外一个"c":true，需要把"c":false的添加到this.yzmgInfo.lineMaps
+       *
+       * 如果有三个元素，那说明是刚开始。这个时候第一行只能选中间三个，需要按照刚开始的算法进行解析。
+       * 要将yzmgCalcPos(lineMaps, firstTime, pos)中的firstTime设置为1
+       *
+       * 如果大于三个元素，那说明是之前打了一部分，这个时候需要取倒数三个元素用于计算线路图
+       * 这里需要分两种情况：
+       * 1. 倒数第三个元素中的"b":0,表示之前没有选择具体的对象，有三个目标可选，
+       * 这个时候就需要获取倒数第4个元素中的"b"的值作为上次攻击目标的pos值计算这次应该选择的目标。
+       * 2. 如果倒数第三个元素中的"b"有值，那这个值就是本次需要选择的目标位置
+       */
+
+      if (redata.pd === 1106) { // 远征迷宫路线信息
+        this.yzmgInfo.remainTimes = redata.c
+        const length = redata.lineMaps.length
+        const copyData = JSON.parse(JSON.stringify(redata))
+        if (length > 3) {
+          const beforeId = copyData.lineMaps[length - 4].b // 倒数第4个evtList就是上次打的那一行
+          const cutNum = length - 3
+          redata.lineMaps.splice(0, cutNum)
+          this.yzmgInfo.lineMaps = yzmgAddWeight(redata)
+          if (this.yzmgInfo.lineMaps[0].b) { // 上次已经选择了目标，但是还没打完就退出了
+            const line = this.yzmgInfo.lineMaps[0]
+            this.yzmgInfo.pos = line.b
+            this.yzmgInfo.packetParams.evtId = line.evtList[line.b - 1].a
+          } else { // 上次已经打完了，然后没有选择目标就退出了，所有三个目标可以选择，根据上次打的ID进行目标选择
+            const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 0, beforeId)
+            this.yzmgInfo.pos = res.pos
+            this.yzmgInfo.packetParams.evtId = res.evtId
+          }
+        } else if (length === 3) {
+          this.yzmgInfo.lineMaps = yzmgAddWeight(redata)
+          const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 1, 3) // 开始打的时候默认是中间，所以可以认为上次打的是中间的一个
+          this.yzmgInfo.pos = res.pos
+          this.yzmgInfo.packetParams.evtId = res.evtId
+        } else if (length === 2) {
+          const updateLineData = yzmgAddWeight(redata)
+          const copyLineMaps = deepClone(this.yzmgInfo.lineMaps)
+          this.yzmgInfo.lineMaps = yzmgUpdateLineMaps(copyLineMaps, updateLineData)
+          const pos = this.yzmgInfo.pos
+          const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 0, pos)
+          this.yzmgInfo.pos = res.pos
+          this.yzmgInfo.packetParams.evtId = res.evtId
+        } else if (length === 1) {
+          const res = yzmgCalcParams(redata)
+          this.yzmgInfo.packetParams.evtId = res.evtId
+          this.yzmgInfo.packetParams.param = res.param
+        }
+      }
+
+      if (redata.pd === 1107) { // 远征迷宫阵容信息
+        this.yzmgInfo.zhenrong = redata.a
+        const heroNum = redata.a.length
+        const xueliang = redata.d
+        let deadNum = 0
+        let aliveNum = 0
+        xueliang.forEach(i => {
+          if (i) {
+            aliveNum += 1
+          } else {
+            deadNum += 1
+          }
+        })
+        const deadMoreThanHeroNum = deadNum >= heroNum
+        const deadMoreThanSix = deadNum >= 6
+        if (deadMoreThanHeroNum || deadMoreThanSix) {
+          this.yzmgInfo.shouldStop = true
+        }
+        if ((aliveNum === 0 || deadMoreThanHeroNum || deadMoreThanSix) && this.flag.yzmgFlag) {
+          this.recordLogs('英雄阵亡过多，请登录游戏处理,阵亡英雄数量为：' + deadNum)
+          this.stopYZMG()
+        }
       }
 
       if (redata.pd === 1023) { // 世界BOSS攻击次数
@@ -2221,7 +2328,6 @@ export default {
       this.websocketsend(jjcPacket)
       if (operate === 2) {
         this.sendGeneric()
-        this.recordLogs('挑战竞技场')
       }
     },
 
@@ -2229,13 +2335,20 @@ export default {
     calcCanAttackRole() {
       const res = []
       const attackZhanli = parseInt(this.roleInfo.zhanli * (100 - this.attackTime.zhanliDiscount) / 100)
+      this.recordLogs('角色战力为:' + this.roleInfo.zhanli)
+      this.recordLogs('竞技场可以攻击目标战力阈值:' + attackZhanli)
       const roleList = this.jjcInfo.roleList
       roleList.forEach(i => {
         if (i.zhanli < attackZhanli && this.jjcInfo.winIds.indexOf(i.roleId) === -1) {
-          res.push(i.roleId)
+          res.push(i)
         }
       })
       this.jjcInfo.canAttackRole = res
+      if (res.length > 0) {
+        this.recordLogs('当前列表中可以挑战的目标数量为:' + res.length)
+      } else {
+        this.recordLogs('当前列表中没有可以挑战的目标')
+      }
     },
 
     // 开始竞技场
@@ -2245,11 +2358,12 @@ export default {
         this.$toast.fail('没次数了')
         return
       }
-      this.recordLogs('开始挑战竞技场')
+      this.recordLogs('开始挑战竞技场，根据系统自动刷新数据，每分钟尝试一次，直到次数完毕')
       this.flag.jjcFlag = true
       const self = this
       const totalTime = this.jjcInfo.todayAttackTimes + this.jjcInfo.jjcTime
       if (totalTime < 10) {
+        this.recordLogs('购买竞技场次数')
         setTimeout(function() { self.sendJingjichang('', 1) }, 100)
         setTimeout(function() { self.sendJingjichang('', 1) }, 200)
         setTimeout(function() { self.sendJingjichang('', 1) }, 300)
@@ -2260,7 +2374,9 @@ export default {
       this.sendJingjichang('', 4)
       this.calcCanAttackRole()
       if (this.jjcInfo.canAttackRole.length > 0) {
-        this.sendJingjichang(this.jjcInfo.canAttackRole[0], 2)
+        this.sendJingjichang(this.jjcInfo.canAttackRole[0].roleId, 2)
+        this.recordLogs('挑战竞技场目标:' + this.jjcInfo.canAttackRole[0].roleName +
+                          '，目标战力:' + this.jjcInfo.canAttackRole[0].zhanli)
         this.jjcInfo.canAttackRole.splice(0, 1)
       }
       // 开始循环
@@ -2269,7 +2385,9 @@ export default {
         self.calcCanAttackRole()
         const l = self.jjcInfo.canAttackRole.length
         if (l > 0) {
-          self.sendJingjichang(self.jjcInfo.canAttackRole[0], 2)
+          self.sendJingjichang(self.jjcInfo.canAttackRole[0].roleId, 2)
+          self.recordLogs('挑战竞技场目标:' + self.jjcInfo.canAttackRole[0].roleName +
+                          '，目标战力:' + self.jjcInfo.canAttackRole[0].zhanli)
           self.jjcInfo.canAttackRole.splice(0, 1)
         }
         if (self.jjcInfo.jjcTime === 0) {
@@ -2342,6 +2460,120 @@ export default {
       this.roleInfo.zhuangbeiList = []
       clearInterval(this.timer.zbUpdateTimer)
       this.recordLogs('停止批量升级装备')
+    },
+
+    /**
+     * 远征迷宫布阵发包
+     *
+     */
+    sendYZMGBuzhen() {
+      const zhenrong = [0, 0, 0, 0, 0, 0]
+      for (let i = 0; i < this.yzmgInfo.zhenrong.length; i++) {
+        zhenrong[i] = this.yzmgInfo.zhenrong[i]
+      }
+      const yzmgBuzhenPacket = this.gen_base_json(278)
+      yzmgBuzhenPacket.heroIndexs = []
+      yzmgBuzhenPacket.operate = 2
+      yzmgBuzhenPacket.zhenrong = zhenrong
+      this.websocketsend(yzmgBuzhenPacket)
+      this.recordLogs('远征迷宫布阵')
+    },
+
+    /**
+     * 远征迷宫发包
+     * @param {Number} operate -1:开始迷宫，1:选择对象，2:开始战斗，4:答题选择答案，5:选择光之神殿buff，6:进入下一关
+     * @param {Number} pos 目标的位置
+     * @param {Number} param 答题或者光之祝福需要的参数，其他的都为０
+     */
+    sendYZMG(operate, pos, param) {
+      const yzmgPacket = this.gen_base_json(277)
+      yzmgPacket.operate = operate
+      yzmgPacket.pos = pos
+      yzmgPacket.param = param
+      console.log('yzmgPacket', yzmgPacket)
+      this.websocketsend(yzmgPacket)
+      if (operate === 2) {
+        this.sendGeneric()
+      }
+    },
+
+    // 开始远征迷宫
+    startYZMG() {
+      if (!this.checkLoginStatus()) return
+      if (this.yzmgInfo.shouldStop) {
+        this.$toast.fail('英雄阵亡过多，请登录游戏处理')
+        return
+      }
+      if (!this.yzmgInfo.remainTimes) {
+        this.$toast.fail('没攻击次数了')
+        return
+      }
+      if (this.yzmgInfo.zhenrong && this.yzmgInfo.lineMaps) {
+        this.sendYZMG(-1, 2, 0)
+        this.sendYZMGBuzhen()
+      } else {
+        this.$toast.fail('没获取到远征迷宫相关信息，请稍后重试或重新登录重试')
+        return
+      }
+      this.recordLogs('开始挑战远征迷宫')
+      this.flag.yzmgFlag = true
+      const self = this
+      self.timer.yzmgTimer = setInterval(function() {
+        const pos = self.yzmgInfo.pos
+        self.sendYZMG(1, pos, 0)
+        setTimeout(function() {
+          const packetParams = self.yzmgInfo.packetParams
+          const remainTimes = self.yzmgInfo.remainTimes
+          if (packetParams.evtId === 200001) {
+            self.recordLogs('远征迷宫普通战斗')
+            self.sendYZMG(2, 2, 0)
+          } else if (packetParams.evtId === 200002) {
+            self.recordLogs('远征迷宫精英战斗')
+            self.sendYZMG(2, 2, 0)
+          } else if (packetParams.evtId === 200003) { // 光之神殿
+            self.recordLogs('远征迷宫光之神殿')
+            self.sendYZMG(5, 2, 1)
+          } else if (packetParams.evtId === 200004 && packetParams.param === 9) { // 魔盒未遭遇战斗
+            self.recordLogs('远征迷宫魔盒未遭遇战斗')
+          } else if (packetParams.evtId === 200005) {
+            if (packetParams.param === 9 || packetParams.param === 0) {
+              self.recordLogs('远征迷宫答题遇到问题，退出本次任务。请登录游戏操作')
+              self.stopYZMG()
+            } else {
+              self.recordLogs('远征迷宫答题')
+              self.sendYZMG(4, 2, packetParams.param)
+            }
+          } else if (packetParams.evtId === 200008) {
+            self.recordLogs('远征迷宫魔盒遭遇普通战斗')
+            self.sendYZMG(2, 2, 0)
+          } else if (packetParams.evtId === 200009) {
+            self.recordLogs('远征迷宫魔盒遭遇精英战斗')
+            self.sendYZMG(2, 2, 0)
+          }
+          self.yzmgInfo.packetParams.param = 9
+          self.sendYZMG(6, 2, 0) // 下一关
+          if (remainTimes === 0) {
+            self.stopYZMG()
+          }
+        }, 1000)
+      }, 2000)
+    },
+
+    // 停止远征迷宫
+    stopYZMG() {
+      this.yzmgInfo.shouldStop = false
+      this.flag.yzmgFlag = false
+      clearInterval(this.timer.yzmgTimer)
+      this.recordLogs('停止远征迷宫')
+    },
+
+    // 远征迷宫帮助
+    showYZMGHelp() {
+      this.$dialog.alert({
+        message: '配置两个英雄，确保能打过关卡，主角和正义或者血狮，然后每天就可以辅助里直接打'
+      }).then(() => {
+        // on confirm
+      })
     }
   }
 }

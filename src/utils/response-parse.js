@@ -260,7 +260,7 @@ export function xuezhan(obj) {
   const str = obj.c
   let res = ''
   const strList = str.split('#')
-  const key = strList[0].split('|')[2]
+  const key = parseInt(strList[0].split('|')[0])
   if (key === 1) {
     const jinbi = strList[0].split('|')[2]
     const jingjibi = strList[1].split('|')[2]
@@ -396,4 +396,129 @@ export function calcZhuangbei(obj, level) {
     res.push(oneZb)
   })
   return res
+}
+
+// 给远征迷宫的lineMaps添加权重
+export function yzmgAddWeight(obj) {
+  const lineMaps = obj.lineMaps
+  for (let i = 0; i < lineMaps.length; i++) {
+    const evtList = lineMaps[i].evtList
+    for (let x = 0; x < evtList.length; x++) {
+      const id = evtList[x].a
+      if (id === 200001) {
+        evtList[x].weight = 1
+      } else if (id === 200002) {
+        evtList[x].weight = 3
+      } else if (id === 200003) {
+        evtList[x].weight = 9
+      } else if (id === 200004) {
+        evtList[x].weight = 27
+      } else if (id === 200005) {
+        evtList[x].weight = 81
+      }
+    }
+  }
+  return lineMaps
+}
+
+/**
+ * 计算远征迷宫需要攻击的目标
+ * @param {Object} lineMaps // 已经添加了weight的lineMaps
+ * @param {Number} firstTime 1: 第一次， 0：不是第一次
+ * @param {Number} pos 上一次攻击的位置，用于计算本次目标选择的范围
+ */
+export function yzmgCalcPos(lineMaps, firstTime, pos) {
+  const thirdRowWeightLeft = lineMaps[2].evtList[0].weight + lineMaps[2].evtList[1].weight + lineMaps[2].evtList[2].weight // 位置1，2，3权重之和
+  const thirdRowWeightMiddle = lineMaps[2].evtList[1].weight + lineMaps[2].evtList[2].weight + lineMaps[2].evtList[3].weight // 位置2，3，4权重之和
+  const thirdRowWeightRight = lineMaps[2].evtList[2].weight + lineMaps[2].evtList[3].weight + lineMaps[2].evtList[4].weight // 位置3，4，5权重之和
+  lineMaps[1].evtList[0].weight += thirdRowWeightLeft
+  lineMaps[1].evtList[1].weight += thirdRowWeightLeft
+  lineMaps[1].evtList[2].weight += thirdRowWeightMiddle
+  lineMaps[1].evtList[3].weight += thirdRowWeightRight
+  lineMaps[1].evtList[4].weight += thirdRowWeightRight
+  const secondRowWeightLeft = lineMaps[1].evtList[0].weight + lineMaps[1].evtList[1].weight + lineMaps[1].evtList[2].weight // 位置1，2，3权重之和
+  const secondRowWeightMiddle = lineMaps[1].evtList[1].weight + lineMaps[1].evtList[2].weight + lineMaps[1].evtList[3].weight // 位置2，3，4权重之和
+  const secondRowWeightRight = lineMaps[1].evtList[2].weight + lineMaps[1].evtList[3].weight + lineMaps[1].evtList[4].weight // 位置3，4，5权重之和
+  lineMaps[0].evtList[0].weight += secondRowWeightLeft
+  lineMaps[0].evtList[1].weight += secondRowWeightLeft
+  lineMaps[0].evtList[2].weight += secondRowWeightMiddle
+  lineMaps[0].evtList[3].weight += secondRowWeightRight
+  lineMaps[0].evtList[4].weight += secondRowWeightRight
+  const weightArray = [lineMaps[0].evtList[0].weight, lineMaps[0].evtList[1].weight, lineMaps[0].evtList[2].weight, lineMaps[0].evtList[3].weight, lineMaps[0].evtList[4].weight]
+  const leftWeightArray = [weightArray[0], weightArray[1], weightArray[2]] // 左边三个元素
+  const middleWeightArray = [weightArray[1], weightArray[2], weightArray[3]] // 中间三个元素
+  const rightWeightArray = [weightArray[2], weightArray[3], weightArray[4]] // 右边三个元素
+  let max = 0
+  let choosedIndex = 0
+  if (firstTime === 1 || pos === 3) {
+    max = Math.max(...middleWeightArray)
+    choosedIndex = weightArray.indexOf(max)
+    if (choosedIndex === 0) { // 当刚开始打的时候，只能选择中间三个，如果第一个和第二个相同，则choosedIndex+1
+      choosedIndex += 1
+    } else if (choosedIndex === 4) { // 如果第4个和第5个相同，则choosedIndex-1
+      choosedIndex -= 1
+    }
+  } else {
+    if (pos === 1 || pos === 2) {
+      max = Math.max(...leftWeightArray)
+      choosedIndex = weightArray.indexOf(max)
+    } else if (pos === 4 || pos === 5) {
+      max = Math.max(...rightWeightArray)
+      choosedIndex = rightWeightArray.indexOf(max) + 2
+    }
+  }
+  const evt = lineMaps[0].evtList[choosedIndex]
+  const res = {}
+  res.evtId = evt.a
+  res.pos = choosedIndex + 1
+  return res
+}
+
+/**
+ * 计算攻击数据包的参数
+ * @param {Object} 返回的lineMaps中只有一个元素的数据
+ * 需要用的数据特征为obj.h=0, obj.lineMaps[0].c=false, obj.a=obj.lineMaps[0].a
+ */
+export function yzmgCalcParams(obj) {
+  const res = {}
+  const i = obj.a === obj.lineMaps[0].a
+  if (!obj.h && !obj.lineMaps[0].c && i) {
+    const evtIndex = obj.lineMaps[0].b - 1
+    res.evtId = obj.lineMaps[0].evtList[evtIndex].a
+    res.param = obj.lineMaps[0].evtList[evtIndex].g
+  }
+  return res
+}
+
+/**
+ * 通过一关后根据获得的数据更新lineMaps
+ * @param {Object} lineMaps // 已经添加了weight的lineMaps
+ * @param {Object} updateLineData // 用于更新的数据，也是用实时返回的数据添加了weight的lineMaps
+ */
+export function yzmgUpdateLineMaps(lineMaps, updateLineData) {
+  // const copyLineMaps = JSON.parse(JSON.stringify(lineMaps))
+  // console.log('yzmgLineMapsIn', copyLineMaps)
+  // console.log('yzmgUpdateLineMapsIn', updateLineData)
+  lineMaps.splice(0, 1)
+  for (let i = 0; i < updateLineData.length; i++) {
+    if (!updateLineData[i].c) {
+      lineMaps.push(updateLineData[i])
+    }
+  }
+  // console.log('yzmgUpdateLineMaps', lineMaps)
+  return lineMaps
+}
+
+/**
+ * 当返回的路线数据的lineMaps中只有一个元素的情况，如果是evtId是200008或者200009
+ * 就表示这是魔盒遭遇到战斗了，就需要战斗
+ */
+export function yzmgOneEvtlist(obj) {
+  const evtIndex = obj.lineMaps[0].b - 1 // 需要攻击的事件index
+  const evtId = obj.lineMaps[0].evtList[evtIndex].a
+  if (evtId === 200008 || evtId === 200009) {
+    return true
+  } else {
+    return false
+  }
 }

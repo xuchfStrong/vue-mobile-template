@@ -206,6 +206,74 @@ const laxiangguan = function(obj) {
   return res
 }
 
+// 给远征迷宫的lineMaps添加权重
+const yzmgAddWeight = function(obj) {
+  const lineMaps = obj.lineMaps
+  for (let i = 0; i < lineMaps.length; i++) {
+    const evtList = lineMaps[i].evtList
+    for (let x = 0; x < evtList.length; x++) {
+      const id = evtList[x].a
+      if (id === 200001) {
+        evtList[x].weight = 1
+      } else if (id === 200002) {
+        evtList[x].weight = 3
+      } else if (id === 200003) {
+        evtList[x].weight = 9
+      } else if (id === 200004) {
+        evtList[x].weight = 27
+      } else if (id === 200005) {
+        evtList[x].weight = 81
+      }
+    }
+  }
+  return lineMaps
+}
+
+/**
+ * 计算远征迷宫需要攻击的目标
+ * @param {Object} lineMaps // 已经添加了weight的lineMaps
+ * @param {Number} firstTime 1: 第一次， 0：不是第一次
+ */
+const yzmgCalcPos = function(lineMaps, firstTime) {
+  const secondRowWeight1 = lineMaps[1].evtList[0].weight + lineMaps[1].evtList[1].weight + lineMaps[1].evtList[2].weight // 位置1，2，3权重之和
+  const secondRowWeight2 = lineMaps[1].evtList[1].weight + lineMaps[1].evtList[2].weight + lineMaps[1].evtList[3].weight // 位置2，3，4权重之和
+  const secondRowWeight3 = lineMaps[1].evtList[2].weight + lineMaps[1].evtList[3].weight + lineMaps[1].evtList[4].weight // 位置3，4，5权重之和
+  lineMaps[0].evtList[0].weight += secondRowWeight1
+  lineMaps[0].evtList[1].weight += secondRowWeight1
+  lineMaps[0].evtList[2].weight += secondRowWeight2
+  lineMaps[0].evtList[3].weight += secondRowWeight3
+  lineMaps[0].evtList[4].weight += secondRowWeight3
+  const weightArray = [lineMaps[0].evtList[0].weight, lineMaps[0].evtList[1].weight, lineMaps[0].evtList[2].weight, lineMaps[0].evtList[3].weight, lineMaps[0].evtList[4].weight]
+  let max = 0
+  if (firstTime === 1) {
+    const middleWeightArray = [weightArray[1], weightArray[2], weightArray[3]]
+    max = Math.max(...middleWeightArray)
+  } else {
+    max = Math.max(...weightArray)
+  }
+  const choosedIndex = weightArray.indexOf(max)
+  const evt = lineMaps[0].evtList[choosedIndex]
+  const res = {}
+  res.evtId = evt.a
+  res.pos = choosedIndex + 1
+  res.answerId = evt.g // 答题的答案ID，1，2，3
+  return res
+}
+
+const yzmgUpdateLineMaps = function(lineMaps, updateLineData) {
+  const copyLineMaps = JSON.parse(JSON.stringify(lineMaps))
+  console.log('yzmgOrgiLineMapsIn', copyLineMaps)
+  console.log('yzmgUpdateLineMapsIn', updateLineData)
+  lineMaps.splice(0, 1)
+  for (let i = 0; i < updateLineData.length; i++) {
+    if (!updateLineData[i].c) {
+      console.log('updateLineData[i]', i, updateLineData[i])
+      lineMaps.push(updateLineData[i])
+    }
+  }
+  return lineMaps
+}
+
 module.exports = {
   getRoleInfo,
   wujin,
@@ -214,5 +282,8 @@ module.exports = {
   emeFuben,
   emmFubenInfo,
   shop,
-  laxiangguan
+  laxiangguan,
+  yzmgAddWeight,
+  yzmgCalcPos,
+  yzmgUpdateLineMaps
 }
