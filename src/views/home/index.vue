@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.4.0</span>
+          <span>古代战争火箭辅助V1.5.0</span>
         </template>
       </Header>
     </div>
@@ -2502,7 +2502,6 @@ export default {
       yzmgPacket.operate = operate
       yzmgPacket.pos = pos
       yzmgPacket.param = param
-      console.log('yzmgPacket', yzmgPacket)
       this.websocketsend(yzmgPacket)
       if (operate === 2) {
         this.sendGeneric()
