@@ -241,7 +241,7 @@
             </van-col>
           </van-row>
 
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+          <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>远征迷宫</div>
             </van-col>
@@ -1294,6 +1294,7 @@ export default {
         this.yzmgInfo.remainTimes = redata.c
         const length = redata.lineMaps.length
         const copyData = JSON.parse(JSON.stringify(redata))
+        // console.log(copyData)
         if (length > 3) {
           const beforeId = copyData.lineMaps[length - 4].b // 倒数第4个evtList就是上次打的那一行
           const cutNum = length - 3
@@ -2341,6 +2342,9 @@ export default {
       if (operate === 2) {
         this.sendGeneric()
       }
+      if (operate === 6) {
+        this.recordLogs('领取竞技场奖励')
+      }
     },
 
     // 竞技场可以攻击的角色
@@ -2402,7 +2406,7 @@ export default {
                           '，目标战力:' + self.jjcInfo.canAttackRole[0].zhanli)
           self.jjcInfo.canAttackRole.splice(0, 1)
         }
-        if (self.jjcInfo.jjcTime === 0) {
+        if (self.jjcInfo.jjcTime === 1) {
           self.sendJingjichang('', 6)
           self.stopJingjichang()
         }
@@ -2544,8 +2548,8 @@ export default {
           } else if (packetParams.evtId === 200003) { // 光之神殿
             self.recordLogs('远征迷宫光之神殿')
             self.sendYZMG(5, 2, 1)
-          } else if (packetParams.evtId === 200004 && packetParams.param === 9) { // 魔盒未遭遇战斗
-            self.recordLogs('远征迷宫魔盒未遭遇战斗')
+          } else if (packetParams.evtId === 200004 && packetParams.param === 9) { // 魔盒未遭遇战斗,实际不会进入这个条件
+            self.recordLogs('远征迷宫魔盒获得奖励')
           } else if (packetParams.evtId === 200005) {
             if (packetParams.param === 9 || packetParams.param === 0) {
               self.recordLogs('远征迷宫答题遇到问题，退出本次任务。请登录游戏操作')
