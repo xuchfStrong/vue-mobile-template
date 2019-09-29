@@ -241,7 +241,7 @@
             </van-col>
           </van-row>
 
-          <van-row class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>远征迷宫</div>
             </van-col>
@@ -716,6 +716,7 @@ export default {
         shijieBossFlag: false,
         shilianchouFlag: false,
         printJinbiShopLog: true,
+        jinbiShopFlag: false,
         jjcFlag: false,
         zbUpdateFlag: false,
         yzmgFlag: false
@@ -1938,18 +1939,23 @@ export default {
     },
     goldShopBuyAll() {
       if (!this.checkLoginStatus()) return
+      if (this.flag.jinbiShopFlag) return
       if (this.shopInfo.hadBuyJinbi) {
         this.$toast.fail({ duration: 1000, message: '已经购买过了，可以刷新后购买' })
         this.flag.printJinbiShopLog = false
       }
+      this.flag.jinbiShopFlag = true
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
       self.timer.buyJinbiShopTimerHero = setInterval(function() {
         if (i > 115) {
           clearInterval(self.timer.buyJinbiShopTimerHero)
-          self.recordLogs('金币商店购买完毕')
+          if (self.flag.printJinbiShopLog) {
+            self.recordLogs('金币商店购买完毕')
+          }
           self.flag.printJinbiShopLog = true
+          self.flag.jinbiShopFlag = false
         } else if (i > 110) {
           self.sendJinbiShop(1, i, 5)
         } else {
@@ -2533,29 +2539,34 @@ export default {
       this.recordLogs('开始挑战远征迷宫')
       this.flag.yzmgFlag = true
       const self = this
+      const yzmgMap = {
+        200001: '普通战斗',
+        200002: '精英战斗',
+        200003: '光之神殿',
+        200004: '魔盒',
+        200005: '谜题'
+      }
       self.timer.yzmgTimer = setInterval(function() {
         const pos = self.yzmgInfo.pos
+        const evtId = self.yzmgInfo.packetParams.evtId
+        self.recordLogs('远征迷宫选择:' + yzmgMap[evtId])
         self.sendYZMG(1, pos, 0)
         setTimeout(function() {
           const packetParams = self.yzmgInfo.packetParams
           const remainTimes = self.yzmgInfo.remainTimes
           if (packetParams.evtId === 200001) {
-            self.recordLogs('远征迷宫普通战斗')
             self.sendYZMG(2, 2, 0)
           } else if (packetParams.evtId === 200002) {
-            self.recordLogs('远征迷宫精英战斗')
             self.sendYZMG(2, 2, 0)
           } else if (packetParams.evtId === 200003) { // 光之神殿
-            self.recordLogs('远征迷宫光之神殿')
             self.sendYZMG(5, 2, 1)
-          } else if (packetParams.evtId === 200004 && packetParams.param === 9) { // 魔盒未遭遇战斗,实际不会进入这个条件
-            self.recordLogs('远征迷宫魔盒获得奖励')
+          } else if (packetParams.param === 9) { // 魔盒未遭遇战斗,实际测试不会进入这个条件
+            self.recordLogs('远征迷宫魔盒未遭遇战斗')
           } else if (packetParams.evtId === 200005) {
             if (packetParams.param === 9 || packetParams.param === 0) {
               self.recordLogs('远征迷宫答题遇到问题，退出本次任务。请登录游戏操作')
               self.stopYZMG()
             } else {
-              self.recordLogs('远征迷宫答题')
               self.sendYZMG(4, 2, packetParams.param)
             }
           } else if (packetParams.evtId === 200008) {
