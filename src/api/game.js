@@ -1,31 +1,91 @@
 import request from '@/utils/request-game'
+import requestForm from '@/utils/request-game-form'
+import qs from 'qs'
 
-export function loginPlatform(data) {
+// 登录一步
+export function loginFirstStep(data) {
   return request({
-    url: '/gdzz/servers_login.php',
+    // url: 'http://center.wscbwh.cn/api/login',
+    url: 'http://106.54.36.248:9080/jqcm_login/api/login',
     method: 'post',
     data
   })
 }
 
-export function logout() {
+// 登录二步获取用户token
+export function loginSecondStep(params) {
   return request({
-    url: '/user/logout',
-    method: 'post'
-  })
-}
-
-export function getDescription(params) {
-  return request({
-    url: '/gdzz/description.php',
+    // url: 'http://ufo.66hjh.com/user/v1/token',
+    url: 'http://106.54.36.248:9080/jqcm_usertoken/user/v1/token',
     method: 'get',
     params
   })
 }
 
-export function getServer(params) {
+// 登录第三步
+export function loginThirdStep(params) {
   return request({
-    url: '/gdzz/servers_info.php',
+    url: 'http://106.53.178.160:83/game/biguo/index.php',
+    method: 'get',
+    params
+  })
+}
+
+// 新用户登录，添加到辅助后台
+export function addUser(data) {
+  return requestForm({
+    url: 'http://118.89.219.161:11658/jqcm/add_user.php',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+
+export function checkUserStatus(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm/check_user.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getServerConfig(params) {
+  return request({
+    url: 'http://dzztest.8866net.com:83/www/api/server_config.php',
+    method: 'get',
+    params
+  })
+}
+
+// 获取角色信息
+export function getRoleInfo(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm/get_role_info.php',
+    method: 'get',
+    params
+  })
+}
+
+// 获取配置信息
+export function getConfigInfo(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm/get_role_settings.php',
+    method: 'get',
+    params
+  })
+}
+
+// 修改配置信息
+export function changeConfigInfo(data) {
+  return requestForm({
+    url: 'http://118.89.219.161:11658/jqcm/change_settings.php',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+
+export function getDescription(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm//description.php',
     method: 'get',
     params
   })
@@ -33,99 +93,25 @@ export function getServer(params) {
 
 export function getHelp(params) {
   return request({
-    url: '/gdzz/help_info.php',
+    url: 'http://118.89.219.161:11658/jqcm//help_info.php',
     method: 'get',
     params
   })
 }
 
-export function startGuaji(data) {
+export function startGuaji(params) {
   return request({
-    url: 'http://118.89.219.161:11658/gdzz/start_guaji.php',
-    method: 'post',
-    data
-  })
-}
-
-export function stopGuaji(data) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/stop_guaji.php',
-    method: 'post',
-    data
-  })
-}
-
-export function getGuajiLog(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/get_guaji_log.php',
+    url: 'http://118.89.219.161:11658/jqcm/start.php',
     method: 'get',
     params
   })
 }
 
-export function getGuajiStatus(params) {
+export function stopGuaji(params) {
   return request({
-    url: 'http://118.89.219.161:11658/gdzz/check_guaji_status.php',
+    url: 'http://118.89.219.161:11658/jqcm/stop.php',
     method: 'get',
     params
-  })
-}
-
-export function getWujingShop(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/wujingShop.php',
-    method: 'get',
-    params
-  })
-}
-
-export function getJingjiShop(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/jingjiShop.php',
-    method: 'get',
-    params
-  })
-}
-
-export function getTaozhuangShop(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/taozhuangShop.php',
-    method: 'get',
-    params
-  })
-}
-
-export function getYuanzhengShop(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/yuanzhengShop.php',
-    method: 'get',
-    params
-  })
-}
-
-export function gonglue(params) {
-  return request({
-    url: 'http://118.89.219.161:11658/gdzz/gonglue.php',
-    method: 'get',
-    params
-  })
-}
-
-export function zhuangbei(params) {
-  return request({
-    // url: 'http://127.0.0.1:8000/zhuangbei/',
-    url: 'http://106.54.36.248:9080/gdzz/zhuangbei/',
-    method: 'get',
-    params
-  })
-}
-
-export function taozhuang(data) {
-  return request({
-    // url: 'http://127.0.0.1:8000/taozhuang/',
-    url: 'http://106.54.36.248:9080/gdzz/taozhuang/',
-    method: 'post',
-    data
   })
 }
 

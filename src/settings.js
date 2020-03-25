@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '古代战争火箭辅助',
+  title: '剑气除魔火箭辅助',
 
   /**
    * @type {boolean} true | false

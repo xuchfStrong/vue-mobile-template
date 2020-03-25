@@ -108,3 +108,52 @@ export function param2Obj(url) {
       '"}'
   )
 }
+
+/**
+ * 生成指定位数的随机数
+ * @param {Number} num
+ */
+export function genRandomNumber(num) {
+  return Math.floor((Math.random() + Math.floor(Math.random() * 9 + 1)) * Math.pow(10, num - 1))
+}
+
+/**
+ * 生成UUID
+ * @param {*}
+ */
+export function genUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0
+    var v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+/**
+ * 生成MAC地址
+ * @param {*}
+ */
+export function genMac() {
+  const mac = [
+    (0x52).toString(16),
+    (0x54).toString(16),
+    (0x18).toString(16),
+    decimalToHexString(genRandomNumberBetween(200, 100)),
+    decimalToHexString(genRandomNumberBetween(200, 100)),
+    decimalToHexString(genRandomNumberBetween(200, 100))
+  ]
+  return mac.join(':')
+}
+
+// 将十进制转换为16进制
+function decimalToHexString(number) {
+  if (number < 0) {
+    number = 0xFFFFFFFF + number + 1
+  } return number.toString(16).toUpperCase()
+}
+
+// 生成n-m之间的随机数
+function genRandomNumberBetween(m, n) {
+  return Math.floor(Math.random() * (m - n)) + n
+}
+
