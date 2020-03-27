@@ -69,6 +69,12 @@
           <span :class="{danger: isPassedTwoHours}">{{ roleInfo.update_time }}</span>
         </van-col>
       </van-row>
+      <van-row class="row-wrap">
+        <van-col span="12">
+          <span>续费请提供此ID：</span>
+          <span>{{ loginInfo.userId }}</span>
+        </van-col>
+      </van-row>
 
       <div class="center">
         <van-button v-if="configInfo.on_off" type="danger" size="small" @click="handleStopguaji">停止云挂机</van-button>
@@ -85,7 +91,7 @@
         </van-col>
         <van-col span="8">
           <span>境界：</span>
-          <span>{{ roleInfo.role_level }}</span>
+          <span>{{ roleInfo.role_level | jingjieFilter }}</span>
         </van-col>
         <van-col span="8">
           <span>VIP等级：</span>
@@ -296,6 +302,7 @@ import { getRoleInfo, getConfigInfo, changeConfigInfo } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
+import jingjieMap from './jingjie.js'
 export default {
 
   components: {
@@ -309,6 +316,9 @@ export default {
         1: '开启'
       }
       return statusMap[status]
+    },
+    jingjieFilter(jingjie) {
+      return jingjieMap[jingjie]
     }
   },
   data() {
