@@ -50,21 +50,19 @@
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
-        <van-col span="12">
+        <van-col span="24">
           <span>角色名：</span>
           <span>{{ roleInfo.role_name }}</span>
         </van-col>
-        <van-col span="12">
-          <span>云挂机状态：</span>
-          <span>{{ configInfo.on_off | statusFilter }}</span>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="24">
+          <span>辅助到期时间：</span>
+          <span :class="{danger: fuzuStatus.isExpired}">{{ fuzuStatus.end_time }}</span>
         </van-col>
       </van-row>
       <van-row class="row-wrap">
-        <van-col span="12">
-          <span>到期时间：</span>
-          <span :class="{danger: fuzuStatus.isExpired}">{{ fuzuStatus.end_time }}</span>
-        </van-col>
-        <van-col span="12">
+        <van-col span="24">
           <span>数据更新时间：</span>
           <span :class="{danger: isPassedTwoHours}">{{ roleInfo.update_time }}</span>
         </van-col>
@@ -73,6 +71,10 @@
         <van-col span="12">
           <span>续费请提供此ID：</span>
           <span>{{ loginInfo.userId }}</span>
+        </van-col>
+        <van-col span="12">
+          <span>云挂机状态：</span>
+          <span>{{ configInfo.on_off | statusFilter }}</span>
         </van-col>
       </van-row>
 
@@ -86,12 +88,12 @@
 
       <van-row class="row-wrap">
         <van-col span="8">
-          <span>角色名：</span>
-          <span>{{ roleInfo.role_name }}</span>
-        </van-col>
-        <van-col span="8">
           <span>境界：</span>
           <span>{{ roleInfo.role_level | jingjieFilter }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>霸主层数：</span>
+          <span>{{ roleInfo.bazhu_cengshu }}</span>
         </van-col>
         <van-col span="8">
           <span>VIP等级：</span>
@@ -104,8 +106,8 @@
           <span>{{ roleInfo.zhanli }}</span>
         </van-col>
         <van-col span="8">
-          <span>仙缘：</span>
-          <span>{{ roleInfo.xianyuan }}</span>
+          <span>主宰层数：</span>
+          <span>{{ roleInfo.zhuzai_level }}</span>
         </van-col>
         <van-col span="8">
           <span>关卡通关：</span>
@@ -114,12 +116,8 @@
       </van-row>
       <van-row class="row-wrap">
         <van-col span="8">
-          <span>主宰层数：</span>
-          <span>{{ roleInfo.zhuzai_level }}</span>
-        </van-col>
-        <van-col span="8">
-          <span>霸主层数：</span>
-          <span>{{ roleInfo.bazhu_cengshu }}</span>
+          <span>仙缘：</span>
+          <span>{{ roleInfo.xianyuan }}</span>
         </van-col>
         <van-col span="8">
           <span>巅峰排名：</span>
@@ -284,6 +282,40 @@
         </van-col>
       </van-row>
 
+      <van-divider>功法设置</van-divider>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="11">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="gongfaObj.options" :options="options.gongfa" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="11">
+          <van-switch-cell v-model="switchInfo.gongfagoumai" title="功法购买" @change="changeGongfa" />
+        </van-col>
+      </van-row>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.gongji" :disabled="disabledGongfa" shape="square">购买攻击</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.shengming" :disabled="disabledGongfa" shape="square">购买生命</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.wufang" :disabled="disabledGongfa" shape="square">购买物防</van-checkbox>
+        </van-col>
+      </van-row>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.fafang" :disabled="disabledGongfa" shape="square">购买法防</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.canye" :disabled="disabledGongfa" shape="square">购买残页</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.juexue" :disabled="disabledGongfa" shape="square">购买绝学</van-checkbox>
+        </van-col>
+      </van-row>
+
       <div style="margin: 16px 0 60px 0; text-align: center;">
         <van-button type="info" size="small" @click="handleChangeConfigInfo">保存设置</van-button>
       </div>
@@ -303,6 +335,16 @@ import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
 import jingjieMap from './jingjie.js'
+
+const gongfaObjDefault = {
+  options: '10', // 10表示关闭
+  gongji: false, // 购买攻击
+  shengming: false, // 购买生命
+  wufang: false, // 购买物防
+  fafang: false, // 购买法防
+  canye: false, // 购买残页
+  juexue: false // 购买绝学
+}
 export default {
 
   components: {
@@ -386,7 +428,8 @@ export default {
         moyuleixing: 0,
         boss_id1: 0,
         boss_id2: 0,
-        on_off: ''
+        on_off: '',
+        gongfagoumai: ''
       },
       fuzuStatus: {
         end_time: '',
@@ -401,9 +444,11 @@ export default {
         yijigongjileixing: false,
         moyuleixing: false,
         boss_id1: false,
-        boss_id2: false
+        boss_id2: false,
+        gongfagoumai: false
 
       },
+      gongfaObj: Object.assign({}, gongfaObjDefault), // 功法购买相关的配置
       flag: {
         loginFlag: false,
         logoutFlag: false,
@@ -452,8 +497,11 @@ export default {
       const a = moment(new Date())
       const b = moment(this.roleInfo.update_time)
       const duration = a.diff(b)
-      console.log(duration)
       return duration > 2 * 3600 * 1000
+    },
+    // 购买功法复选框的disabled状态
+    disabledGongfa() {
+      return this.gongfaObj.options === '10'
     }
   },
 
@@ -503,6 +551,14 @@ export default {
     'configInfo.boss_id2': {
       handler: function(newVal) {
         this.switchInfo.boss_id2 = !!newVal
+      }
+    },
+    'gongfaObj.options': {
+      handler: function(newVal) {
+        this.switchInfo.gongfagoumai = newVal !== '10'
+        if (newVal === '10') {
+          this.gongfaObj = Object.assign({}, gongfaObjDefault)
+        }
       }
     }
   },
@@ -560,6 +616,10 @@ export default {
 
     changeBoss2(val) {
       if (!val) this.configInfo.boss_id2 = 0
+    },
+
+    changeGongfa(val) {
+      if (!val) this.gongfaObj.options = '10'
     },
 
     showHelp() {
@@ -832,6 +892,7 @@ export default {
             this.isClickLilianbeishu = false
             this.configInfo = res.data
             this.calsIsExpired(res.data.end_time)
+            this.calcGongfagoumai(String(res.data.gongfagoumai))
             break
           case 403:
             this.$toast({ duration: 2000, message: '参数错误' })
@@ -844,6 +905,29 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+
+    // 计算功法购买的各种属性
+    calcGongfagoumai(cfgStr) {
+      this.gongfaObj.options = cfgStr.slice(0, 2)
+      this.gongfaObj.gongji = cfgStr.slice(2, 3) === '1'
+      this.gongfaObj.shengming = cfgStr.slice(3, 4) === '1'
+      this.gongfaObj.wufang = cfgStr.slice(4, 5) === '1'
+      this.gongfaObj.fafang = cfgStr.slice(5, 6) === '1'
+      this.gongfaObj.canye = cfgStr.slice(6, 7) === '1'
+      this.gongfaObj.juexue = cfgStr.slice(7, 8) === '1'
+    },
+
+    // 从购买功法的对象中生成购买功法的配置数据发到后端
+    genGongfagoumaiCfg() {
+      const options = this.gongfaObj.options
+      const gongji = this.gongfaObj.gongji ? 1 : 0
+      const shengming = this.gongfaObj.shengming ? 1 : 0
+      const wufang = this.gongfaObj.wufang ? 1 : 0
+      const fafang = this.gongfaObj.fafang ? 1 : 0
+      const canye = this.gongfaObj.canye ? 1 : 0
+      const juexue = this.gongfaObj.juexue ? 1 : 0
+      return options + gongji + shengming + wufang + fafang + canye + juexue
     },
 
     // 计算辅助到期时间
@@ -860,6 +944,7 @@ export default {
 
     // 修改配置信息
     handleChangeConfigInfo() {
+      this.configInfo.gongfagoumai = this.genGongfagoumaiCfg()
       const param = {
         userid: this.loginInfo.userId,
         server_id: this.userInfo.server,
