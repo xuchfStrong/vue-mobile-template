@@ -22,7 +22,31 @@
     </van-popup>
 
     <div class="content-container">
+
       <van-row gutter="0" type="flex" justify="space-between">
+        <van-col span="14">
+          <van-dropdown-menu class="select-item">
+            <van-dropdown-item v-model="userInfo.loginType" :options="options.loginType" :disabled="flag.showServer" @change="changeServer" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="10" class="right">
+          <van-button v-if="flag.showServer" plain type="info" size="small" @click="logout">切换账号</van-button>
+          <van-button v-else type="info" size="small" @click="handleCheckUserStatus">登录</van-button>
+        </van-col>
+      </van-row>
+
+      <div v-if="userInfo.loginType===1">
+        <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
+        <van-field v-model="userInfo.passwordPlatForm" :disabled="flag.showServer" size="mini" label="密码:" placeholder="请输入密码" />
+      </div>
+
+      <div v-if="userInfo.loginType===2">
+        <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
+        <van-field v-model="userInfo.uid" :disabled="flag.showServer" size="mini" label="编号:" placeholder="请输入编号" />
+        <van-field v-model="userInfo.sessionid" :disabled="flag.showServer" size="mini" label="凭证:" placeholder="请输入凭证" />
+      </div>
+
+      <!-- <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="8">
           <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
         </van-col>
@@ -33,7 +57,7 @@
           <van-button v-if="flag.showServer" plain type="info" size="small" @click="logout">切换账号</van-button>
           <van-button v-else type="info" size="small" @click="handleCheckUserStatus">登录</van-button>
         </van-col>
-      </van-row>
+      </van-row> -->
 
       <div v-if="flag.showServer" class="server-wraper">
         <div class="name-item">有角色的服务器：</div>
@@ -469,11 +493,13 @@ export default {
         site: 'jqcm_android',
         mac: '',
         uid: '',
+        sessionid: '',
         adid: '',
         udid: '',
         aid: '',
         openuidi: '',
-        nickname: ''
+        nickname: '',
+        loginType: 1 // 账号密码，QQ微信，手机验证码
       },
       loginInfo: { // 登录过程中需要的数据
         sessionid: '',
@@ -558,6 +584,14 @@ export default {
         this.switchInfo.gongfagoumai = newVal !== '10'
         if (newVal === '10') {
           this.gongfaObj = Object.assign({}, gongfaObjDefault)
+        }
+      }
+    },
+    'userInfo.loginType': { // 当选择用户名密码登录的时候需要将uid和sessionid设置为空
+      handler: function(newVal) {
+        if (newVal === 1) {
+          this.userInfo.uid = ''
+          this.userInfo.sessionid = ''
         }
       }
     }
@@ -664,10 +698,10 @@ export default {
         time: timeStamp,
         mac: this.userInfo.mac || genMac(),
         site: this.userInfo.site,
-        sessionid: '',
+        sessionid: this.userInfo.sessionid,
         version: '6.0.1',
         channelid: '',
-        uid: '',
+        uid: this.userInfo.uid,
         adid: this.userInfo.adid || genRandomNumber(17),
         udid: this.userInfo.udid,
         aid: this.userInfo.aid || genUUID(),
@@ -1033,6 +1067,9 @@ export default {
         this.userInfo.usernamePlatForm = gameLoginInfo.usernamePlatForm
         this.userInfo.passwordPlatForm = gameLoginInfo.passwordPlatForm
         this.userInfo.username = gameLoginInfo.username
+        this.userInfo.uid = gameLoginInfo.uid
+        this.userInfo.sessionid = gameLoginInfo.sessionid
+        this.userInfo.loginType = gameLoginInfo.loginType
         this.loginInfo.userId = gameLoginInfo.userId
         this.flag.showServer = gameLoginInfo.showServer
         this.serverInfo = JSON.parse(gameLoginInfo.serverInfo)
@@ -1047,6 +1084,9 @@ export default {
         server: this.userInfo.server,
         usernamePlatForm: this.userInfo.usernamePlatForm,
         passwordPlatForm: this.userInfo.passwordPlatForm,
+        uid: this.userInfo.uid,
+        sessionid: this.userInfo.sessionid,
+        loginType: this.userInfo.loginType,
         username: this.userInfo.username,
         userId: this.loginInfo.userId,
         showServer: this.flag.showServer,
