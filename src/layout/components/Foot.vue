@@ -21,6 +21,13 @@
       >
         购买说明
       </van-tabbar-item>
+      <van-tabbar-item
+        replace
+        to="/gonglue"
+        icon="description"
+      >
+        攻略
+      </van-tabbar-item>
       <!-- <van-tabbar-item
         replace
         to="/info"

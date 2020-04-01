@@ -72,7 +72,15 @@ export const constantRoutes = [
       name: 'description',
       component: () => import('@/views/description/index'),
       meta: {
-        title: '进度查询'
+        title: '购买说明'
+      }
+    },
+    {
+      path: '/gonglue',
+      name: 'gonglue',
+      component: () => import('@/views/gonglue/index'),
+      meta: {
+        title: '攻略'
       }
     }
     // {

@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>剑气除魔火箭辅助V1.0.0</span>
+          <span>剑气除魔火箭辅助V1.1.1</span>
         </template>
       </Header>
     </div>
@@ -37,14 +37,14 @@
 
       <div v-if="userInfo.loginType===1">
         <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
-        <van-field v-model="userInfo.passwordPlatForm" :disabled="flag.showServer" size="mini" label="密码:" placeholder="请输入密码" />
+        <van-field v-model="userInfo.passwordPlatForm" :disabled="flag.showServer" size="mini" label="密码:" type="password" placeholder="请输入密码" />
       </div>
 
-      <div v-if="userInfo.loginType===2">
+      <!-- <div v-if="userInfo.loginType===2">
         <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
         <van-field v-model="userInfo.uid" :disabled="flag.showServer" size="mini" label="编号:" placeholder="请输入编号" />
         <van-field v-model="userInfo.sessionid" :disabled="flag.showServer" size="mini" label="凭证:" placeholder="请输入凭证" />
-      </div>
+      </div> -->
 
       <!-- <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="8">
@@ -70,6 +70,14 @@
         <van-dropdown-menu class="select-item">
           <van-dropdown-item v-model="userInfo.server" :options="serverInfo.server_list" @change="changeServer" />
         </van-dropdown-menu>
+      </div>
+
+      <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div>
+
+      <div style="margin-top:10px; color:#1989fa;">
+        <a :href="utils.apkDownloadUrl">
+          <span>点击下载辅助app</span>
+        </a>
       </div>
 
       <van-divider>云挂机</van-divider>
@@ -105,7 +113,7 @@
       <div class="center">
         <van-button v-if="configInfo.on_off" type="danger" size="small" @click="handleStopguaji">停止云挂机</van-button>
         <van-button v-else type="info" size="small" @click="handleStartguaji">开启云挂机</van-button>
-        <van-button type="info" size="small" @click="handleGuajiStatus">查询挂机状态</van-button>
+        <van-button type="info" size="small" @click="handleGuajiStatus">获取最新数据</van-button>
       </div>
 
       <van-divider>角色信息</van-divider>
@@ -354,7 +362,7 @@ import { randomWord } from '@/utils/rsa'
 import { genRandomNumber, genUUID, genMac } from '@/utils/index'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { loginFirstStep, loginSecondStep, loginThirdStep, getServerConfig, addUser, startGuaji, stopGuaji, checkUserStatus } from '@/api/game'
-import { getRoleInfo, getConfigInfo, changeConfigInfo } from '@/api/game'
+import { getRoleInfo, getConfigInfo, changeConfigInfo, getUtils } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
@@ -396,6 +404,9 @@ export default {
       yunguaji: false,
       options: options,
       isClickLilianbeishu: false,
+      utils: {
+
+      },
       userRole: { // 用户类型
         free: false, // 免费版本
         normal: false, // 普通版本
@@ -603,6 +614,7 @@ export default {
 
   mounted() {
     this.loadLoginInfo()
+    this.handleGetUtils()
   },
 
   methods: {
@@ -658,6 +670,14 @@ export default {
 
     showHelp() {
       this.show.helpInfo = true
+    },
+
+    handleGetUtils() {
+      getUtils().then(res => {
+        this.utils = res
+      }).catch(err => {
+        console.log(err)
+      })
     },
 
     // 在辅助服务端检查用户状态
@@ -1195,6 +1215,10 @@ export default {
 }
 .danger {
   color: red;
+}
+.waring-wrap {
+  color: red;
+  margin-top: 10px;
 }
 
 </style>

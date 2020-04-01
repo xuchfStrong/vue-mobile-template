@@ -99,6 +99,14 @@ export function getHelp(params) {
   })
 }
 
+export function getGonglue(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm//gonglue.php',
+    method: 'get',
+    params
+  })
+}
+
 export function startGuaji(params) {
   return request({
     url: 'http://118.89.219.161:11658/jqcm/start.php',
@@ -110,6 +118,14 @@ export function startGuaji(params) {
 export function stopGuaji(params) {
   return request({
     url: 'http://118.89.219.161:11658/jqcm/stop.php',
+    method: 'get',
+    params
+  })
+}
+
+export function getUtils(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm/utils.php',
     method: 'get',
     params
   })
