@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>剑气除魔火箭辅助V1.2.0</span>
+          <span>剑气除魔火箭辅助V1.1.1</span>
         </template>
       </Header>
     </div>
@@ -74,11 +74,11 @@
 
       <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div>
 
-      <!-- <div style="margin-top:10px; color:#1989fa;">
+      <div style="margin-top:10px; color:#1989fa;">
         <a :href="utils.apkDownloadUrl">
           <span>点击下载辅助app</span>
         </a>
-      </div> -->
+      </div>
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
@@ -315,59 +315,36 @@
       </van-row>
 
       <van-divider>功法设置</van-divider>
-
-      <van-row type="flex" justify="space-between" class="gongfa-wrap">
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">攻击：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.gongji !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.gongji" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="11">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="gongfaObj.options" :options="options.gongfa" />
+          </van-dropdown-menu>
         </van-col>
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">生命：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.shengming !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.shengming" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+        <van-col span="11">
+          <van-switch-cell v-model="switchInfo.gongfagoumai" title="功法购买" @change="changeGongfa" />
         </van-col>
       </van-row>
-      <van-row type="flex" justify="space-between" class="gongfa-wrap">
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">物防：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.wufang !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.wufang" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.gongji" :disabled="disabledGongfa" shape="square">购买攻击</van-checkbox>
         </van-col>
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">法防：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.fafang !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.fafang" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.shengming" :disabled="disabledGongfa" shape="square">购买生命</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.wufang" :disabled="disabledGongfa" shape="square">购买物防</van-checkbox>
         </van-col>
       </van-row>
-      <van-row type="flex" justify="space-between" class="gongfa-wrap">
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">残页：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.canye !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.canye" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.fafang" :disabled="disabledGongfa" shape="square">购买法防</van-checkbox>
         </van-col>
-        <van-col span="11" class="flex flex-align-items-center">
-          <div class="name">绝学：</div>
-          <div class="drop-down">
-            <van-dropdown-menu :class="{ active: gongfaObj.juexue !== '10' }">
-              <van-dropdown-item v-model="gongfaObj.juexue" :options="options.gongfa" />
-            </van-dropdown-menu>
-          </div>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.canye" :disabled="disabledGongfa" shape="square">购买残页</van-checkbox>
+        </van-col>
+        <van-col span="8">
+          <van-checkbox v-model="gongfaObj.juexue" :disabled="disabledGongfa" shape="square">购买绝学</van-checkbox>
         </van-col>
       </van-row>
 
@@ -393,12 +370,12 @@ import jingjieMap from './jingjie.js'
 
 const gongfaObjDefault = {
   options: '10', // 10表示关闭
-  gongji: '10', // 购买攻击
-  shengming: '10', // 购买生命
-  wufang: '10', // 购买物防
-  fafang: '10', // 购买法防
-  canye: '10', // 购买残页
-  juexue: '10' // 购买绝学
+  gongji: false, // 购买攻击
+  shengming: false, // 购买生命
+  wufang: false, // 购买物防
+  fafang: false, // 购买法防
+  canye: false, // 购买残页
+  juexue: false // 购买绝学
 }
 export default {
 
@@ -970,7 +947,6 @@ export default {
             this.configInfo = res.data
             this.calsIsExpired(res.data.end_time)
             this.calcGongfagoumai(String(res.data.gongfagoumai))
-            // this.calcGongfagoumai(String(111210101013))
             break
           case 403:
             this.$toast({ duration: 2000, message: '参数错误' })
@@ -985,38 +961,27 @@ export default {
       })
     },
 
-    /**
-     * 计算功法购买的各种属性
-     * 总共12为数字每两位表示一个属性，从前到后是攻击，生命，物防，法防，残页，绝学
-     * 两位数字是10-22之间，表示购买不同价格的功法
-     */
+    // 计算功法购买的各种属性
     calcGongfagoumai(cfgStr) {
-      if (cfgStr.length < 12) {
-        this.$dialog.alert({
-          title: '提示',
-          message: '功法购买功能有变更，请重新设置后保存！'
-        }).then(() => {
-          // on close
-        })
-        return
-      }
-      this.gongfaObj.gongji = cfgStr.slice(0, 2)
-      this.gongfaObj.shengming = cfgStr.slice(2, 4)
-      this.gongfaObj.wufang = cfgStr.slice(4, 6)
-      this.gongfaObj.fafang = cfgStr.slice(6, 8)
-      this.gongfaObj.canye = cfgStr.slice(8, 10)
-      this.gongfaObj.juexue = cfgStr.slice(10, 12)
+      this.gongfaObj.options = cfgStr.slice(0, 2)
+      this.gongfaObj.gongji = cfgStr.slice(2, 3) === '1'
+      this.gongfaObj.shengming = cfgStr.slice(3, 4) === '1'
+      this.gongfaObj.wufang = cfgStr.slice(4, 5) === '1'
+      this.gongfaObj.fafang = cfgStr.slice(5, 6) === '1'
+      this.gongfaObj.canye = cfgStr.slice(6, 7) === '1'
+      this.gongfaObj.juexue = cfgStr.slice(7, 8) === '1'
     },
 
     // 从购买功法的对象中生成购买功法的配置数据发到后端
     genGongfagoumaiCfg() {
-      const gongji = this.gongfaObj.gongji
-      const shengming = this.gongfaObj.shengming
-      const wufang = this.gongfaObj.wufang
-      const fafang = this.gongfaObj.fafang
-      const canye = this.gongfaObj.canye
-      const juexue = this.gongfaObj.juexue
-      return gongji + shengming + wufang + fafang + canye + juexue
+      const options = this.gongfaObj.options
+      const gongji = this.gongfaObj.gongji ? 1 : 0
+      const shengming = this.gongfaObj.shengming ? 1 : 0
+      const wufang = this.gongfaObj.wufang ? 1 : 0
+      const fafang = this.gongfaObj.fafang ? 1 : 0
+      const canye = this.gongfaObj.canye ? 1 : 0
+      const juexue = this.gongfaObj.juexue ? 1 : 0
+      return options + gongji + shengming + wufang + fafang + canye + juexue
     },
 
     // 计算辅助到期时间
@@ -1221,11 +1186,6 @@ export default {
     flex: 0 0 20% !important;
   }
 }
-.active {
-  .van-dropdown-menu__title {
-    color: #1989fa;
-  }
-}
 </style>
 
 <style lang='scss' scoped>
@@ -1259,16 +1219,6 @@ export default {
 .waring-wrap {
   color: red;
   margin-top: 10px;
-  white-space: pre-line;
-}
-.gongfa-wrap {
-  margin-top: 10px;
-  .name {
-    width: 25%;
-  }
-  .drop-down {
-    width: 75%;
-  }
 }
 
 </style>
