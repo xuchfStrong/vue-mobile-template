@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>剑气除魔火箭辅助V1.2.0</span>
+          <span>剑气除魔火箭辅助V1.3.0</span>
         </template>
       </Header>
     </div>
@@ -59,7 +59,7 @@
         </van-col>
       </van-row> -->
 
-      <div v-if="flag.showServer" class="server-wraper">
+      <!-- <div v-if="flag.showServer" class="server-wraper">
         <div class="name-item">有角色的服务器：</div>
         <van-dropdown-menu class="select-item">
           <van-dropdown-item v-model="userInfo.server" :options="serverInfo.last_server_list" @change="changeServer" />
@@ -70,15 +70,35 @@
         <van-dropdown-menu class="select-item">
           <van-dropdown-item v-model="userInfo.server" :options="serverInfo.server_list" @change="changeServer" />
         </van-dropdown-menu>
-      </div>
+      </div> -->
+
+      <van-row v-if="flag.showServer" type="flex" align="center">
+        <van-col span="17">
+          <div v-if="flag.showServer" class="server-wraper">
+            <div class="name-item">有角色的服务器：</div>
+            <van-dropdown-menu class="select-item">
+              <van-dropdown-item v-model="userInfo.server" :options="serverInfo.last_server_list" @change="changeServer" />
+            </van-dropdown-menu>
+          </div>
+          <div v-if="flag.showServer" class="server-wraper">
+            <div class="name-item">所有的服务器：</div>
+            <van-dropdown-menu class="select-item">
+              <van-dropdown-item v-model="userInfo.server" :options="serverInfo.server_list" @change="changeServer" />
+            </van-dropdown-menu>
+          </div>
+        </van-col>
+        <van-col span="7" class="right">
+          <van-button type="info" size="small" @click="handleGetServerList">更新服务器</van-button>
+        </van-col>
+      </van-row>
 
       <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div>
 
-      <!-- <div style="margin-top:10px; color:#1989fa;">
+      <div style="margin-top:10px; color:#1989fa;">
         <a :href="utils.apkDownloadUrl">
           <span>点击下载辅助app</span>
         </a>
-      </div> -->
+      </div>
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
@@ -400,6 +420,27 @@ const gongfaObjDefault = {
   canye: '10', // 购买残页
   juexue: '10' // 购买绝学
 }
+const configInfoDefault = {
+  is_richang: 0,
+  is_xiandou: 0,
+  is_shenglingwan: 0,
+  is_modi: 0,
+  is_liandan: 0,
+  is_xianmengmijing: 0,
+  is_liandanlianqixiulian: 0,
+  is_use_dianfeng: 0,
+  lixianbeishu: 0,
+  lilianfuben: 0,
+  xianmengjianshe: 0,
+  bazhukongwei: 0,
+  yijikaicaileixing: 0,
+  yijigongjileixing: 0,
+  moyuleixing: 0,
+  boss_id1: 0,
+  boss_id2: 0,
+  on_off: '',
+  gongfagoumai: ''
+}
 export default {
 
   components: {
@@ -468,7 +509,8 @@ export default {
         xianmengmijing_times: '',
         moyu_times: ''
       },
-      configInfo: {
+      configInfo: Object.assign({}, configInfoDefault),
+      configInfo1: {
         is_richang: 0,
         is_xiandou: 0,
         is_shenglingwan: 0,
@@ -721,6 +763,12 @@ export default {
           this.handleLoginFirstStep() // 去服务端校验
         }
       })
+    },
+
+    // 更新服务器列表
+    handleGetServerList() {
+      this.flag.newUserFlag = false
+      this.handleLoginFirstStep() // 去服务端校验
     },
 
     // 登录第一步
@@ -978,6 +1026,7 @@ export default {
           case 404:
             this.yunguaji = false
             this.$toast({ duration: 2000, message: '未查询到挂机信息，请开启云挂机' })
+            this.configInfo = Object.assign({}, configInfoDefault)
             break
         }
       }).catch(err => {
@@ -1247,7 +1296,7 @@ export default {
     text-align: end;
   }
   .select-item {
-    width: 200px;
+    width: 150px;
   }
 }
 .cell-wraper {
