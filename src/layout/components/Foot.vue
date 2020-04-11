@@ -28,14 +28,15 @@
       >
         攻略
       </van-tabbar-item>
-      <!-- <van-tabbar-item
-        replace
-        to="/info"
-        icon="friends-o"
-      >
-        申请
-      </van-tabbar-item>
       <van-tabbar-item
+        replace
+        to="/upgrade"
+        icon="upgrade"
+        :dot="hasNewVersion"
+      >
+        更新
+      </van-tabbar-item>
+      <!-- <van-tabbar-item
         replace
         to="/user"
         icon="setting-o"
@@ -60,11 +61,18 @@ export default {
 
   data() {
     return {
-      active: 0
+      active: 0,
+      version: 130
     }
   },
 
-  computed: {},
+  computed: {
+    hasNewVersion() {
+      const newVersion = this.$store.getters.newJqcmVersion
+      const currentVersion = this.$global.jqcmVersion
+      return newVersion > currentVersion
+    }
+  },
 
   watch: {},
 

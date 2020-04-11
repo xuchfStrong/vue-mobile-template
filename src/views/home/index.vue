@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>剑气除魔火箭辅助V1.3.0</span>
+          <span>剑气除魔火箭辅助V{{ $global.jqcmVersionName }}</span>
         </template>
       </Header>
     </div>
@@ -26,7 +26,7 @@
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="14">
           <van-dropdown-menu class="select-item">
-            <van-dropdown-item v-model="userInfo.loginType" :options="options.loginType" :disabled="flag.showServer" @change="changeServer" />
+            <van-dropdown-item v-model="userInfo.loginType" :options="options.loginType" :disabled="flag.showServer" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="10" class="right">
@@ -35,42 +35,10 @@
         </van-col>
       </van-row>
 
-      <div v-if="userInfo.loginType===1">
+      <div>
         <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
         <van-field v-model="userInfo.passwordPlatForm" :disabled="flag.showServer" size="mini" label="密码:" type="password" placeholder="请输入密码" />
       </div>
-
-      <!-- <div v-if="userInfo.loginType===2">
-        <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" size="mini" label="账号:" placeholder="请输入账号" />
-        <van-field v-model="userInfo.uid" :disabled="flag.showServer" size="mini" label="编号:" placeholder="请输入编号" />
-        <van-field v-model="userInfo.sessionid" :disabled="flag.showServer" size="mini" label="凭证:" placeholder="请输入凭证" />
-      </div> -->
-
-      <!-- <van-row gutter="0" type="flex" justify="space-between">
-        <van-col span="8">
-          <van-field v-model="userInfo.usernamePlatForm" :disabled="flag.showServer" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
-        </van-col>
-        <van-col span="8">
-          <van-field v-model="userInfo.passwordPlatForm" :disabled="flag.showServer" input-align="center" type="password" class="input-wrap" placeholder="密码" />
-        </van-col>
-        <van-col span="6" class="right">
-          <van-button v-if="flag.showServer" plain type="info" size="small" @click="logout">切换账号</van-button>
-          <van-button v-else type="info" size="small" @click="handleCheckUserStatus">登录</van-button>
-        </van-col>
-      </van-row> -->
-
-      <!-- <div v-if="flag.showServer" class="server-wraper">
-        <div class="name-item">有角色的服务器：</div>
-        <van-dropdown-menu class="select-item">
-          <van-dropdown-item v-model="userInfo.server" :options="serverInfo.last_server_list" @change="changeServer" />
-        </van-dropdown-menu>
-      </div>
-      <div v-if="flag.showServer" class="server-wraper">
-        <div class="name-item">所有的服务器：</div>
-        <van-dropdown-menu class="select-item">
-          <van-dropdown-item v-model="userInfo.server" :options="serverInfo.server_list" @change="changeServer" />
-        </van-dropdown-menu>
-      </div> -->
 
       <van-row v-if="flag.showServer" type="flex" align="center">
         <van-col span="17">
@@ -92,13 +60,13 @@
         </van-col>
       </van-row>
 
-      <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div>
-
-      <div style="margin-top:10px; color:#1989fa;">
+      <!-- <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div> -->
+      <!--
+      <div v-if="!isWebview" style="margin-top:10px; color:#1989fa;">
         <a :href="utils.apkDownloadUrl">
-          <span>点击下载辅助app</span>
+          <span>点击下载辅助APP</span>
         </a>
-      </div>
+      </div> -->
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
@@ -401,11 +369,12 @@
 <script>
 import CryptoJS from 'crypto-js'
 import moment from 'moment'
-import { randomWord } from '@/utils/rsa'
+// const IsWebview = require('js-is-webview')
 import { genRandomNumber, genUUID, genMac } from '@/utils/index'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { loginFirstStep, loginSecondStep, loginThirdStep, getServerConfig, addUser, startGuaji, stopGuaji, checkUserStatus } from '@/api/game'
 import { getRoleInfo, getConfigInfo, changeConfigInfo, getUtils } from '@/api/game'
+import { loginFirstStepTapTap, getServerConfigQudao, loginThirdStepTapTap } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
@@ -463,7 +432,6 @@ export default {
     return {
       name: '',
       pIn: 0,
-      secretKey: '',
       vip: true,
       yunguaji: false,
       options: options,
@@ -575,11 +543,12 @@ export default {
         aid: '',
         openuidi: '',
         nickname: '',
-        loginType: 1 // 账号密码，QQ微信，手机验证码
+        loginType: 1 // 官方平台：1，taptap：2
       },
       loginInfo: { // 登录过程中需要的数据
         sessionid: '',
         userId: '',
+        uid: '', // 渠道登录的时候uid和userId不同
         token: '',
         channelId: '',
         pfId: '',
@@ -605,6 +574,14 @@ export default {
     disabledGongfa() {
       return this.gongfaObj.options === '10'
     }
+    // 计算是否是webView
+    // isWebview() {
+    //   const userAgent = {
+    //     userAgent: navigator.userAgent
+    //   }
+    //   const ss = new IsWebview()
+    //   return ss.check(userAgent)
+    // }
   },
 
   watch: {
@@ -755,12 +732,20 @@ export default {
         if (res.code === 200) {
           // 获取用户信息
           this.loginInfo.userId = res.userid
-          this.handleLoginFirstStep()
+          if (this.userInfo.loginType === 1) { // 官方平台
+            this.handleLoginFirstStep() // 去服务端校验
+          } else if (this.userInfo.loginType === 2) {
+            this.handleLoginFirstStepTapTap() // TapTap平台
+          }
           this.flag.showServer = true
           this.saveLoginInfo()
         } else {
           this.flag.newUserFlag = true
-          this.handleLoginFirstStep() // 去服务端校验
+          if (this.userInfo.loginType === 1) { // 官方平台
+            this.handleLoginFirstStep() // 去服务端校验
+          } else if (this.userInfo.loginType === 2) {
+            this.handleLoginFirstStepTapTap() // TapTap平台
+          }
         }
       })
     },
@@ -768,12 +753,15 @@ export default {
     // 更新服务器列表
     handleGetServerList() {
       this.flag.newUserFlag = false
-      this.handleLoginFirstStep() // 去服务端校验
+      if (this.userInfo.loginType === 1) { // 官方平台
+        this.handleLoginFirstStep() // 去服务端校验
+      } else if (this.userInfo.loginType === 2) {
+        this.handleLoginFirstStepTapTap() // TapTap平台
+      }
     },
 
     // 登录第一步
     handleLoginFirstStep() {
-      this.secretKey = randomWord(false, 16)
       if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
         this.$toast('请输入用户名和密码')
         return
@@ -808,6 +796,44 @@ export default {
           this.loginInfo.userId = res.data.uid
           this.handleLoginSecondStep()
         } else {
+          this.flag.showServer = false
+          this.$toast(res.data.msg)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
+    // TapTap登录第一步
+    handleLoginFirstStepTapTap() {
+      if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
+        this.$toast('请输入用户名和密码')
+        return
+      }
+      this.userInfo.aid = this.userInfo.aid || genUUID()
+      const timeStamp = Date.parse(new Date()) / 1000
+      const key = '9e2ece875dac4b56b4a05525c471f5a5'
+      const signStr = 'gameAppId=' + 12 +
+                      '&name=' + this.userInfo.usernamePlatForm +
+                      '&passport=' + this.userInfo.passwordPlatForm +
+                      '&time=' + timeStamp +
+                      '&type=' + 1 +
+                      '&key=' + key
+      const param = {
+        gameAppId: 12,
+        name: this.userInfo.usernamePlatForm, // 用户名
+        passport: this.userInfo.passwordPlatForm, // 密码
+        sign: CryptoJS.MD5(signStr).toString(),
+        time: timeStamp,
+        type: 1
+      }
+      loginFirstStepTapTap(param).then(res => {
+        if (res.code === 0) {
+          this.loginInfo.uid = res.id
+          this.loginInfo.token = res.accessToken
+          this.handleLoginSecondStepTapTap()
+        } else {
+          this.flag.showServer = false
           this.$toast(res.data.msg)
         }
       }).catch(err => {
@@ -863,12 +889,48 @@ export default {
       })
     },
 
+    // TapTap登录第二步，获取usertoken
+    handleLoginSecondStepTapTap() {
+      const timeStamp = Date.parse(new Date()) / 1000
+      const signObj = {
+        uid: this.loginInfo.uid,
+        token: this.loginInfo.token,
+        uname: this.userInfo.usernamePlatForm
+      }
+      const str1 = JSON.stringify(signObj)
+      const arr = [6, 6002, str1, this.userInfo.aid, timeStamp, '1.2', 'cG3dKvBJ10mTGrHf5IOzQLH1dn']
+      const singStr = arr.join('#')
+      const param = {
+        appId: 6,
+        channelId: 6002,
+        deviceId: this.userInfo.aid,
+        sign: CryptoJS.MD5(singStr).toString(),
+        ts: timeStamp,
+        version: '1.2',
+        data: {
+          uid: this.loginInfo.uid,
+          token: this.loginInfo.token,
+          uname: this.userInfo.usernamePlatForm
+        }
+      }
+      loginSecondStep(param).then(res => {
+        if (res.code === 1) {
+          this.loginInfo.userId = res.data.userId // 这里获取的userId是为了获取服务器信息
+          this.loginInfo.token = res.data.token
+          this.loginInfo.channelId = res.data.channelId
+          this.handleGetServerConfigTapTap()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
     // 获取服务器列表和最后登录服务器
     handleGetServerConfig() {
       const param = {
-        v: '1.1.53',
+        v: '1.1.54',
         game_id: 3,
-        channelId: 6008,
+        channelId: this.loginInfo.channelId,
         channel: 'biguo',
         user_name: this.loginInfo.userId
       }
@@ -878,6 +940,28 @@ export default {
           this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
           this.serverInfo.server_list = this.formatServerList(res.server_list)
           this.handleLoginThirdStep()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
+    // TapTap获取服务器列表和最后登录服务器
+    handleGetServerConfigTapTap() {
+      const param = {
+        v: '1.1.54',
+        game_id: 6,
+        channelId: this.loginInfo.channelId,
+        channel: 'biguo',
+        user_name: this.loginInfo.userId,
+        ver: undefined
+      }
+      getServerConfigQudao(param).then(res => {
+        if (res.server_list) {
+          this.serverInfo.client_ip = res.client_ip
+          this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
+          this.serverInfo.server_list = this.formatServerList(res.server_list)
+          this.handleLoginThirdStepTapTap()
         }
       }).catch(err => {
         console.log(err)
@@ -928,6 +1012,23 @@ export default {
       })
     },
 
+    // TapTap登录第三步
+    handleLoginThirdStepTapTap() {
+      const param = {
+        userId: this.loginInfo.userId,
+        token: this.loginInfo.token,
+        channelId: this.loginInfo.channelId
+      }
+      loginThirdStepTapTap(param).then(res => {
+        this.loginInfo.token = res.token
+        this.loginInfo.time = res.time
+        this.loginInfo.pfId = res.pfId
+        if (this.flag.newUserFlag) this.handleAddUser()
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
     // 登录游戏辅助，添加新用户
     handleAddUser() {
       let serverId = ''
@@ -939,7 +1040,7 @@ export default {
       const param = {
         userid: this.loginInfo.userId,
         last_server_id: serverId,
-        login_type: 1,
+        login_type: this.userInfo.loginType,
         username: this.userInfo.usernamePlatForm,
         password: this.userInfo.passwordPlatForm,
         platform: this.userInfo.platform,

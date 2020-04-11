@@ -1,6 +1,7 @@
 const state = {
   gameRoleInfo: '',
-  guajiLog: ''
+  guajiLog: '',
+  newJqcmVersion: ''
 }
 
 const mutations = {
@@ -9,6 +10,9 @@ const mutations = {
   },
   SET_GUAJI_LOG: (state, guajiLog) => {
     state.guajiLog = guajiLog
+  },
+  SET_NEW_JQCM_VERSION: (state, newJqcmVersion) => {
+    state.newJqcmVersion = newJqcmVersion
   }
 }
 
@@ -18,6 +22,9 @@ const actions = {
   },
   changeGuajiLog({ commit }, guajiLog) {
     commit('SET_GUAJI_LOG', guajiLog)
+  },
+  changeNewJqcmVersion({ commit }, newJqcmVersion) {
+    commit('SET_NEW_JQCM_VERSION', newJqcmVersion)
   }
 }
 

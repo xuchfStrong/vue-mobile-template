@@ -82,6 +82,14 @@ export const constantRoutes = [
       meta: {
         title: '攻略'
       }
+    },
+    {
+      path: '/upgrade',
+      name: 'upgrade',
+      component: () => import('@/views/upgrade/index'),
+      meta: {
+        title: '更新'
+      }
     }
     // {
     //   path: '/user',

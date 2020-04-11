@@ -214,6 +214,8 @@
         {"value":"22","text":"购买36703445灵液及以下"}
     ],
   "loginType": [
-    {"value":1, "text":"账号密码登录"}
+    {"value":1, "text":"官方平台"},
+    {"value":2, "text":"TapTap平台"},
+    {"value":3, "text":"其他平台"}
   ]
 }

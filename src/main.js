@@ -6,10 +6,13 @@ import '@/styles/index.scss' // global css
 import '@vant/touch-emulator' // 用于桌面端使用vant
 import Vant from 'vant'
 import 'vant/lib/index.css'
+import global from '@/utils/global'
 Vue.use(Vant)
 
 import Mui from 'vue-awesome-mui' // 用于监听手机物理按键
 Vue.use(Mui)
+
+Vue.prototype.$global = global
 
 import App from './App'
 import store from './store'

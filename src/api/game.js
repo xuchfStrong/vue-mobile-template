@@ -31,6 +31,33 @@ export function loginThirdStep(params) {
   })
 }
 
+// TapTap登录第一步
+export function loginFirstStepTapTap(data) {
+  return requestForm({
+    url: 'http://sdk.66hjh.com/user/login',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+
+// TapTap登录二步获取用户token
+export function loginSecondStepTapTap(params) {
+  return request({
+    url: 'http://ufo.66hjh.com/user/v1/token',
+    method: 'get',
+    params
+  })
+}
+
+// TapTap登录第三步
+export function loginThirdStepTapTap(params) {
+  return request({
+    url: 'http://106.53.178.160:83/game/biguo/index_qudao.php',
+    method: 'get',
+    params
+  })
+}
+
 // 新用户登录，添加到辅助后台
 export function addUser(data) {
   return requestForm({
@@ -51,6 +78,15 @@ export function checkUserStatus(params) {
 export function getServerConfig(params) {
   return request({
     url: 'http://dzztest.8866net.com:83/www/api/server_config.php',
+    method: 'get',
+    params
+  })
+}
+
+// 获取渠道服务器列表
+export function getServerConfigQudao(params) {
+  return request({
+    url: 'http://dzztest.8866net.com:83/www/api/server_config_qudao.php',
     method: 'get',
     params
   })
