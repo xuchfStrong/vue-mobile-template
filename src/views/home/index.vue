@@ -26,7 +26,7 @@
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="14">
           <van-dropdown-menu class="select-item">
-            <van-dropdown-item v-model="userInfo.loginType" :options="options.loginType" :disabled="flag.showServer" />
+            <van-dropdown-item v-model="userInfo.loginType" :options="utils.platform" :disabled="flag.showServer" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="10" class="right">
@@ -526,11 +526,9 @@ export default {
       logs: [],
       remoteGuajiLog: '',
       userInfo: {
-        username: '', // 登录游戏用的，是由平台返回的
-        password: 'ljs', // 登录游戏服务器的密码，websocket连接使用
         usernamePlatForm: '', // 平台的用户名
         passwordPlatForm: '', // 平台的密码
-        platform: 1,
+        platform: 1, // 这个platform用在像辅助添加用户的时候
         server: '',
         endTime: '', // 辅助到期时间
         deviceType: 'vivo+x5s+l',
@@ -655,8 +653,8 @@ export default {
   destroyed: function() {},
 
   mounted() {
-    this.loadLoginInfo()
     this.handleGetUtils()
+    this.loadLoginInfo()
   },
 
   methods: {
@@ -717,6 +715,7 @@ export default {
     handleGetUtils() {
       getUtils().then(res => {
         this.utils = res
+        this.$store.dispatch('game/changeNewJqcmVersion', res.version)
       }).catch(err => {
         console.log(err)
       })
@@ -726,7 +725,8 @@ export default {
     handleCheckUserStatus() {
       const param = {
         uname_md5: CryptoJS.MD5(this.userInfo.usernamePlatForm).toString(), // 用户名
-        pwd_md5: CryptoJS.MD5(this.userInfo.passwordPlatForm).toString() // 密码
+        pwd_md5: CryptoJS.MD5(this.userInfo.passwordPlatForm).toString(), // 密码
+        login_type: this.userInfo.loginType
       }
       checkUserStatus(param).then(res => {
         if (res.code === 200) {
@@ -736,6 +736,13 @@ export default {
             this.handleLoginFirstStep() // 去服务端校验
           } else if (this.userInfo.loginType === 2) {
             this.handleLoginFirstStepTapTap() // TapTap平台
+          } else {
+            this.loginInfo.userId = this.userInfo.usernamePlatForm
+            this.handleGetServerConfigOther() // 其他平台只需要在后端检查是否存在，如果不存在就需要提取用户名密码
+            this.$toast({
+              duration: 2000,
+              message: '登录成功，请选择服务器后，点击开始挂机'
+            })
           }
           this.flag.showServer = true
           this.saveLoginInfo()
@@ -745,6 +752,11 @@ export default {
             this.handleLoginFirstStep() // 去服务端校验
           } else if (this.userInfo.loginType === 2) {
             this.handleLoginFirstStepTapTap() // TapTap平台
+          } else {
+            this.$toast({
+              duration: 2000,
+              message: '登录失败，请使用登陆助手提取账号密码后再登录。'
+            })
           }
         }
       })
@@ -757,6 +769,8 @@ export default {
         this.handleLoginFirstStep() // 去服务端校验
       } else if (this.userInfo.loginType === 2) {
         this.handleLoginFirstStepTapTap() // TapTap平台
+      } else {
+        this.handleGetServerConfigOther() // 其他平台
       }
     },
 
@@ -962,6 +976,27 @@ export default {
           this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
           this.serverInfo.server_list = this.formatServerList(res.server_list)
           this.handleLoginThirdStepTapTap()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
+    // 获取其他服务器列表和最后登录服务器
+    handleGetServerConfigOther() {
+      const param = {
+        v: '1.1.54',
+        game_id: 6,
+        channelId: 6002,
+        channel: 'biguo',
+        user_name: this.userInfo.usernamePlatForm,
+        ver: undefined
+      }
+      getServerConfigQudao(param).then(res => {
+        if (res.server_list) {
+          this.serverInfo.client_ip = res.client_ip
+          this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
+          this.serverInfo.server_list = this.formatServerList(res.server_list)
         }
       }).catch(err => {
         console.log(err)
@@ -1312,7 +1347,7 @@ export default {
     },
 
     // 选择服务器
-    changeServer(platForm) {
+    changeServer(server) {
       this.handleGuajiStatus()
       this.saveLoginInfo()
     },

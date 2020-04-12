@@ -216,6 +216,10 @@
   "loginType": [
     {"value":1, "text":"官方平台"},
     {"value":2, "text":"TapTap平台"},
-    {"value":3, "text":"其他平台"}
+    {"value":3, "text":"其他平台"},
+    {"value":4, "text":"小米"},
+    {"value":5, "text":"华为"},
+    {"value":6, "text":"九游"},
+    {"value":7, "text":"指趣"}
   ]
 }
