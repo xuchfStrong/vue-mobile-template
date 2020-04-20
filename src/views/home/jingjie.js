@@ -261,4 +261,17 @@ const jingjieMap = {
   260: '天道仙尊境10阶'
 }
 
-export default jingjieMap
+const weimianMap = {
+  0: '未占有',
+  1: '风云大陆·初级',
+  2: '紫光大陆·初级',
+  3: '青羽大陆·和平',
+  4: '玄武大陆·初级',
+  5: '苍雷大陆·初级',
+  6: '太极大陆·初级',
+  7: '飞龙大陆·中级',
+  8: '伏魔大陆·中级',
+  9: '仙灵大陆·高级'
+}
+
+export { jingjieMap, weimianMap }

@@ -61,12 +61,7 @@
       </van-row>
 
       <!-- <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div> -->
-      <!--
-      <div v-if="!isWebview" style="margin-top:10px; color:#1989fa;">
-        <a :href="utils.apkDownloadUrl">
-          <span>点击下载辅助APP</span>
-        </a>
-      </div> -->
+      <div v-if="utils.showContact2" class="waring-wrap">{{ utils.contact2 }}</div>
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
@@ -112,8 +107,8 @@
           <span>{{ roleInfo.role_level | jingjieFilter }}</span>
         </van-col>
         <van-col span="8">
-          <span>霸主层数：</span>
-          <span>{{ roleInfo.bazhu_cengshu }}</span>
+          <span>巅峰排名：</span>
+          <span>{{ roleInfo.dianfeng_pos }}</span>
         </van-col>
         <van-col span="8">
           <span>VIP等级：</span>
@@ -140,8 +135,12 @@
           <span>{{ roleInfo.xianyuan }}</span>
         </van-col>
         <van-col span="8">
-          <span>巅峰排名：</span>
-          <span>{{ roleInfo.dianfeng_pos }}</span>
+          <span>霸主层数：</span>
+          <span>{{ roleInfo.bazhu_cengshu }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>登录天数：</span>
+          <span>{{ roleInfo.login_days }}</span>
         </van-col>
       </van-row>
 
@@ -187,6 +186,28 @@
         <van-col span="8">
           <span>魔域次数：</span>
           <span>{{ roleInfo.moyu_times }}</span>
+        </van-col>
+      </van-row>
+
+      <van-divider>位面信息</van-divider>
+      <van-row class="row-wrap">
+        <van-col span="8">
+          <span>兵力：</span>
+          <span>{{ roleInfo.weimian_bingli }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>攻击令：</span>
+          <span>{{ roleInfo.weimian_gongjiling }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>食物：</span>
+          <span>{{ roleInfo.weimian_shiwu }}</span>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="24">
+          <span>位置：</span>
+          <span :class="{danger: isNoWeimian}">{{ roleInfo.weimian_weizhi | weimianFilter }}</span>
         </van-col>
       </van-row>
 
@@ -378,7 +399,7 @@ import { loginFirstStepTapTap, getServerConfigQudao, loginThirdStepTapTap } from
 import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
-import jingjieMap from './jingjie.js'
+import { jingjieMap, weimianMap } from './jingjie.js'
 
 const gongfaObjDefault = {
   options: '10', // 10表示关闭
@@ -426,6 +447,9 @@ export default {
     },
     jingjieFilter(jingjie) {
       return jingjieMap[jingjie]
+    },
+    weimianFilter(weimian) {
+      return weimianMap[weimian] || '未获取到位面信息'
     }
   },
   data() {
@@ -478,27 +502,6 @@ export default {
         moyu_times: ''
       },
       configInfo: Object.assign({}, configInfoDefault),
-      configInfo1: {
-        is_richang: 0,
-        is_xiandou: 0,
-        is_shenglingwan: 0,
-        is_modi: 0,
-        is_liandan: 0,
-        is_xianmengmijing: 0,
-        is_liandanlianqixiulian: 0,
-        is_use_dianfeng: 0,
-        lixianbeishu: 0,
-        lilianfuben: 0,
-        xianmengjianshe: 0,
-        bazhukongwei: 0,
-        yijikaicaileixing: 0,
-        yijigongjileixing: 0,
-        moyuleixing: 0,
-        boss_id1: 0,
-        boss_id2: 0,
-        on_off: '',
-        gongfagoumai: ''
-      },
       fuzuStatus: {
         end_time: '',
         on_off: '',
@@ -571,6 +574,11 @@ export default {
     // 购买功法复选框的disabled状态
     disabledGongfa() {
       return this.gongfaObj.options === '10'
+    },
+
+    // 计算位面位置是否未占有
+    isNoWeimian() {
+      return this.roleInfo.weimian_weizhi === 0
     }
     // 计算是否是webView
     // isWebview() {

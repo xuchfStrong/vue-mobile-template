@@ -17,7 +17,10 @@
         </div>
 
         <div style="margin-top:10px; color:#1989fa;">
-          <a :href="utils.apkDownloadUrl">
+          <!-- <a :href="utils.apkDownloadUrl">
+            <span>点击下载辅助APP</span>
+          </a> -->
+          <a :href="utils.apkDownloadUrl2">
             <span>点击下载辅助APP</span>
           </a>
         </div>
@@ -62,6 +65,9 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    handleDownload(url) {
+      window.open(url)
     }
   }
 }
