@@ -221,5 +221,14 @@
     {"value":5, "text":"华为"},
     {"value":6, "text":"九游"},
     {"value":7, "text":"指趣"}
+  ],
+  "shenshou": [
+    {"value":0, "text":"关闭自动炼化神兽"},
+    {"value":1, "text":"玄灵鸟"},
+    {"value":2, "text":"穿云雀"},
+    {"value":3, "text":"千机龟"},
+    {"value":4, "text":"火灵狼"},
+    {"value":5, "text":"水灵狐"},
+    {"value":6, "text":"黄金虎"}
   ]
 }

@@ -17,10 +17,13 @@
         </div>
 
         <div style="margin-top:10px; color:#1989fa;">
-          <!-- <a :href="utils.apkDownloadUrl">
+          <a v-if="$global.jqcmSaleChannel===1" :href="utils.apkDownloadUrl">
             <span>点击下载辅助APP</span>
-          </a> -->
-          <a :href="utils.apkDownloadUrl2">
+          </a>
+          <a v-if="$global.jqcmSaleChannel===2" :href="utils.apkDownloadUrl2">
+            <span>点击下载辅助APP</span>
+          </a>
+          <a v-if="$global.jqcmSaleChannel===3" :href="utils.apkDownloadUrl3">
             <span>点击下载辅助APP</span>
           </a>
         </div>

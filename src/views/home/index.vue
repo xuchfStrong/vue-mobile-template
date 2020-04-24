@@ -60,8 +60,9 @@
         </van-col>
       </van-row>
 
-      <!-- <div v-if="utils.showContact" class="waring-wrap">{{ utils.contact }}</div> -->
-      <div v-if="utils.showContact2" class="waring-wrap">{{ utils.contact2 }}</div>
+      <div v-if="utils.showContact&&$global.jqcmSaleChannel===1" class="waring-wrap">{{ utils.contact }}</div>
+      <div v-if="utils.showContact2&&$global.jqcmSaleChannel===2" class="waring-wrap">{{ utils.contact2 }}</div>
+      <div v-if="utils.showContact3&&$global.jqcmSaleChannel===3" class="waring-wrap">{{ utils.contact3 }}</div>
 
       <van-divider>云挂机</van-divider>
       <van-row class="row-wrap">
@@ -141,6 +142,13 @@
         <van-col span="8">
           <span>登录天数：</span>
           <span>{{ roleInfo.login_days }}</span>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="24">
+          <span>充值额度：</span>
+          <span>已充{{ notGetChargeValue ? '未获取到':roleInfo.charge_value }}元，</span>
+          <span v-if="!notGetChargeValue">还差{{ vipUpValue }}元升级到VIP{{ roleInfo.vip_level + 1 }}</span>
         </van-col>
       </van-row>
 
@@ -233,6 +241,8 @@
         <van-switch-cell v-model="configInfo.is_xianmengmijing" :active-value="1" :inactive-value="0" title="自动仙盟秘境 " />
         <van-switch-cell v-model="configInfo.is_liandanlianqixiulian" :active-value="1" :inactive-value="0" title="自动洞府炼丹/炼器修炼" />
         <van-switch-cell v-model="configInfo.is_use_dianfeng" :active-value="1" :inactive-value="0" title="21:30之后自动巅峰剩余次数" />
+        <van-switch-cell v-model="configInfo.is_goumai_tiaozhan" :active-value="1" :inactive-value="0" title="神兽山挑战次数买满" />
+        <van-switch-cell v-model="configInfo.is_goumai_lianhua" :active-value="1" :inactive-value="0" title="神兽山炼化次数买满" />
       </van-cell-group>
 
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
@@ -323,6 +333,17 @@
         </van-col>
       </van-row>
 
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="11">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="configInfo.shenshou_id" :options="options.shenshou" @change="changeShenshouSelect" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="11">
+          <van-switch-cell v-model="switchInfo.shenshou_id" title="自动炼化神兽" @change="changeShenshou" />
+        </van-col>
+      </van-row>
+
       <van-divider>功法设置</van-divider>
 
       <van-row type="flex" justify="space-between" class="gongfa-wrap">
@@ -399,7 +420,7 @@ import { loginFirstStepTapTap, getServerConfigQudao, loginThirdStepTapTap } from
 import Header from '@/components/Header'
 import Help from './components/Help'
 import options from './options.json'
-import { jingjieMap, weimianMap } from './jingjie.js'
+import { jingjieMap, weimianMap, vipMap } from './mapData.js'
 
 const gongfaObjDefault = {
   options: '10', // 10表示关闭
@@ -429,7 +450,10 @@ const configInfoDefault = {
   boss_id1: 0,
   boss_id2: 0,
   on_off: '',
-  gongfagoumai: ''
+  gongfagoumai: '',
+  shenshou_id: 0,
+  is_goumai_tiaozhan: 0,
+  is_goumai_lianhua: 0
 }
 export default {
 
@@ -499,7 +523,8 @@ export default {
         xiandou_times: '',
         xianmengjianshe_times: '',
         xianmengmijing_times: '',
-        moyu_times: ''
+        moyu_times: '',
+        charge_value: ''
       },
       configInfo: Object.assign({}, configInfoDefault),
       fuzuStatus: {
@@ -516,6 +541,7 @@ export default {
         moyuleixing: false,
         boss_id1: false,
         boss_id2: false,
+        shenshou_id: false,
         gongfagoumai: false
 
       },
@@ -579,6 +605,18 @@ export default {
     // 计算位面位置是否未占有
     isNoWeimian() {
       return this.roleInfo.weimian_weizhi === 0
+    },
+
+    // 是否获取到充值额度
+    notGetChargeValue() {
+      return this.roleInfo.charge_value === -1
+    },
+
+    // 计算差多少金额升级到下级VIP
+    vipUpValue() {
+      const netxtVipLevel = this.roleInfo.vip_level + 1
+      const netxtVipValue = vipMap[netxtVipLevel]
+      return netxtVipValue - this.roleInfo.charge_value
     }
     // 计算是否是webView
     // isWebview() {
@@ -636,6 +674,11 @@ export default {
     'configInfo.boss_id2': {
       handler: function(newVal) {
         this.switchInfo.boss_id2 = !!newVal
+      }
+    },
+    'configInfo.shenshou_id': {
+      handler: function(newVal) {
+        this.switchInfo.shenshou_id = !!newVal
       }
     },
     'gongfaObj.options': {
@@ -712,8 +755,20 @@ export default {
       if (!val) this.configInfo.boss_id2 = 0
     },
 
+    changeShenshou(val) {
+      if (!val) this.configInfo.shenshou_id = 0
+    },
+
     changeGongfa(val) {
       if (!val) this.gongfaObj.options = '10'
+    },
+
+    changeShenshouSelect(val) {
+      // this.$dialog.alert({
+      //   message: val
+      // }).then(() => {
+      //   // on close
+      // })
     },
 
     showHelp() {
@@ -1049,7 +1104,7 @@ export default {
         this.loginInfo.token = res.token
         this.loginInfo.time = res.time
         this.loginInfo.pfId = res.pfId
-        if (this.flag.newUserFlag) this.handleAddUser()
+        this.handleAddUser()
       }).catch(err => {
         console.log(err)
       })
@@ -1066,7 +1121,7 @@ export default {
         this.loginInfo.token = res.token
         this.loginInfo.time = res.time
         this.loginInfo.pfId = res.pfId
-        if (this.flag.newUserFlag) this.handleAddUser()
+        this.handleAddUser()
       }).catch(err => {
         console.log(err)
       })
@@ -1105,7 +1160,11 @@ export default {
         if (res.code === 200) {
           this.saveLoginInfo()
           this.flag.showServer = true
-          this.$toast({ duration: 2000, message: '新用户登录成功，请选择服务器，然后开始挂机' })
+          if (this.flag.newUserFlag) {
+            this.$toast({ duration: 2000, message: '新用户登录成功，请选择服务器，然后开始挂机' })
+          } else {
+            this.$toast({ duration: 2000, message: '登录成功' })
+          }
         }
       }).catch(err => {
         console.log(err)
@@ -1230,6 +1289,7 @@ export default {
       const param = {
         userid: this.loginInfo.userId,
         server_id: this.userInfo.server,
+        pwd_md5: CryptoJS.MD5(this.userInfo.passwordPlatForm).toString(),
         ... this.configInfo
       }
       changeConfigInfo(param).then(res => {
@@ -1260,7 +1320,8 @@ export default {
       }
       const param = {
         userid: this.loginInfo.userId,
-        server_id: this.userInfo.server
+        server_id: this.userInfo.server,
+        pwd_md5: CryptoJS.MD5(this.userInfo.passwordPlatForm).toString()
       }
       startGuaji(param).then(res => {
         const code = res.code
@@ -1287,7 +1348,8 @@ export default {
     handleStopguaji() {
       const param = {
         userid: this.loginInfo.userId,
-        server_id: this.userInfo.server
+        server_id: this.userInfo.server,
+        pwd_md5: CryptoJS.MD5(this.userInfo.passwordPlatForm).toString()
       }
       stopGuaji(param).then(res => {
         const code = res.code
