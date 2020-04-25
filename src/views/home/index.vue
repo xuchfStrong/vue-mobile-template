@@ -146,9 +146,9 @@
       </van-row>
       <van-row class="row-wrap">
         <van-col span="24">
-          <span>充值额度：</span>
-          <span>已充{{ notGetChargeValue ? '未获取到':roleInfo.charge_value }}元，</span>
-          <span v-if="!notGetChargeValue">还差{{ vipUpValue }}元升级到VIP{{ roleInfo.vip_level + 1 }}</span>
+          <span>VIP经验：</span>
+          <span>{{ notGetChargeValue ? '未获取到':roleInfo.charge_value }}，</span>
+          <span v-if="!notGetChargeValue">还差{{ vipUpValue }}升级到VIP{{ roleInfo.vip_level + 1 }}</span>
         </van-col>
       </van-row>
 
