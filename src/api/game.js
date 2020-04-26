@@ -31,6 +31,15 @@ export function loginThirdStep(params) {
   })
 }
 
+// 无尽修炼登录第三步
+export function loginThirdStepWJXL(params) {
+  return request({
+    url: 'http://106.53.178.160:83/game/biguo/index_ml.php',
+    method: 'get',
+    params
+  })
+}
+
 // TapTap登录第一步
 export function loginFirstStepTapTap(data) {
   return requestForm({
@@ -87,6 +96,24 @@ export function getServerConfig(params) {
 export function getServerConfigQudao(params) {
   return request({
     url: 'http://dzztest.8866net.com:83/www/api/server_config_qudao.php',
+    method: 'get',
+    params
+  })
+}
+
+// 获取无尽修炼服务器列表
+export function getServerConfigWJXL(params) {
+  return request({
+    url: 'http://dzztest.8866net.com:83/www/api/server_config_ml.php',
+    method: 'get',
+    params
+  })
+}
+
+// 获取远端选项信息
+export function getRemoteOptions(params) {
+  return request({
+    url: 'http://118.89.219.161:11658/jqcm/options.php',
     method: 'get',
     params
   })

@@ -336,7 +336,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.shenshou_id" :options="options.shenshou" @change="changeShenshouSelect" />
+            <van-dropdown-item v-model="configInfo.shenshou_id" :options="remoteOptions.shenshou" @change="changeShenshouSelect" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -415,7 +415,7 @@ import moment from 'moment'
 import { genRandomNumber, genUUID, genMac } from '@/utils/index'
 import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
 import { loginFirstStep, loginSecondStep, loginThirdStep, getServerConfig, addUser, startGuaji, stopGuaji, checkUserStatus } from '@/api/game'
-import { getRoleInfo, getConfigInfo, changeConfigInfo, getUtils } from '@/api/game'
+import { getRoleInfo, getConfigInfo, changeConfigInfo, getUtils, getRemoteOptions, getServerConfigWJXL } from '@/api/game'
 import { loginFirstStepTapTap, getServerConfigQudao, loginThirdStepTapTap } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
@@ -483,6 +483,7 @@ export default {
       vip: true,
       yunguaji: false,
       options: options,
+      remoteOptions: {},
       isClickLilianbeishu: false,
       utils: {
 
@@ -704,6 +705,7 @@ export default {
   destroyed: function() {},
 
   mounted() {
+    this.handleGetRemoteOptions()
     this.handleGetUtils()
     this.loadLoginInfo()
   },
@@ -784,6 +786,14 @@ export default {
       })
     },
 
+    handleGetRemoteOptions() {
+      getRemoteOptions().then(res => {
+        this.remoteOptions = res
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
     // 在辅助服务端检查用户状态
     handleCheckUserStatus() {
       const param = {
@@ -799,6 +809,8 @@ export default {
             this.handleLoginFirstStep() // 去服务端校验
           } else if (this.userInfo.loginType === 2) {
             this.handleLoginFirstStepTapTap() // TapTap平台
+          } else if (this.userInfo.loginType === 12) {
+            this.handleLoginFirstStep() // 无尽修炼
           } else {
             this.loginInfo.userId = this.userInfo.usernamePlatForm
             this.handleGetServerConfigOther() // 其他平台只需要在后端检查是否存在，如果不存在就需要提取用户名密码
@@ -815,6 +827,8 @@ export default {
             this.handleLoginFirstStep() // 去服务端校验
           } else if (this.userInfo.loginType === 2) {
             this.handleLoginFirstStepTapTap() // TapTap平台
+          } else if (this.userInfo.loginType === 12) {
+            this.handleLoginFirstStep() // 无尽修炼
           } else {
             this.$toast({
               duration: 2000,
@@ -832,6 +846,8 @@ export default {
         this.handleLoginFirstStep() // 去服务端校验
       } else if (this.userInfo.loginType === 2) {
         this.handleLoginFirstStepTapTap() // TapTap平台
+      } else if (this.userInfo.loginType === 12) {
+        this.handleLoginFirstStep() // 无尽修炼
       } else {
         this.handleGetServerConfigOther() // 其他平台
       }
@@ -933,11 +949,17 @@ export default {
         }
       }
       const str1 = JSON.stringify(signObj)
-      const arr = [6, 6008, str1, this.userInfo.aid, timeStamp, '1.2', 'cG3dKvBJ10mTGrHf5IOzQLH1dn']
+      let channelId = ''
+      if (this.userInfo.loginType === 1) { // 官方平台
+        channelId = 6008
+      } else if (this.userInfo.loginType === 12) { // 无尽修炼
+        channelId = 6030
+      }
+      const arr = [6, channelId, str1, this.userInfo.aid, timeStamp, '1.2', 'cG3dKvBJ10mTGrHf5IOzQLH1dn']
       const singStr = arr.join('#')
       const param = {
         appId: 6,
-        channelId: 6008,
+        channelId: channelId,
         deviceId: this.userInfo.aid,
         sign: CryptoJS.MD5(singStr).toString(),
         ts: timeStamp,
@@ -959,7 +981,11 @@ export default {
           this.loginInfo.userId = res.data.userId // 这里获取的userId是为了获取服务器信息
           this.loginInfo.token = res.data.token
           this.loginInfo.channelId = res.data.channelId
-          this.handleGetServerConfig()
+          if (this.userInfo.loginType === 1) { // 官方平台
+            this.handleGetServerConfig()
+          } else if (this.userInfo.loginType === 12) { // 无尽修炼
+            this.handleGetServerConfigWJXL()
+          }
         }
       }).catch(err => {
         console.log(err)
@@ -1060,6 +1086,26 @@ export default {
           this.serverInfo.client_ip = res.client_ip
           this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
           this.serverInfo.server_list = this.formatServerList(res.server_list)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
+    // 获取无尽修炼服务器列表和最后登录服务器
+    handleGetServerConfigWJXL() {
+      const param = {
+        game_id: 7,
+        channelId: 6030,
+        channel: 'biguo',
+        user_name: this.loginInfo.userId
+      }
+      getServerConfigWJXL(param).then(res => {
+        if (res.server_list) {
+          this.serverInfo.client_ip = res.client_ip
+          this.serverInfo.last_server_list = this.formatLastServerList(res.last_server_list)
+          this.serverInfo.server_list = this.formatServerList(res.server_list)
+          this.handleLoginThirdStep()
         }
       }).catch(err => {
         console.log(err)

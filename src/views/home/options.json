@@ -224,11 +224,17 @@
   ],
   "shenshou": [
     {"value":0, "text":"关闭自动炼化神兽"},
-    {"value":1, "text":"玄灵鸟"},
-    {"value":2, "text":"穿云雀"},
-    {"value":3, "text":"千机龟"},
-    {"value":4, "text":"火灵狼"},
-    {"value":5, "text":"水灵狐"},
-    {"value":6, "text":"黄金虎"}
+    {"value":1, "text":"玄灵鸟-lv.1"},
+    {"value":2, "text":"穿云雀-lv.1"},
+    {"value":3, "text":"千机龟-lv.1"},
+    {"value":4, "text":"火灵狼-lv.1"},
+    {"value":5, "text":"水灵狐-lv.1"},
+    {"value":6, "text":"黄金虎-lv.1"},
+    {"value":7, "text":"天妖鸟-lv.2"},
+    {"value":8, "text":"地冥蟒-lv.2"},
+    {"value":9, "text":"青风雕-lv.2"},
+    {"value":10, "text":"夜天狼-lv.2"},
+    {"value":11, "text":"赤炎虎-lv.2"},
+    {"value":12, "text":"疾风狮-lv.2"}
   ]
 }
