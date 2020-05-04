@@ -70,7 +70,7 @@ export function loginThirdStepTapTap(params) {
 // 新用户登录，添加到辅助后台
 export function addUser(data) {
   return requestForm({
-    url: 'http://118.89.219.161:11658/jqcm/add_user.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/add_user.php',
     method: 'post',
     data: qs.stringify(data)
   })
@@ -78,7 +78,7 @@ export function addUser(data) {
 
 export function checkUserStatus(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/check_user.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/check_user.php',
     method: 'get',
     params
   })
@@ -113,7 +113,7 @@ export function getServerConfigWJXL(params) {
 // 获取远端选项信息
 export function getRemoteOptions(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/options.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/options.php',
     method: 'get',
     params
   })
@@ -122,7 +122,7 @@ export function getRemoteOptions(params) {
 // 获取角色信息
 export function getRoleInfo(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/get_role_info.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/get_role_info.php',
     method: 'get',
     params
   })
@@ -131,7 +131,7 @@ export function getRoleInfo(params) {
 // 获取配置信息
 export function getConfigInfo(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/get_role_settings.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/get_role_settings.php',
     method: 'get',
     params
   })
@@ -140,7 +140,7 @@ export function getConfigInfo(params) {
 // 修改配置信息
 export function changeConfigInfo(data) {
   return requestForm({
-    url: 'http://118.89.219.161:11658/jqcm/change_settings.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/change_settings.php',
     method: 'post',
     data: qs.stringify(data)
   })
@@ -148,7 +148,7 @@ export function changeConfigInfo(data) {
 
 export function getDescription(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm//description.php',
+    url: 'http://www.huojiangame.com:11658/jqcm//description.php',
     method: 'get',
     params
   })
@@ -156,7 +156,7 @@ export function getDescription(params) {
 
 export function getHelp(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm//help_info.php',
+    url: 'http://www.huojiangame.com:11658/jqcm//help_info.php',
     method: 'get',
     params
   })
@@ -164,7 +164,7 @@ export function getHelp(params) {
 
 export function getGonglue(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm//gonglue.php',
+    url: 'http://www.huojiangame.com:11658/jqcm//gonglue.php',
     method: 'get',
     params
   })
@@ -172,7 +172,7 @@ export function getGonglue(params) {
 
 export function startGuaji(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/start.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/start.php',
     method: 'get',
     params
   })
@@ -180,7 +180,7 @@ export function startGuaji(params) {
 
 export function stopGuaji(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/stop.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/stop.php',
     method: 'get',
     params
   })
@@ -188,7 +188,7 @@ export function stopGuaji(params) {
 
 export function getUtils(params) {
   return request({
-    url: 'http://118.89.219.161:11658/jqcm/utils.php',
+    url: 'http://www.huojiangame.com:11658/jqcm/utils.php',
     method: 'get',
     params
   })

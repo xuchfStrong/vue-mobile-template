@@ -26,7 +26,7 @@
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="14">
           <van-dropdown-menu class="select-item">
-            <van-dropdown-item v-model="userInfo.loginType" :options="utils.platform" :disabled="flag.showServer" />
+            <van-dropdown-item v-model="userInfo.loginType" :options="remoteOptions.platform" :disabled="flag.showServer" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="10" class="right">
@@ -69,6 +69,12 @@
         <van-col span="24">
           <span>角色名：</span>
           <span>{{ roleInfo.role_name }}</span>
+        </van-col>
+      </van-row>
+      <van-row class="row-wrap">
+        <van-col span="24">
+          <span>辅助版本类型：</span>
+          <span>{{ configInfo.fuzhu_vip | vipStatus }}</span>
         </van-col>
       </van-row>
       <van-row class="row-wrap">
@@ -145,6 +151,17 @@
         </van-col>
       </van-row>
       <van-row class="row-wrap">
+        <van-col span="8">
+          <span>修为：</span>
+          <span>{{ roleInfo.xiuwei | valueFormatFilter }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>灵币：</span>
+          <span>{{ roleInfo.lingbi | valueFormatFilter }}</span>
+        </van-col>
+        <van-col span="8" />
+      </van-row>
+      <van-row class="row-wrap">
         <van-col span="24">
           <span>VIP经验：</span>
           <span>{{ notGetChargeValue ? '未获取到':roleInfo.charge_value }}，</span>
@@ -196,6 +213,16 @@
           <span>{{ roleInfo.moyu_times }}</span>
         </van-col>
       </van-row>
+      <van-row class="row-wrap">
+        <van-col span="8">
+          <span>神兽挑战剩余：</span>
+          <span>{{ roleInfo.shenshou_tiaozhan_times }}</span>
+        </van-col>
+        <van-col span="8">
+          <span>神兽炼化剩余：</span>
+          <span>{{ roleInfo.shenshou_lianhua_times }}</span>
+        </van-col>
+      </van-row>
 
       <van-divider>位面信息</van-divider>
       <van-row class="row-wrap">
@@ -236,6 +263,11 @@
         <van-switch-cell v-model="configInfo.is_shenglingwan" :active-value="1" :inactive-value="0" title="升聚灵碗" />
         <van-switch-cell v-model="configInfo.is_modi" :active-value="1" :inactive-value="0" title="自动魔帝" />
         <van-switch-cell v-model="configInfo.is_richang" :active-value="1" :inactive-value="0" title="自动日常" />
+        <van-switch-cell v-model="configInfo.is_goumai_richang_lingbi" :active-value="1" :inactive-value="0" title="日常购买-灵币" />
+        <van-switch-cell v-model="configInfo.is_goumai_richang_jinglian" :active-value="1" :inactive-value="0" title="日常购买-精炼石" />
+        <van-switch-cell v-model="configInfo.is_goumai_richang_jinjie" :active-value="1" :inactive-value="0" title="日常购买-进阶丹" />
+        <van-switch-cell v-model="configInfo.is_goumai_richang_shengxing" :active-value="1" :inactive-value="0" title="日常购买-升星丹" />
+        <van-switch-cell v-model="configInfo.is_goumai_richang_zhuling" :active-value="1" :inactive-value="0" title="日常购买-注灵石" />
         <van-switch-cell v-model="configInfo.is_xiandou" :active-value="1" :inactive-value="0" title="自动仙斗" />
         <van-switch-cell v-model="configInfo.is_liandan" :active-value="1" :inactive-value="0" title="自动炼丹" />
         <van-switch-cell v-model="configInfo.is_xianmengmijing" :active-value="1" :inactive-value="0" title="自动仙盟秘境 " />
@@ -281,7 +313,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.yijikaicaileixing" :options="options.caiyiji" />
+            <van-dropdown-item v-model="configInfo.yijikaicaileixing" :options="options.yijikaicaileixing" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -292,7 +324,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.yijigongjileixing" :options="options.qiangyiji" />
+            <van-dropdown-item v-model="configInfo.yijigongjileixing" :options="options.yijigongjileixing" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -303,7 +335,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.moyuleixing" :options="options.moyu" />
+            <van-dropdown-item v-model="configInfo.moyuleixing" :options="options.moyuleixing" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -314,7 +346,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.boss_id1" :options="options.mozuBoss1" />
+            <van-dropdown-item v-model="configInfo.boss_id1" :options="options.boss_id1" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -325,7 +357,7 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.boss_id2" :options="options.mozuBoss2" />
+            <van-dropdown-item v-model="configInfo.boss_id2" :options="options.boss_id2" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
@@ -336,11 +368,22 @@
       <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
         <van-col span="11">
           <van-dropdown-menu>
-            <van-dropdown-item v-model="configInfo.shenshou_id" :options="remoteOptions.shenshou" @change="changeShenshouSelect" />
+            <van-dropdown-item v-model="configInfo.shenshou_id1" :options="remoteOptions.shenshou" @change="changeShenshouSelect1" />
           </van-dropdown-menu>
         </van-col>
         <van-col span="11">
-          <van-switch-cell v-model="switchInfo.shenshou_id" title="自动炼化神兽" @change="changeShenshou" />
+          <van-switch-cell v-model="switchInfo.shenshou_id1" title="炼化神兽1" @change="changeShenshou1" />
+        </van-col>
+      </van-row>
+
+      <van-row type="flex" justify="space-between" align="center" class="cell-wraper">
+        <van-col span="11">
+          <van-dropdown-menu>
+            <van-dropdown-item v-model="configInfo.shenshou_id2" :options="remoteOptions.shenshou" @change="changeShenshouSelect2" />
+          </van-dropdown-menu>
+        </van-col>
+        <van-col span="11">
+          <van-switch-cell v-model="switchInfo.shenshou_id2" title="炼化神兽2" @change="changeShenshou2" />
         </van-col>
       </van-row>
 
@@ -451,9 +494,16 @@ const configInfoDefault = {
   boss_id2: 0,
   on_off: '',
   gongfagoumai: '',
-  shenshou_id: 0,
+  shenshou_id1: 0,
+  shenshou_id2: 0,
   is_goumai_tiaozhan: 0,
-  is_goumai_lianhua: 0
+  is_goumai_lianhua: 0,
+  is_goumai_richang_lingbi: 0,
+  is_goumai_richang_jinglian: 0,
+  is_goumai_richang_jinjie: 0,
+  is_goumai_richang_shengxing: 0,
+  is_goumai_richang_zhuling: 0,
+  fuzhu_vip: 0
 }
 export default {
 
@@ -474,6 +524,25 @@ export default {
     },
     weimianFilter(weimian) {
       return weimianMap[weimian] || '未获取到位面信息'
+    },
+    vipStatus(isVip) {
+      const map = {
+        0: '普通版',
+        1: 'VIP版'
+      }
+      return map[isVip]
+    },
+
+    // 单位换算
+    valueFormatFilter(str) {
+      const numVal = Number(str)
+      if (isNaN(numVal)) return ''
+      if (numVal < 0) return '未获取到'
+      if (numVal > 100000000) {
+        return (numVal / 100000000).toFixed(1) + '亿'
+      } else {
+        return (numVal / 10000).toFixed(1) + '万'
+      }
     }
   },
   data() {
@@ -525,7 +594,11 @@ export default {
         xianmengjianshe_times: '',
         xianmengmijing_times: '',
         moyu_times: '',
-        charge_value: ''
+        charge_value: '',
+        xiuwei: '',
+        lingbi: '',
+        shenshou_tiaozhan_times: '',
+        shenshou_lianhua_times: ''
       },
       configInfo: Object.assign({}, configInfoDefault),
       fuzuStatus: {
@@ -542,7 +615,8 @@ export default {
         moyuleixing: false,
         boss_id1: false,
         boss_id2: false,
-        shenshou_id: false,
+        shenshou_id1: false,
+        shenshou_id2: false,
         gongfagoumai: false
 
       },
@@ -677,9 +751,14 @@ export default {
         this.switchInfo.boss_id2 = !!newVal
       }
     },
-    'configInfo.shenshou_id': {
+    'configInfo.shenshou_id1': {
       handler: function(newVal) {
-        this.switchInfo.shenshou_id = !!newVal
+        this.switchInfo.shenshou_id1 = !!newVal
+      }
+    },
+    'configInfo.shenshou_id2': {
+      handler: function(newVal) {
+        this.switchInfo.shenshou_id2 = !!newVal
       }
     },
     'gongfaObj.options': {
@@ -757,20 +836,22 @@ export default {
       if (!val) this.configInfo.boss_id2 = 0
     },
 
-    changeShenshou(val) {
-      if (!val) this.configInfo.shenshou_id = 0
+    changeShenshou1(val) {
+      if (!val) this.configInfo.shenshou_id1 = 0
+    },
+
+    changeShenshou2(val) {
+      if (!val) this.configInfo.shenshou_id2 = 0
     },
 
     changeGongfa(val) {
       if (!val) this.gongfaObj.options = '10'
     },
 
-    changeShenshouSelect(val) {
-      // this.$dialog.alert({
-      //   message: val
-      // }).then(() => {
-      //   // on close
-      // })
+    changeShenshouSelect1(val) {
+    },
+
+    changeShenshouSelect2(val) {
     },
 
     showHelp() {
