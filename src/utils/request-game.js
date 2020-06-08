@@ -5,7 +5,7 @@ import { Toast } from 'vant'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: 'http://118.89.219.161:11658/', // url = base url + request url
+  baseURL: 'http://49.232.96.20:11658/', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
