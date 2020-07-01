@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.5.0</span>
+          <span>古代战争火箭辅助V1.6.0</span>
         </template>
       </Header>
     </div>
@@ -63,7 +63,7 @@
         </van-col>
         <van-col span="4" class="right">
           <van-button v-if="flag.loginFlag" type="danger" size="small" @click="logout">退出</van-button>
-          <van-button v-else type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
+          <van-button v-else :loading="loginLoading" type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
         </van-col>
       </van-row>
 
@@ -74,8 +74,8 @@
         辅助到期时间: {{ userInfo.endTime }}
       </div>
 
-      <van-divider>云挂机</van-divider>
-      <div class="vip-wrap">
+      <van-divider v-if="userRole.vh">云挂机</van-divider>
+      <div v-if="userRole.vh" class="vip-wrap">
         <van-button v-if="!yunguaji" type="info" size="small" @click="handleStartguaji">开始云挂机</van-button>
         <van-button v-if="yunguaji" type="danger" size="small" @click="handleStopguaji">停止云挂机</van-button>
         <van-button type="info" size="small" @click="handleGetGuajiLog">查询挂机信息</van-button>
@@ -169,7 +169,7 @@
               <van-button v-else type="danger" size="small" @click="stopFubenBoss">停止</van-button>
             </van-col>
           </van-row>
-          <van-row v-if="userRole.vh" class="row-wrap" type="flex" align="center">
+          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>推图副本小怪</div>
             </van-col>
@@ -562,6 +562,7 @@ export default {
   data() {
     return {
       name: '',
+      loginLoading: false,
       websock: null,
       pIn: 0,
       secretKey: '',
@@ -932,6 +933,7 @@ export default {
 
     // 登录平台
     handleLoginPlatForm() {
+      this.loginLoading = true
       this.secretKey = randomWord(false, 16)
       if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
         this.$toast('请输入用户名和密码')
@@ -952,6 +954,7 @@ export default {
         k: encrypt(this.secretKey) // ase的密钥
       }
       loginPlatform(param).then(res => {
+        this.loginLoading = false
         const resPlain = CryptoJS.AES.decrypt(res, CryptoJS.enc.Utf8.parse(this.secretKey), {
           mode: CryptoJS.mode.ECB,
           padding: CryptoJS.pad.Pkcs7
@@ -1002,6 +1005,7 @@ export default {
           this.initWebSocket()
         }
       }).catch(err => {
+        this.loginLoading = false
         console.log(err)
       })
     },

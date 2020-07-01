@@ -8,6 +8,22 @@ export function loginPlatform(data) {
   })
 }
 
+export function loginGame(params) {
+  return request({
+    url: 'http://www.dgzz1.com:20002/',
+    method: 'get',
+    params
+  })
+}
+
+export function serverTime(params) {
+  return request({
+    url: 'http://www.dgzz1.com:20002/ServerTime',
+    method: 'get',
+    params
+  })
+}
+
 export function logout() {
   return request({
     url: '/user/logout',
