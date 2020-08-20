@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.6.0</span>
+          <span>古代战争火箭辅助V1.6.1</span>
         </template>
       </Header>
     </div>
