@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.6.0</span>
+          <span>古代战争火箭辅助</span>
         </template>
       </Header>
     </div>
@@ -28,17 +28,6 @@
     >
       <textarea id="remotelog-textarea" v-model="remoteGuajiLog" rows="20" readonly />
     </van-popup>
-
-    <van-dialog
-      v-model="show.yzmgHelp"
-    >
-      <div style="padding-left:20px;padding-right:20px; font-size:14px;">
-        <p>1.配置两个英雄，保证能正常打过。一般主角+血狮或者主角+正义</p>
-        <p>2.主角技能修改为奶，这里配置保存后，外面主角技能可以随便改</p>
-        <p>3.配置完毕后，之后每天直接用辅助打迷宫就可以了</p>
-        <p>4.如果遇到连续打一个关卡10次以上，请手动停止，然后进游戏处理</p>
-      </div>
-    </van-dialog>
 
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
@@ -63,19 +52,16 @@
         </van-col>
         <van-col span="4" class="right">
           <van-button v-if="flag.loginFlag" type="danger" size="small" @click="logout">退出</van-button>
-          <van-button v-else :loading="loginLoading" type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
+          <van-button v-else type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
         </van-col>
       </van-row>
 
-      <div v-if="userRole.free" class="endtiem-wrap">
-        免费模式，购买后使用更多功能！
-      </div>
-      <div v-else class="endtiem-wrap">
+      <div class="endtiem-wrap">
         辅助到期时间: {{ userInfo.endTime }}
       </div>
 
-      <van-divider v-if="userRole.vh">云挂机</van-divider>
-      <div v-if="userRole.vh" class="vip-wrap">
+      <van-divider>云挂机</van-divider>
+      <div class="vip-wrap">
         <van-button v-if="!yunguaji" type="info" size="small" @click="handleStartguaji">开始云挂机</van-button>
         <van-button v-if="yunguaji" type="danger" size="small" @click="handleStopguaji">停止云挂机</van-button>
         <van-button type="info" size="small" @click="handleGetGuajiLog">查询挂机信息</van-button>
@@ -157,7 +143,7 @@
       <van-divider>挂机设置</van-divider>
       <van-tabs v-model="tabActive" type="card" color="#1989fa">
         <van-tab title="挑战">
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+          <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>推图副本挑战</div>
             </van-col>
@@ -169,19 +155,7 @@
               <van-button v-else type="danger" size="small" @click="stopFubenBoss">停止</van-button>
             </van-col>
           </van-row>
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>推图副本小怪</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <van-stepper v-model="attackTime.xiaoguaiTime" button-size="20px" />
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.xiaoguaiFlag" type="info" size="small" @click="startFubenXiaoguai">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopFubenXiaoguai">停止</van-button>
-            </van-col>
-          </van-row>
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+          <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>无尽炼狱挑战</div>
             </van-col>
@@ -193,7 +167,7 @@
               <van-button v-else type="danger" size="small" @click="stopWujin">停止</van-button>
             </van-col>
           </van-row>
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+          <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>恶魔巢穴挑战</div>
             </van-col>
@@ -206,7 +180,7 @@
               <van-button v-else type="danger" size="small" @click="stopEme">停止</van-button>
             </van-col>
           </van-row>
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
+          <van-row class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>每日副本挑战</div>
             </van-col>
@@ -217,41 +191,6 @@
             <van-col span="8" class="right">
               <van-button v-if="!flag.meiriFubenFlag" type="info" size="small" @click="startMeiriFuben">开始</van-button>
               <van-button v-else type="danger" size="small" @click="stopMeiriFuben">停止</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>竞技场挑战</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>已打{{ jjcInfo.todayAttackTimes }}次,剩余{{ jjcInfo.jjcTime }}次,胜{{ jjcInfo.jjcWinTime }}次,输{{ jjcInfo.jjcLoseTime }}次,连胜{{ jjcInfo.jjcLinkWinTime }}次</span>
-              <van-row>
-                <van-col span="18">
-                  <van-stepper v-model="attackTime.zhanliDiscount" :step="10" button-size="20px" />
-                </van-col>
-                <van-col span="6">
-                  <van-button type="default" size="mini" @click="showJJCHelop">帮助</van-button>
-                </van-col>
-              </van-row>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.jjcFlag" type="info" size="small" @click="startJingjichang">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopJingjichang">停止</van-button>
-            </van-col>
-          </van-row>
-
-          <van-row v-if="userRole.normal" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>远征迷宫</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <span>剩余{{ yzmgInfo.remainTimes }}次</span>
-              <van-button type="default" size="mini" @click="showYZMGHelp">帮助</van-button>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button v-if="!flag.yzmgFlag" type="info" size="small" @click="startYZMG">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopYZMG">停止</van-button>
             </van-col>
           </van-row>
 
@@ -302,7 +241,7 @@
               <div>世界BOSS挑战</div>
             </van-col>
             <van-col span="8" class="center">
-              <span>剩余{{ taskInfo.bossCanAttackTime }}次</span>
+              <span>已经挑战{{ taskInfo.bossAttackTime }}次</span>
               <van-stepper v-model="attackTime.shijieBossTime" button-size="20px" />
             </van-col>
             <van-col span="8" class="right">
@@ -310,44 +249,18 @@
               <van-button v-else type="danger" size="small" @click="stopShiJieBOSS">停止</van-button>
             </van-col>
           </van-row>
-
-          <van-row v-if="userRole.sv" class="row-wrap" type="flex" align="center">
-            <van-col span="8">
-              <div>超级探索</div>
-            </van-col>
-            <van-col span="8" class="center">
-              <div>
-                <span>小队ID</span>
-                <span>英雄ID</span>
-              </div>
-              <van-row type="flex" justify="space-around" align="center">
-                <van-col span="11">
-                  <van-field v-model="tansuo.xiaoduiId" input-align="center" size="mini" class="input-wrap tansuo-item" placeholder="小队ID" />
-                </van-col>
-                <van-col span="11">
-                  <van-field v-model="tansuo.heroId" input-align="center" size="mini" class="input-wrap tansuo-item" placeholder="英雄ID" />
-                </van-col>
-              </van-row>
-            </van-col>
-            <van-col span="8" class="right">
-              <van-button type="info" size="small" @click="superTansuo">探索</van-button>
-            </van-col>
-          </van-row>
         </van-tab>
 
         <van-tab title="购买">
           <van-row v-if="userRole.goldShop" class="row-wrap" type="flex" align="center">
-            <van-col span="6">
+            <van-col span="8">
               <div>金币商店</div>
             </van-col>
-            <van-col span="7" class="right">
+            <van-col span="8" class="center">
               <van-button type="default" size="small" @click="flushShop">{{ shopInfo.jinbiShuaXin }}钻石刷新</van-button>
             </van-col>
-            <van-col span="7" class="left left-padding">
-              <van-switch v-model="switchFlag.autoGlodShop" size="25px" @change="changeAutoGoldShop" />
-            </van-col>
-            <van-col span="4" class="right">
-              <van-button type="info" size="small" @click="goldShopBuyAll">全买</van-button>
+            <van-col span="8" class="right">
+              <van-button type="info" size="small" @click="buyAll">全买</van-button>
             </van-col>
           </van-row>
 
@@ -356,7 +269,7 @@
               <div>酒馆十连抽</div>
             </van-col>
             <van-col span="8" class="center">
-              <van-stepper v-model="attackTime.shilianchouTime" button-size="20px" />
+              <span>剩余钻石{{ roleInfo.zuanshi }}</span>
             </van-col>
             <van-col span="8" class="right">
               <van-button type="info" size="small" @click="startShilianchou">开始</van-button>
@@ -405,7 +318,7 @@
               <van-button type="info" size="small" @click="buyLaxiangguan">购买</van-button>
             </van-col>
           </van-row>
-          <!--
+
           <van-row v-if="userRole.otherShop" class="row-wrap" type="flex" align="center">
             <van-col span="8">
               <div>无尽商店</div>
@@ -460,68 +373,46 @@
             <van-col span="8" class="right">
               <van-button type="info" size="small" @click="buyYuanzhengShop">购买</van-button>
             </van-col>
-          </van-row> -->
+          </van-row>
         </van-tab>
 
-        <van-tab title="日常">
+        <van-tab title="扫荡">
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="6">
-              <div>每日副本扫荡</div>
+            <van-col span="8">
+              <div>每日副本</div>
             </van-col>
-            <van-col span="12" class="center" />
-            <van-col span="6" class="right">
+            <van-col span="8" class="center" />
+            <van-col span="8" class="right">
               <van-button type="info" size="small" @click="saodangMeiriFuben">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="6">
-              <div>无尽炼狱扫荡</div>
+            <van-col span="8">
+              <div>无尽炼狱</div>
             </van-col>
-            <van-col span="12" class="center" />
-            <van-col span="6" class="right">
+            <van-col span="8" class="center" />
+            <van-col span="8" class="right">
               <van-button type="info" size="small" @click="saodangWujin">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="6">
-              <div>恶魔巢穴扫荡</div>
+            <van-col span="8">
+              <div>恶魔巢穴</div>
             </van-col>
-            <van-col span="12" class="center" />
-            <van-col span="6" class="right">
+            <van-col span="8" class="center" />
+            <van-col span="8" class="right">
               <van-button type="info" size="small" @click="saodangEme">扫荡</van-button>
             </van-col>
           </van-row>
           <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="6">
-              <div>蜡像馆扫荡</div>
+            <van-col span="8">
+              <div>蜡像馆</div>
             </van-col>
-            <van-col span="12" class="center">
-              <span>扫荡后自动领任务奖</span>
-            </van-col>
-            <van-col span="6" class="right">
+            <van-col span="8" class="center" />
+            <van-col span="8" class="right">
               <van-button type="info" size="small" @click="saodangLaxiangguan">扫荡</van-button>
             </van-col>
           </van-row>
-          <van-row class="row-wrap" type="flex" align="center">
-            <van-col span="6">
-              <div>装备升级</div>
-            </van-col>
-            <van-col span="12" class="center">
-              <span>装备自动升级，用于做成就</span>
-            </van-col>
-            <van-col span="6" class="right">
-              <van-button v-if="!flag.zbUpdateFlag" type="info" size="small" @click="startZbUpdate">开始</van-button>
-              <van-button v-else type="danger" size="small" @click="stopZbUpdate">停止</van-button>
-            </van-col>
-          </van-row>
-        </van-tab>
-
-        <van-tab title="套装">
-          <Taozhuang />
-        </van-tab>
-
-        <van-tab title="攻略">
-          <GongLue />
         </van-tab>
       </van-tabs>
 
@@ -537,58 +428,43 @@
 import SHA1 from 'js-sha1'
 import axios from 'axios'
 import moment from 'moment'
-import deepClone from '@jsbits/deep-clone'
 import CryptoJS from 'crypto-js'
 import { encrypt, randomWord } from '@/utils/rsa'
 import { mapGetters, mapActions } from 'vuex'
-import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from '@/utils/auth'
-import { wujin, boss, meiriFuben, emeFuben, guaji, hadBuyInfo } from '@/utils/response-parse'
+import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
+import { wujin, boss, meiriFuben, emeFuben, guaji, jinbiShop, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
-import { calcZhanli, calcJjcInfo, calcZhuangbei, yzmgAddWeight, yzmgCalcPos, yzmgCalcParams, yzmgUpdateLineMaps } from '@/utils/response-parse'
 import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
-import GongLue from './components/GongLue'
-import Taozhuang from './components/Taozhuang'
 export default {
 
   components: {
     Header,
-    Help,
-    GongLue,
-    Taozhuang
+    Help
   },
   data() {
     return {
       name: '',
-      loginLoading: false,
       websock: null,
       pIn: 0,
       secretKey: '',
       timeDiff: 0,
       vip: true,
       yunguaji: false,
-      tansuo: {
-        xiaoduiId: 1,
-        heroId: 0
-      },
       tabActive: 0, // Tab默认页面
       userRole: { // 用户类型
-        free: false, // 免费版本
-        normal: false, // 普通版本
         v: false, // vip版本
         h: false, // 黑科技
         vh: false, // 黑科技+vip
-        sv: false, // 超级VIP
-        userLevelId: 0, // 0:免费用户，1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
+        userLevelId: 1, // 1:普通用户，2：云挂机，3：黑科技，4：云挂机+黑科技
         goldShop: false, // 是否显示金币商店
         otherShop: false // 其他商店跨等级买东西
       },
       show: {
         helpInfo: false,
-        remoteGuajiLog: false,
-        yzmgHelp: false
+        remoteGuajiLog: false
       },
       url: {
         serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
@@ -608,9 +484,7 @@ export default {
         taozhuangsuipian: '',
         rongyu: '', // 竞技荣誉
         jiban: '',
-        laxiangbi: '', // 蜡像币
-        zhanli: 0, // 战力
-        zhuangbeiList: [] // 计算后的，装备列表，用于升级
+        laxiangbi: '' // 蜡像币
       },
       laxiangguanInfo: { // 蜡像馆信息
         difficulty: 0,
@@ -628,25 +502,6 @@ export default {
         buysqTimes: 0, // 恶魔副本购买次数
         sqLevel: 0, // 恶魔副本级别
         sqTimes: 0 // 恶魔副本可打次数
-      },
-      jjcInfo: {
-        jjcTime: 0, // 竞技场剩余次数
-        jjcWinTime: 0, // 竞技场胜利次数
-        jjcLoseTime: 0, // 竞技场输的次数
-        jjcLinkWinTime: 0, // 连胜次数
-        todayAttackTimes: 0, // 今天攻击次数
-        winIds: [], // 当前返回的列表中已经打赢的角色
-        roleList: [], // 竞技场角色信息
-        canAttackRole: [] // 可以攻击的角色
-      },
-      yzmgInfo: { // 远征迷宫信息
-        zhenrong: [], // 可以布阵的英雄
-        remainTimes: 0, // 剩余次数
-        shouldStop: false, // 因为死亡英雄过多，不能开始
-        moheZhandou: false, // 魔盒是否遭遇战斗
-        lineMaps: [], // 线路图
-        pos: 0, // 选择的目标位置
-        packetParams: { evtId: 0, param: 9 } // 这里设置为9只是为了和实际值不同
       },
       meiriFubenInfo: {
         buyjinbiTimes: 0, // 金币副本购买次数
@@ -676,9 +531,9 @@ export default {
         taozhuangShop: [], // 套装商店
         yuanzhengShop: [], // 远征商店
         emeFuben: [
-          { 'text': '美女副本-经验书', 'value': 1 },
-          { 'text': '亡灵副本-套装碎片', 'value': 2 },
-          { 'text': '恶魔副本-神器碎片', 'value': 3 }
+          { 'text': '美女副本', 'value': 1 },
+          { 'text': '亡灵副本', 'value': 2 },
+          { 'text': '恶魔副本', 'value': 3 }
         ],
         meiriFuben: [
           { 'text': '金币副本', 'value': 1 },
@@ -691,8 +546,7 @@ export default {
       },
       taskInfo: { // 每天的各种任务信息
         xuezhanRemainTime: 0, // 血战竞技剩余次数
-        bossAttackTime: 0, // 世界BOSS攻击次数
-        bossCanAttackTime: 0 // 世界BOSS剩余次数
+        bossAttackTime: 0 // 世界BOSS攻击次数
       },
       buyInfo: {
         laxiangguanBuyTime: 1, // 蜡像馆的购买次数
@@ -705,58 +559,39 @@ export default {
       },
       flag: {
         loginFlag: false,
-        logoutFlag: false,
         tuituFlag: false,
-        xiaoguaiFlag: false,
         wujinFlag: false,
         emeFubenFlag: false,
         meiriFubenFlag: false,
         xuezhanjingjiFlag: false,
         laxiangguanFlag: false,
         laxiangguanLowFlag: false,
-        shijieBossFlag: false,
-        shilianchouFlag: false,
-        printJinbiShopLog: true,
-        jinbiShopFlag: false,
-        jjcFlag: false,
-        zbUpdateFlag: false,
-        yzmgFlag: false
+        shijieBossFlag: false
       },
       attackTime: {
         bossTime: 1,
-        xiaoguaiTime: 1,
         wujinTime: 1,
         emeTime: 1,
         meiriTime: 1,
         xuezhanjingjiTime: 1,
         laxiangguanTime: 1,
         laxiangguanLowTime: 1,
-        shijieBossTime: 1,
-        shilianchouTime: 1,
-        zhanliDiscount: 30
+        shijieBossTime: 1
       },
       timer: {
         heartBeatTimer: null,
         bossTimer: null,
-        xiaoguaiTimer: null,
         wujinTimer: null,
         emeTimer: null,
         meiriTimer: null,
         buyJinbiShopTimerYaocao: null,
         buyJinbiShopTimerHero: null,
         xuezhanjingjiTimer: null,
-        guajiXiaoguaiTimer: null,
+        attackXiaoguaiTimer: null,
         laxiangguanTimer: null,
         laxiangguanLowTimer: null,
         laxiangguanBuyTimer: null,
-        shijieBossTimer: null,
-        shilianchouTimer: null,
-        jjcTimer: null,
-        zbUpdateTimer: null,
-        yzmgTimer: null
-      },
-      switchFlag: {
-        autoGlodShop: false
+        shijieBossTimer: null
       },
       logs: [],
       remoteGuajiLog: '',
@@ -891,14 +726,6 @@ export default {
     // 当选择平台的时候更新对应的服务器列表
     platform(newVal) {
       this.serverOption = this.serverObj[newVal]
-    },
-
-    // 监控各种开关的变化
-    switchFlag: {
-      handler: function() {
-        this.saveSwitchInfo()
-      },
-      deep: true
     }
   },
 
@@ -919,7 +746,6 @@ export default {
     this.handleGetJingjiShop()
     this.handleGetTaozhuangShop()
     this.handleGetYuanzhengShop()
-    this.loadSwitchInfo()
   },
 
   methods: {
@@ -933,7 +759,6 @@ export default {
 
     // 登录平台
     handleLoginPlatForm() {
-      this.loginLoading = true
       this.secretKey = randomWord(false, 16)
       if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
         this.$toast('请输入用户名和密码')
@@ -954,7 +779,6 @@ export default {
         k: encrypt(this.secretKey) // ase的密钥
       }
       loginPlatform(param).then(res => {
-        this.loginLoading = false
         const resPlain = CryptoJS.AES.decrypt(res, CryptoJS.enc.Utf8.parse(this.secretKey), {
           mode: CryptoJS.mode.ECB,
           padding: CryptoJS.pad.Pkcs7
@@ -968,28 +792,15 @@ export default {
           this.$toast.fail('辅助时间到期，请充值后登录！')
           return
         } else if (resObj.r === 200) {
-          if (resObj.l === 0) {
-            this.userRole.free = true
-          } else if (resObj.l === 1) {
-            this.userRole.normal = true
-          } else if (resObj.l === 2) {
-            this.userRole.normal = true
+          if (resObj.l === 2) {
             this.userRole.v = true
           } else if (resObj.l === 3) {
-            this.userRole.normal = true
             this.userRole.v = true
             this.userRole.h = true
           } else if (resObj.l === 4) {
-            this.userRole.normal = true
             this.userRole.v = true
             this.userRole.h = true
             this.userRole.vh = true
-          } else if (resObj.l === 9) {
-            this.userRole.normal = true
-            this.userRole.v = true
-            this.userRole.h = true
-            this.userRole.vh = true
-            this.userRole.sv = true
           }
           this.userRole.userLevelId = resObj.l
           this.userInfo.endTime = moment(resObj.t * 1000).format('YYYY-MM-DD HH:mm:ss')
@@ -1005,7 +816,6 @@ export default {
           this.initWebSocket()
         }
       }).catch(err => {
-        this.loginLoading = false
         console.log(err)
       })
     },
@@ -1120,17 +930,6 @@ export default {
         username: this.userInfo.username
       }
       setGameLoginInfo(gameLoginInfo)
-    },
-
-    // 读取各种开关信息
-    loadSwitchInfo() {
-      const switchInfo = getSwitchInfo()
-      this.switchFlag = { ...switchInfo }
-    },
-
-    // 存储各种开关信息
-    saveSwitchInfo() {
-      setSwitchInfo(this.switchFlag)
     },
 
     // 让日志框的滚动条一直在底部
@@ -1253,118 +1052,14 @@ export default {
         this.roleInfo.rongyu = redata.rongyu
         this.roleInfo.jiban = redata.jiban
         this.roleInfo.laxiangbi = redata.o
-        this.jjcInfo.jjcTime = redata.jjcTime
         // this.recordLogs('当前经验：' + redata.i)
       }
-
-      if (redata.pd === 1007) { // 装备列表
-        const res = calcZhuangbei(redata, this.roleInfo.level)
-        this.roleInfo.zhuangbeiList = res
-      }
-
       if (redata.pd === 1008) {
         this.roleInfo.levelId = redata.openLevel
       }
 
-      if (redata.pd === 1012) { // 计算竞技场的角色信息
-        const res = calcJjcInfo(redata)
-        this.jjcInfo.jjcWinTime = res.jjcWinTime
-        this.jjcInfo.jjcLoseTime = res.jjcLoseTime
-        this.jjcInfo.jjcLinkWinTime = res.jjcLinkWinTime
-        this.jjcInfo.todayAttackTimes = res.todayAttackTimes
-        this.jjcInfo.winIds = res.winIds
-        this.jjcInfo.roleList = res.roleList
-      }
-
-      /**
-       * 远征迷宫解析
-       * 根据lineMaps数组中的元素数量进行区别。
-       * 如果只有一个元素，则用于解析下一次攻击的参数，其中根据"h":0和"c":false这两个来判断
-       * 这表示是需要进行解析的，"a":14和lineMaps中的元素中的"a":14应该是一样的。
-       *
-       * 如果有两个元素，那这个数据包中包含了上次攻击目标的行和更新的行，需要把更新的行数据添加到this.yzmgInfo.lineMaps
-       * 区别在于其中的一个"c":false另外一个"c":true，需要把"c":false的添加到this.yzmgInfo.lineMaps
-       *
-       * 如果有三个元素，那说明是刚开始。这个时候第一行只能选中间三个，需要按照刚开始的算法进行解析。
-       * 要将yzmgCalcPos(lineMaps, firstTime, pos)中的firstTime设置为1
-       *
-       * 如果大于三个元素，那说明是之前打了一部分，这个时候需要取倒数三个元素用于计算线路图
-       * 这里需要分两种情况：
-       * 1. 倒数第三个元素中的"b":0,表示之前没有选择具体的对象，有三个目标可选，
-       * 这个时候就需要获取倒数第4个元素中的"b"的值作为上次攻击目标的pos值计算这次应该选择的目标。
-       * 2. 如果倒数第三个元素中的"b"有值，那这个值就是本次需要选择的目标位置
-       */
-
-      if (redata.pd === 1106) { // 远征迷宫路线信息
-        this.yzmgInfo.remainTimes = redata.c
-        const length = redata.lineMaps.length
-        const copyData = JSON.parse(JSON.stringify(redata))
-        // console.log(copyData)
-        if (length > 3) {
-          const beforeId = copyData.lineMaps[length - 4].b // 倒数第4个evtList就是上次打的那一行
-          const cutNum = length - 3
-          redata.lineMaps.splice(0, cutNum)
-          this.yzmgInfo.lineMaps = yzmgAddWeight(redata)
-          if (this.yzmgInfo.lineMaps[0].b) { // 上次已经选择了目标，但是还没打完就退出了
-            const line = this.yzmgInfo.lineMaps[0]
-            this.yzmgInfo.pos = line.b
-            this.yzmgInfo.packetParams.evtId = line.evtList[line.b - 1].a
-          } else { // 上次已经打完了，然后没有选择目标就退出了，所有三个目标可以选择，根据上次打的ID进行目标选择
-            const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 0, beforeId)
-            this.yzmgInfo.pos = res.pos
-            this.yzmgInfo.packetParams.evtId = res.evtId
-          }
-        } else if (length === 3) {
-          this.yzmgInfo.lineMaps = yzmgAddWeight(redata)
-          const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 1, 3) // 开始打的时候默认是中间，所以可以认为上次打的是中间的一个
-          this.yzmgInfo.pos = res.pos
-          this.yzmgInfo.packetParams.evtId = res.evtId
-        } else if (length === 2) {
-          const updateLineData = yzmgAddWeight(redata)
-          const copyLineMaps = deepClone(this.yzmgInfo.lineMaps)
-          this.yzmgInfo.lineMaps = yzmgUpdateLineMaps(copyLineMaps, updateLineData)
-          const pos = this.yzmgInfo.pos
-          const res = yzmgCalcPos(this.yzmgInfo.lineMaps, 0, pos)
-          this.yzmgInfo.pos = res.pos
-          this.yzmgInfo.packetParams.evtId = res.evtId
-        } else if (length === 1) {
-          const res = yzmgCalcParams(redata)
-          this.yzmgInfo.packetParams.evtId = res.evtId
-          this.yzmgInfo.packetParams.param = res.param
-        }
-      }
-
-      if (redata.pd === 1107) { // 远征迷宫阵容信息
-        this.yzmgInfo.zhenrong = redata.a
-        const heroNum = redata.a.length
-        const xueliang = redata.d
-        let deadNum = 0
-        let aliveNum = 0
-        xueliang.forEach(i => {
-          if (i) {
-            aliveNum += 1
-          } else {
-            deadNum += 1
-          }
-        })
-        const deadMoreThanHeroNum = deadNum >= heroNum
-        const deadMoreThanSix = deadNum >= 6
-        if (deadMoreThanHeroNum || deadMoreThanSix) {
-          this.yzmgInfo.shouldStop = true
-        }
-        if ((aliveNum === 0 || deadMoreThanHeroNum || deadMoreThanSix) && this.flag.yzmgFlag) {
-          this.recordLogs('英雄阵亡过多，请登录游戏处理,阵亡英雄数量为：' + deadNum)
-          this.stopYZMG()
-        }
-      }
-
       if (redata.pd === 1023) { // 世界BOSS攻击次数
         this.taskInfo.bossAttackTime = redata.todayAttackTimes
-        this.taskInfo.bossCanAttackTime = 3 - redata.todayAttackTimes
-      }
-
-      if (redata.pd === 1025) { // 上阵英雄战力
-        this.roleInfo.zhanli = calcZhanli(redata)
       }
 
       // 商店信息
@@ -1415,13 +1110,8 @@ export default {
 
       // 蜡像馆信息
       if (redata.pd === 1093) {
-        if (redata.difficulty < 4) {
-          this.laxiangguanInfo.difficulty = redata.difficulty
-          this.laxiangguanInfo.level = redata.level
-        } else {
-          this.laxiangguanInfo.difficulty = parseInt(redata.difficulty) - 1
-          this.laxiangguanInfo.level = 6
-        }
+        this.laxiangguanInfo.difficulty = redata.difficulty
+        this.laxiangguanInfo.level = redata.level
         this.laxiangguanInfo.buyTime = redata.buyTime
         this.laxiangguanInfo.canAttackTime = redata.canAttackTime
       }
@@ -1491,17 +1181,13 @@ export default {
       }
     },
 
-    // 数据发送
-    websocketsend(data) {
+    websocketsend(data) { // 数据发送
       this.websock.send(JSON.stringify(data))
       // console.log('send', JSON.stringify(data))
     },
 
     websocketclose(e) { // 关闭
-      if (!this.flag.logoutFlag) {
-        this.recordLogs('掉线或者被挤下线')
-      }
-      this.handleLogout()
+      this.logout()
       console.log('connection closed (' + e + ')')
     },
 
@@ -1556,35 +1242,19 @@ export default {
       setTimeout(function() { self.websocketsend(login_packet6) }, 800)
       setTimeout(function() { self.websocketsend(login_packet7) }, 900)
       setTimeout(function() { self.sendGeneric() }, 950)
-      setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
-      setTimeout(function() { self.autoFunction() }, 1500)
-      // if (this.userRole.userLevelId <= 2) {
-      //   setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
-      // }
+      if (this.userRole.userLevelId <= 2) {
+        setTimeout(function() { self.fuben(0, 5, 0) }, 990) // 发这个包就会进行上线确认
+      }
       this.timer.heartBeatTimer = setInterval(function() { self.websocketsend(self.gen_base_json(-1)) }, 10090)
-      this.timer.guajiXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10190)
+      // this.timer.attackXiaoguaiTimer = setInterval(function() { self.fuben(self.roleInfo.levelId, 1, 1) }, 10590)
     },
 
     logout() {
-      this.flag.logoutFlag = true
       this.recordLogs('退出登录')
+      clearInterval(this.timer.heartBeatTimer)
+      // clearInterval(this.timer.attackXiaoguaiTimer)
       this.websock.close()
-    },
-
-    handleLogout() {
-      for (const key in this.timer) {
-        clearInterval(this.timer[key])
-      }
-      for (const key in this.flag) {
-        this.flag[key] = false
-      }
-      for (const key in this.userRole) {
-        if (key === 'userLevelId') {
-          this.userRole[key] = 0
-        } else {
-          this.userRole[key] = false
-        }
-      }
+      this.flag.loginFlag = false
       this.pIn = 0
     },
 
@@ -1660,30 +1330,6 @@ export default {
       this.recordLogs('停止推图')
     },
 
-    // 开始小怪
-    startFubenXiaoguai() {
-      if (!this.checkLoginStatus()) return
-      this.flag.xiaoguaiFlag = true
-      let i = 1
-      const xiaoguaiTime = this.attackTime.xiaoguaiTime
-      const self = this
-      self.timer.xiaoguaiTimer = setInterval(function() {
-        self.recordLogs('攻击小怪')
-        self.fuben(self.roleInfo.levelId, 1, 1)
-        i++
-        if (i > xiaoguaiTime) {
-          self.stopFubenXiaoguai()
-        }
-      }, 1000)
-    },
-
-    // 停止小怪
-    stopFubenXiaoguai() {
-      this.flag.xiaoguaiFlag = false
-      clearInterval(this.timer.xiaoguaiTimer)
-      this.recordLogs('停止打小怪')
-    },
-
     // 无尽炼狱发包
     sendWujin(operate) {
       const wujinPacket = this.gen_base_json(244)
@@ -1716,7 +1362,7 @@ export default {
       const self = this
       self.timer.wujinTimer = setInterval(function() {
         self.recordLogs('挑战无尽炼狱第' + self.attackWujinLevelId + '关')
-        self.sendWujin(2)
+        self.sendWujin()
         i++
         if (i > wujinTime) {
           self.stopWujin()
@@ -1934,32 +1580,25 @@ export default {
       packet.operate = operate
       packet.num = num
       this.websocketsend(packet)
-      // if (operate === 1 && this.flag.printJinbiShopLog) {
-      //   this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
-      // }
+      if (operate === 1) {
+        this.recordLogs('购买商品:' + jinbiShop(id) + '*' + num)
+      }
     },
     flushShop() {
       this.sendJinbiShop(2, 0, 0)
     },
-    goldShopBuyAll() {
+    buyAll() {
       if (!this.checkLoginStatus()) return
-      if (this.flag.jinbiShopFlag) return
       if (this.shopInfo.hadBuyJinbi) {
         this.$toast.fail({ duration: 1000, message: '已经购买过了，可以刷新后购买' })
-        this.flag.printJinbiShopLog = false
+        return
       }
-      this.flag.jinbiShopFlag = true
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
       self.timer.buyJinbiShopTimerHero = setInterval(function() {
         if (i > 115) {
           clearInterval(self.timer.buyJinbiShopTimerHero)
-          if (self.flag.printJinbiShopLog) {
-            self.recordLogs('金币商店购买完毕')
-          }
-          self.flag.printJinbiShopLog = true
-          self.flag.jinbiShopFlag = false
         } else if (i > 110) {
           self.sendJinbiShop(1, i, 5)
         } else {
@@ -2073,13 +1712,12 @@ export default {
     saodangLaxiangguan() {
       if (!this.checkLoginStatus()) return
       this.sendLaxiangguan(0, 4, 0, 0)
-      const self = this
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 1) }, 1000)
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 2) }, 1100)
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 3) }, 1200)
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 4) }, 1300)
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 5) }, 1400)
-      setTimeout(function() { self.sendLaxiangguan(0, 3, 0, 6) }, 1500)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 1) }, 1000)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 2) }, 1100)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 3) }, 1200)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 4) }, 1300)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 5) }, 1400)
+      setTimeout(function() { this.sendLaxiangguan(0, 3, 0, 6) }, 1500)
     },
 
     // 开始蜡像馆
@@ -2112,17 +1750,9 @@ export default {
       this.flag.laxiangguanLowFlag = true
       let i = 1
       const lxgTime = this.attackTime.laxiangguanLowTime
-      let difficulty = this.laxiangguanInfo.difficulty
-      let level = this.laxiangguanInfo.level
-      if (this.laxiangguanInfo.level === 1) {
-        difficulty = difficulty - 1
-        level = 6
-      } else {
-        level = level - 1
-      }
       const self = this
       self.timer.laxiangguanLowTimer = setInterval(function() {
-        self.sendLaxiangguan(difficulty, 2, level, 0)
+        self.sendLaxiangguan(self.laxiangguanInfo.difficulty, 2, self.laxiangguanInfo.level - 1, 0)
         i++
         if (i > lxgTime) {
           self.stopLaxiangguanLow()
@@ -2183,6 +1813,7 @@ export default {
         packet.id = id
         packet.operate = 1
         packet.num = 1
+        // console.log(packet)
         this.websocketsend(packet)
         this.recordLogs('购买商品: ' + name)
       }).catch(() => {
@@ -2256,7 +1887,7 @@ export default {
       }
       this.flag.shijieBossFlag = true
       let i = 1
-      const sjbTime = this.attackTime.shijieBossTime
+      const lxgTime = this.attackTime.shijieBossTime
       const self = this
       self.timer.shijieBossTimer = setInterval(function() {
         self.sendShijieBoss(1)
@@ -2266,10 +1897,10 @@ export default {
           self.sendShijieBoss(4)
         }
         i++
-        if (i > sjbTime) {
+        if (i > lxgTime) {
           self.stopShiJieBOSS()
         }
-      }, 2000)
+      }, 3000)
     },
 
     // 停止世界BOSS
@@ -2281,325 +1912,19 @@ export default {
     /**
      * 十连抽发包
      */
-    sendShilianchou() {
-      const shilianchouPacket = this.gen_base_json(6)
-      shilianchouPacket.id = 2
-      this.websocketsend(shilianchouPacket)
-      this.recordLogs('酒馆十连抽')
-    },
     startShilianchou() {
       if (!this.checkLoginStatus()) return
       this.$dialog.confirm({
         title: '',
-        message: '确认开始酒馆十连抽?'
+        message: '确认购买酒馆十连抽?'
       }).then(() => {
-        this.flag.shilianchouFlag = true
-        let i = 1
-        const slcTime = this.attackTime.shilianchouTime
-        const self = this
-        self.timer.shilianchouTimer = setInterval(function() {
-          self.sendShilianchou()
-          i++
-          if (i > slcTime) {
-            self.stopShilianchou()
-          }
-        }, 1000)
+        const shilianchouPacket = this.gen_base_json(6)
+        shilianchouPacket.id = 2
+        this.websocketsend(shilianchouPacket)
+        this.recordLogs('酒馆十连抽')
       }).catch(() => {
         // on cancel
       })
-    },
-
-    // 停止十连抽
-    stopShilianchou() {
-      clearInterval(this.timer.shilianchouTimer)
-      this.flag.shilianchouFlag = false
-      this.recordLogs('停止酒馆十连抽')
-    },
-
-    // 超级探索
-    superTansuo() {
-      const tansuoPacket = this.gen_base_json(262)
-      tansuoPacket.id = this.xiaoduiId
-      tansuoPacket.operate = 1
-      tansuoPacket.heroIndexs = [this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId, this.tansuo.heroId]
-      this.websocketsend(tansuoPacket)
-      this.recordLogs('超级探索')
-    },
-
-    // 改变自动购买金币商店的开关
-    changeAutoGoldShop() {
-      if (this.switchFlag.autoGlodShop) {
-        this.$toast({ duration: 3000, message: '开启登录辅助自动购买金币商店' })
-      } else {
-        this.$toast({ duration: 3000, message: '关闭登录辅助自动购买金币商店' })
-      }
-    },
-
-    // 登录后自动操作的功能
-    autoFunction() {
-      if (this.userRole.goldShop && this.switchFlag.autoGlodShop) {
-        this.recordLogs('自动购买金币商店')
-        this.goldShopBuyAll()
-      }
-    },
-
-    // 竞技场发包
-    sendJingjichang(roleId, operate) {
-      const jjcPacket = this.gen_base_json(7)
-      jjcPacket.roleId = roleId
-      jjcPacket.operate = operate
-      this.websocketsend(jjcPacket)
-      if (operate === 2) {
-        this.sendGeneric()
-      }
-      if (operate === 6) {
-        this.recordLogs('领取竞技场奖励')
-      }
-    },
-
-    // 竞技场可以攻击的角色
-    calcCanAttackRole() {
-      const res = []
-      const attackZhanli = parseInt(this.roleInfo.zhanli * (100 - this.attackTime.zhanliDiscount) / 100)
-      this.recordLogs('角色战力为:' + this.roleInfo.zhanli)
-      this.recordLogs('竞技场可以攻击目标战力阈值:' + attackZhanli)
-      const roleList = this.jjcInfo.roleList
-      roleList.forEach(i => {
-        if (i.zhanli < attackZhanli && this.jjcInfo.winIds.indexOf(i.roleId) === -1) {
-          res.push(i)
-        }
-      })
-      this.jjcInfo.canAttackRole = res
-      if (res.length > 0) {
-        this.recordLogs('当前列表中可以挑战的目标数量为:' + res.length)
-      } else {
-        this.recordLogs('当前列表中没有可以挑战的目标')
-      }
-    },
-
-    // 开始竞技场
-    startJingjichang() {
-      if (!this.checkLoginStatus()) return
-      if (this.timer.jjcTimer === 0) {
-        this.$toast.fail('没次数了')
-        return
-      }
-      this.recordLogs('开始挑战竞技场，根据系统自动刷新数据，每分钟尝试一次，直到次数完毕')
-      this.flag.jjcFlag = true
-      const self = this
-      const totalTime = this.jjcInfo.todayAttackTimes + this.jjcInfo.jjcTime
-      if (totalTime < 10) {
-        this.recordLogs('购买竞技场次数')
-        setTimeout(function() { self.sendJingjichang('', 1) }, 100)
-        setTimeout(function() { self.sendJingjichang('', 1) }, 200)
-        setTimeout(function() { self.sendJingjichang('', 1) }, 300)
-        setTimeout(function() { self.sendJingjichang('', 1) }, 400)
-        setTimeout(function() { self.sendJingjichang('', 1) }, 500)
-      }
-      // 先尝试攻击一次,要不然第一共攻击要等到后面的第一次setInterval之后
-      this.sendJingjichang('', 4)
-      this.calcCanAttackRole()
-      if (this.jjcInfo.canAttackRole.length > 0) {
-        this.sendJingjichang(this.jjcInfo.canAttackRole[0].roleId, 2)
-        this.recordLogs('挑战竞技场目标:' + this.jjcInfo.canAttackRole[0].roleName +
-                          '，目标战力:' + this.jjcInfo.canAttackRole[0].zhanli)
-        this.jjcInfo.canAttackRole.splice(0, 1)
-      }
-      // 开始循环
-      self.timer.jjcTimer = setInterval(function() {
-        self.sendJingjichang('', 4)
-        self.calcCanAttackRole()
-        const l = self.jjcInfo.canAttackRole.length
-        if (l > 0) {
-          self.sendJingjichang(self.jjcInfo.canAttackRole[0].roleId, 2)
-          self.recordLogs('挑战竞技场目标:' + self.jjcInfo.canAttackRole[0].roleName +
-                          '，目标战力:' + self.jjcInfo.canAttackRole[0].zhanli)
-          self.jjcInfo.canAttackRole.splice(0, 1)
-        }
-        if (self.jjcInfo.jjcTime === 1) {
-          self.sendJingjichang('', 6)
-          self.stopJingjichang()
-        }
-      }, 1000 * 60)
-    },
-
-    // 停止竞技场
-    stopJingjichang() {
-      this.flag.jjcFlag = false
-      clearInterval(this.timer.jjcTimer)
-    },
-
-    // 竞技场帮助信息
-    showJJCHelop() {
-      this.$dialog.alert({
-        message: '这里设置的是百分比,默认30%,开始后会先购买次数,然后自动挑战比自己战力低30%的对手，没有就等系统自动刷新,直到次数完毕'
-      }).then(() => {
-        // on confirm
-      })
-    },
-
-    /**
-     * 装备升级发包
-     * @param {Number} equipIndex 装备Index
-     * @param {Number} updateLevel 需要升级的等级数
-     */
-    sendZbUpdate(equipIndex, updateLevel) {
-      const zbUpdatePacket = this.gen_base_json(106)
-      zbUpdatePacket.heroIndex = 0
-      zbUpdatePacket.equipIndex = equipIndex
-      zbUpdatePacket.level = updateLevel
-      this.websocketsend(zbUpdatePacket)
-    },
-
-    // 开始装备升级
-    startZbUpdate() {
-      if (!this.checkLoginStatus()) return
-      if (!this.roleInfo.zhuangbeiList) {
-        this.$toast.fail('没有获取到装备信息，稍等重试')
-        return
-      }
-      this.recordLogs('开始批量升级装备')
-      let i = 0
-      const zbList = [...this.roleInfo.zhuangbeiList]
-      this.flag.zbUpdateFlag = true
-      const self = this
-      self.timer.zbUpdateTimer = setInterval(function() {
-        const equipIndex = zbList[i].equipIndex
-        const updateLevel = zbList[i].updateLevel
-        const h = i + 1
-        if (updateLevel > 0) {
-          self.recordLogs('将第' + h + '件装备升级' + updateLevel + '级')
-        } else {
-          self.recordLogs('第' + h + '件装备无需升级')
-        }
-        self.sendZbUpdate(equipIndex, updateLevel)
-        i++
-        if (i > zbList.length - 1) {
-          self.stopZbUpdate()
-        }
-      }, 100)
-    },
-
-    // 停止装备升级
-    stopZbUpdate() {
-      this.flag.zbUpdateFlag = false
-      this.roleInfo.zhuangbeiList = []
-      clearInterval(this.timer.zbUpdateTimer)
-      this.recordLogs('停止批量升级装备')
-    },
-
-    /**
-     * 远征迷宫布阵发包
-     *
-     */
-    sendYZMGBuzhen() {
-      const zhenrong = [0, 0, 0, 0, 0, 0]
-      for (let i = 0; i < this.yzmgInfo.zhenrong.length; i++) {
-        zhenrong[i] = this.yzmgInfo.zhenrong[i]
-      }
-      const yzmgBuzhenPacket = this.gen_base_json(278)
-      yzmgBuzhenPacket.heroIndexs = []
-      yzmgBuzhenPacket.operate = 2
-      yzmgBuzhenPacket.zhenrong = zhenrong
-      this.websocketsend(yzmgBuzhenPacket)
-      this.recordLogs('远征迷宫布阵')
-    },
-
-    /**
-     * 远征迷宫发包
-     * @param {Number} operate -1:开始迷宫，1:选择对象，2:开始战斗，4:答题选择答案，5:选择光之神殿buff，6:进入下一关
-     * @param {Number} pos 目标的位置
-     * @param {Number} param 答题或者光之祝福需要的参数，其他的都为０
-     */
-    sendYZMG(operate, pos, param) {
-      const yzmgPacket = this.gen_base_json(277)
-      yzmgPacket.operate = operate
-      yzmgPacket.pos = pos
-      yzmgPacket.param = param
-      this.websocketsend(yzmgPacket)
-      if (operate === 2) {
-        this.sendGeneric()
-      }
-    },
-
-    // 开始远征迷宫
-    startYZMG() {
-      if (!this.checkLoginStatus()) return
-      if (this.yzmgInfo.shouldStop) {
-        this.$toast.fail('英雄阵亡过多，请登录游戏处理')
-        return
-      }
-      if (!this.yzmgInfo.remainTimes) {
-        this.$toast.fail('没攻击次数了')
-        return
-      }
-      if (this.yzmgInfo.zhenrong && this.yzmgInfo.lineMaps) {
-        this.sendYZMG(-1, 2, 0)
-        this.sendYZMGBuzhen()
-      } else {
-        this.$toast.fail('没获取到远征迷宫相关信息，请稍后重试或重新登录重试')
-        return
-      }
-      this.recordLogs('开始挑战远征迷宫')
-      this.flag.yzmgFlag = true
-      const self = this
-      const yzmgMap = {
-        200001: '普通战斗',
-        200002: '精英战斗',
-        200003: '光之神殿',
-        200004: '魔盒',
-        200005: '谜题'
-      }
-      self.timer.yzmgTimer = setInterval(function() {
-        const pos = self.yzmgInfo.pos
-        const evtId = self.yzmgInfo.packetParams.evtId
-        self.recordLogs('远征迷宫选择:' + yzmgMap[evtId])
-        self.sendYZMG(1, pos, 0)
-        setTimeout(function() {
-          const packetParams = self.yzmgInfo.packetParams
-          const remainTimes = self.yzmgInfo.remainTimes
-          if (packetParams.evtId === 200001) {
-            self.sendYZMG(2, 2, 0)
-          } else if (packetParams.evtId === 200002) {
-            self.sendYZMG(2, 2, 0)
-          } else if (packetParams.evtId === 200003) { // 光之神殿
-            self.sendYZMG(5, 2, 1)
-          } else if (packetParams.param === 9) { // 魔盒未遭遇战斗,实际测试不会进入这个条件
-            self.recordLogs('远征迷宫魔盒未遭遇战斗')
-          } else if (packetParams.evtId === 200005) {
-            if (packetParams.param === 9 || packetParams.param === 0) {
-              self.recordLogs('远征迷宫答题遇到问题，退出本次任务。请登录游戏操作')
-              self.stopYZMG()
-            } else {
-              self.sendYZMG(4, 2, packetParams.param)
-            }
-          } else if (packetParams.evtId === 200008) {
-            self.recordLogs('远征迷宫魔盒遭遇普通战斗')
-            self.sendYZMG(2, 2, 0)
-          } else if (packetParams.evtId === 200009) {
-            self.recordLogs('远征迷宫魔盒遭遇精英战斗')
-            self.sendYZMG(2, 2, 0)
-          }
-          self.yzmgInfo.packetParams.param = 9
-          self.sendYZMG(6, 2, 0) // 下一关
-          if (remainTimes === 0) {
-            self.stopYZMG()
-          }
-        }, 1000)
-      }, 2000)
-    },
-
-    // 停止远征迷宫
-    stopYZMG() {
-      this.yzmgInfo.shouldStop = false
-      this.flag.yzmgFlag = false
-      clearInterval(this.timer.yzmgTimer)
-      this.recordLogs('停止远征迷宫')
-    },
-
-    // 远征迷宫帮助
-    showYZMGHelp() {
-      this.show.yzmgHelp = true
     }
   }
 }
@@ -2626,10 +1951,6 @@ export default {
   .van-tabs--card {
     padding-top: 0;
   }
-  .van-tabs__wrap--scrollable .van-tab {
-    -webkit-flex: 0 0 20% !important;
-    flex: 0 0 20% !important;
-  }
 }
 </style>
 
@@ -2645,12 +1966,6 @@ textarea {
   margin-bottom: 50px;
   padding-bottom: 30px;
 }
-.left {
-  text-align: start;
-}
-.left-padding {
-  padding-left: 10px;
-}
 .right {
   text-align: end;
 }
@@ -2662,9 +1977,6 @@ textarea {
 }
 .endtiem-wrap {
   margin-top: 15px;
-}
-.tansuo-item {
-  line-height: 16px;
 }
 
 </style>

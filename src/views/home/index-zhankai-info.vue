@@ -4,12 +4,23 @@
     <div>
       <Header>
         <template slot="left" />
-        <template slot="right" />
+        <template slot="right">
+          <van-icon name="arrow" @click="showHelp()" />
+        </template>
         <template>
           <span class="title">古代战争-同肝</span>
         </template>
       </Header>
     </div>
+
+    <van-popup
+      v-model="show.helpInfo"
+      position="top"
+      :style="{ height: '40%' }"
+    >
+      <help />
+    </van-popup>
+
     <div class="content-container">
       <van-row type="flex" align="center" justify="space-between" class="row-wrap">
         <!-- <van-col span="3">
@@ -34,47 +45,100 @@
       </van-row>
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="9">
-          <van-field v-model="userInfo.username" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
+          <van-field v-model="userInfo.usernamePlatForm" input-align="center" size="mini" class="input-wrap" placeholder="请输入用户名" />
         </van-col>
         <van-col span="9">
           <van-field v-model="userInfo.passwordPlatForm" input-align="center" type="password" class="input-wrap" placeholder="密码" />
         </van-col>
         <van-col span="4" class="right">
           <van-button v-if="flag.loginFlag" type="danger" size="small" @click="logout">退出</van-button>
-          <van-button v-else type="info" size="small" @click="initWebSocket">登录</van-button>
+          <van-button v-else type="info" size="small" @click="handleLoginPlatForm">登录</van-button>
         </van-col>
       </van-row>
 
-      <van-divider>角色信息</van-divider>
-
-      <van-row class="row-wrap">
-        <van-col span="8">
-          <span>角色：</span>
-          <span>{{ roleInfo.name }}</span>
-        </van-col>
-        <van-col span="8">
-          <span>等级：</span>
-          <span>{{ roleInfo.level }}</span>
-        </van-col>
-        <van-col span="8">
-          <span>推图：</span>
-          <span>{{ levelIdStr }}</span>
-        </van-col>
-      </van-row>
-      <van-row class="row-wrap">
-        <van-col span="8">
-          <span>血精：</span>
-          <span>{{ roleInfo.xuejing }}</span>
-        </van-col>
-        <van-col span="8">
-          <span>钻石：</span>
-          <span>{{ roleInfo.zuanshi }}</span>
-        </van-col>
-        <van-col span="8">
-          <span>无尽：</span>
-          <span>{{ roleInfo.wujinLevelId }}</span>
-        </van-col>
-      </van-row>
+      <div class="info-wrap">
+        <van-collapse v-model="activeName" accordion :border="false" class="info-container">
+          <van-collapse-item :border="false" :is-link="false">
+            <template slot="title">
+              <div>
+                <van-divider>角色信息</van-divider>
+                <van-row class="row-wrap">
+                  <van-col span="8">
+                    <span>角色：</span>
+                    <span>{{ roleInfo.name }}</span>
+                  </van-col>
+                  <van-col span="8">
+                    <span>等级：</span>
+                    <span>{{ roleInfo.level }}</span>
+                  </van-col>
+                  <van-col span="8">
+                    <span>推图关卡：</span>
+                    <span>{{ roleInfo.levelId }}</span>
+                  </van-col>
+                </van-row>
+                <van-row class="row-wrap-last">
+                  <van-col span="8">
+                    <span>血精：</span>
+                    <span>{{ roleInfo.xuejing }}</span>
+                  </van-col>
+                  <van-col span="8">
+                    <span>钻石：</span>
+                    <span>{{ roleInfo.zuanshi }}</span>
+                  </van-col>
+                  <van-col span="8">
+                    <span>无尽关卡：</span>
+                    <span>{{ roleInfo.wujinLevelId }}</span>
+                  </van-col>
+                </van-row>
+              </div>
+            </template>
+            <template>
+              <van-row class="row-wrap">
+                <van-col span="8">
+                  <span>金币：</span>
+                  <span>7亿</span>
+                </van-col>
+                <van-col span="8">
+                  <span>无尽币：</span>
+                  <span>{{ roleInfo.level }}</span>
+                </van-col>
+                <van-col span="8">
+                  <span>神器碎片：</span>
+                  <span>{{ roleInfo.levelId }}</span>
+                </van-col>
+              </van-row>
+              <van-row class="row-wrap">
+                <van-col span="8">
+                  <span>熔炼：</span>
+                  <span>{{ roleInfo.xuejing }}</span>
+                </van-col>
+                <van-col span="8">
+                  <span>远征币：</span>
+                  <span>{{ roleInfo.zuanshi }}</span>
+                </van-col>
+                <van-col span="8">
+                  <span>套装碎片：</span>
+                  <span>{{ roleInfo.wujinLevelId }}</span>
+                </van-col>
+              </van-row>
+              <van-row class="row-wrap">
+                <van-col span="8">
+                  <span>竞技积分：</span>
+                  <span>19827</span>
+                </van-col>
+                <van-col span="8">
+                  <span>竞技次数：</span>
+                  <span>5</span>
+                </van-col>
+                <van-col span="8">
+                  <span>套装碎片：</span>
+                  <span>{{ roleInfo.wujinLevelId }}</span>
+                </van-col>
+              </van-row>
+            </template>
+          </van-collapse-item>
+        </van-collapse>
+      </div>
 
       <van-divider>挂机设置</van-divider>
       <van-row class="row-wrap" type="flex" align="center">
@@ -128,6 +192,20 @@
 
       <van-row class="row-wrap" type="flex" align="center">
         <van-col span="8">
+          <div>血战竞技</div>
+        </van-col>
+        <van-col span="8" class="center">
+          <span>剩余{{ taskInfo.xuezhanRemainTime }}次</span>
+          <van-stepper v-model="attackTime.xuezhanjingjiTime" button-size="20px" />
+        </van-col>
+        <van-col span="8" class="right">
+          <van-button v-if="!flag.xuezhanjingjiFlag" type="info" size="small" @click="startXuezhan">开始</van-button>
+          <van-button v-else type="danger" size="small" @click="stopXuezhan">停止</van-button>
+        </van-col>
+      </van-row>
+
+      <van-row class="row-wrap" type="flex" align="center">
+        <van-col span="8">
           <div>金币商店</div>
         </van-col>
         <van-col span="8" class="center">
@@ -138,42 +216,52 @@
         </van-col>
       </van-row>
 
-      <div class="flex-center-wrapper">
-        <div>
-          <!-- <van-button type="info" size="small" @click="startall">开始全部</van-button> -->
-          <van-button type="info" size="small" @click="clearLog">清理日志</van-button>
-        </div>
-      </div>
-
-      <van-divider>挂机日志</van-divider>
-      <textarea v-model="guajiLog" rows="20" readonly />
+      <van-divider>
+        <van-button type="default" size="small" @click="clearLog">清理日志</van-button>
+      </van-divider>
+      <textarea id="log-textarea" v-model="guajiLog" rows="20" readonly />
     </div>
   </div>
 </template>
 
 <script>
 import SHA1 from 'js-sha1'
+import axios from 'axios'
 import moment from 'moment'
+import CryptoJS from 'crypto-js'
 import { mapGetters, mapActions } from 'vuex'
-import Header from '@/components/Header'
 import { getGameLoginInfo, setGameLoginInfo } from '@/utils/auth'
-const parse = require('@/utils/response-parse')
+import { wujin, boss, meiriFuben, emeFuben } from '@/utils/response-parse'
+import { loginPlatform } from '@/api/game'
+import Header from '@/components/Header'
+import Help from './components/Help'
 export default {
 
   components: {
-    Header
+    Header,
+    Help
   },
   data() {
     return {
       name: '',
       websock: null,
       pIn: 0,
+      secretKey: 'sjsdofjdf2849skd',
+      timeDiff: 0,
+      activeName: 1,
+      show: {
+        helpInfo: false
+      },
+      url: {
+        serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
+      },
       flag: {
         loginFlag: false,
         tuituFlag: false,
         wujinFlag: false,
         emeFubenFlag: false,
-        meiriFubenFlag: false
+        meiriFubenFlag: false,
+        xuezhanjingjiFlag: false
       },
       roleInfo: {
         name: '',
@@ -186,11 +274,15 @@ export default {
       shopInfo: { // 夏洛克商店信息
         jinbiShuaXin: 0 // 金币商店刷新价格
       },
+      taskInfo: { // 每天的各种任务信息
+        xuezhanRemainTime: 0 // 血战竞技剩余次数
+      },
       attackTime: {
         bossTime: 1,
         wujinTime: 1,
         emeTime: 1,
-        meiriTime: 1
+        meiriTime: 1,
+        xuezhanjingjiTime: 1
       },
       timer: {
         heartBeatTimer: null,
@@ -198,18 +290,20 @@ export default {
         wujinTimer: null,
         emeTimer: null,
         meiriTimer: null,
-        buyJinbiShopTimer: null
+        buyJinbiShopTimer: null,
+        xuezhanjingjiTimer: null
       },
       logs: [],
       userInfo: {
-        username: '',
+        username: '', // 登录游戏用的，是由平台返回的
         password: 'ljs', // 登录游戏服务器的密码，websocket连接使用
+        usernamePlatForm: '', // 平台的用户名
         passwordPlatForm: '', // 平台的密码
-        platform: 1,
+        platform: 'taptap_mobile',
         server: 'ws://tapandroid4.maobugames.com:35001/'
       },
       platformOption: [
-        { text: 'TapTap', value: 1 }
+        { text: 'TapTap', value: 'taptap_mobile' }
       ],
       serverOption: [
         { text: '天启位面', value: 'ws://xgm.xiaomaoqipai.cn:35001/' },
@@ -229,12 +323,16 @@ export default {
       const yu = (this.roleInfo.levelId - 1) % 200 + 1
       const str = mo + '-' + yu
       return str
+    },
+    attackWujinLevelId() {
+      return this.roleInfo.wujinLevelId + 1
     }
   },
 
   watch: {
     logs(newVal) {
       this.changeGuajiLog(newVal)
+      this.scrollToBottom()
     }
   },
 
@@ -250,6 +348,7 @@ export default {
 
   mounted() {
     this.loadLoginInfo()
+    this.getServerTIme()
   },
 
   methods: {
@@ -257,13 +356,55 @@ export default {
       'changeGuajiLog'
     ]),
 
+    showHelp() {
+      this.show.helpInfo = true
+    },
+
+    // 登录平台
+    handleLoginPlatForm() {
+      if (!this.userInfo.usernamePlatForm || !this.userInfo.passwordPlatForm) {
+        this.$toast('请输入用户名和密码')
+        return
+      }
+      const cipherPwd = CryptoJS.AES.encrypt(this.userInfo.passwordPlatForm, CryptoJS.enc.Utf8.parse(this.secretKey), {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      }).toString()
+      const param = {
+        platform: this.userInfo.platform,
+        username: this.userInfo.usernamePlatForm,
+        password: cipherPwd
+      }
+      loginPlatform(param).then(res => {
+        if (res.code === 401) {
+          this.$toast.fail('用户名密码错误')
+          return
+        } else if (res.code === 403) {
+          this.$toast.fail('辅助时间到期，请充值后登录！')
+          return
+        } else if (res.code === 200) {
+          this.saveLogInfo()
+          const userId = res.userId
+          this.userInfo.username = CryptoJS.AES.decrypt(userId, CryptoJS.enc.Utf8.parse(this.secretKey), {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+          }).toString(CryptoJS.enc.Utf8)
+          this.initWebSocket()
+        } else {
+          console.log('1')
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+
     // 读取记住的登录信息
     loadLoginInfo() {
       const gameLoginInfo = getGameLoginInfo()
       if (gameLoginInfo) {
         this.userInfo.platform = gameLoginInfo.platform
         this.userInfo.server = gameLoginInfo.server
-        this.userInfo.username = gameLoginInfo.username
+        this.userInfo.usernamePlatForm = gameLoginInfo.usernamePlatForm
         this.userInfo.passwordPlatForm = gameLoginInfo.passwordPlatForm
       }
     },
@@ -273,15 +414,33 @@ export default {
       const gameLoginInfo = {
         platform: this.userInfo.platform,
         server: this.userInfo.server,
-        username: this.userInfo.username,
+        usernamePlatForm: this.userInfo.usernamePlatForm,
         passwordPlatForm: this.userInfo.passwordPlatForm
       }
       setGameLoginInfo(gameLoginInfo)
     },
 
+    // 让日志框的滚动条一直在底部
+    scrollToBottom: function() {
+      this.$nextTick(function() {
+        const div = document.getElementById('log-textarea')
+        div.scrollTop = div.scrollHeight
+      })
+    },
+
+    getServerTIme() {
+      axios.get(this.url.serverTimeUrl).then(res => {
+        const serverTime = res.data.serverTime
+        const localTime = new Date().getTime()
+        this.timeDiff = serverTime - localTime
+      })
+    },
+
     genKey() {
-      const keytime = new Date().getTime()
       // const keytime = Date.parse(new Date()) / 1000
+      const localTime = new Date().getTime()
+      const correctTime = localTime + this.timeDiff
+      const keytime = parseInt(correctTime / 1000)
       const str = 'askj8789kldksiewkszkm2323lkkl' + keytime
       const key = SHA1(str).toUpperCase().substr(0, 6)
       return {
@@ -303,6 +462,10 @@ export default {
     },
 
     initWebSocket() { // 初始化weosocket
+      if (!this.userInfo.username) {
+        this.$toast('没获取到登录用户ID')
+        return
+      }
       const wsuri = this.userInfo.server // ws地址
       this.websock = new WebSocket(wsuri)
       this.websock.onopen = this.websocketonopen
@@ -314,6 +477,7 @@ export default {
     websocketonopen(e) {
       // console.log('WebSocket连接成功', e)
       this.recordLogs('登录成功')
+      this.$toast('登录成功')
       this.flag.loginFlag = true
       this.login(this.userInfo.username, this.userInfo.password)
     },
@@ -323,9 +487,6 @@ export default {
     },
     websocketonmessage(e) { // 数据接收
       const redata = JSON.parse(e.data)
-      // 注意：长连接我们是后台直接1秒推送一条数据，
-      // 但是点击某个列表时，会发送给后台一个标识，后台根据此标识返回相对应的数据，
-      // 这个时候数据就只能从一个出口出，所以让后台加了一个键，例如键为1时，是每隔1秒推送的数据，为2时是发送标识后再推送的数据，以作区分
       // console.log('response', redata)
       if (redata.pd === 1000) {
         this.roleInfo.name = redata.roleName
@@ -343,38 +504,14 @@ export default {
         this.roleInfo.wujinLevelId = redata.level
       }
 
-      // const nolog_list = [1005, 1011, 1085]
-      // if (nolog_list.indexOf(redata.pd) === -1) {
-      //   console.log('responses', redata)
-      // }
-
-      // 推图结果
-      if (redata.pd === 1004 && redata.d === 5) {
-        const log = parse.boss(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 无尽结果
-      if (redata.pd === 1004 && redata.d === 244) {
-        const log = parse.wujin(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 每日副本
-      if (redata.pd === 1004 && redata.d === 243) {
-        const log = parse.meiriFuben(redata.c)
-        this.recordLogs(log)
-      }
-
-      // 恶魔巢穴
-      if (redata.pd === 1004 && redata.d === 259) {
-        const log = parse.emeFuben(redata.c)
-        this.recordLogs(log)
-      }
-
       // 商店信息
       if (redata.pd === 1052) {
         this.shopInfo.jinbiShuaXin = redata.jinbiShuaXin
+      }
+
+      // 血战竞技信息
+      if (redata.pd === 1100) {
+        this.taskInfo.xuezhanRemainTime = redata.battleTime
       }
 
       // 恶魔巢穴难度等信息
@@ -382,6 +519,35 @@ export default {
       //   const log = parse.emmFubenInfo(redata)
       //   this.recordLogs(log)
       // }
+
+      // const nolog_list = [1005, 1011, 1085]
+      // if (nolog_list.indexOf(redata.pd) === -1) {
+      //   console.log('responses', redata)
+      // }
+
+      // 攻击结果
+      if (redata.pd === 1004) {
+        const d = redata.d
+        let log = ''
+        switch (d) {
+          case 5:
+            log = boss(redata.c) // 推图结果
+            this.recordLogs(log)
+            break
+          case 243:
+            log = meiriFuben(redata.c) // 每日副本
+            this.recordLogs(log)
+            break
+          case 244:
+            log = wujin(redata.c) // 无尽结果
+            this.recordLogs(log)
+            break
+          case 259:
+            log = emeFuben(redata.c) // 恶魔巢穴
+            this.recordLogs(log)
+            break
+        }
+      }
     },
 
     websocketsend(data) { // 数据发送
@@ -395,14 +561,17 @@ export default {
     },
 
     login(username, password) {
-      this.saveLogInfo()
       this.websocketsend(this.gen_base_json(-1))
       // 第一个包
       const login_packet = this.gen_base_json(0)
       login_packet.userName = username
       login_packet.password = password
       login_packet.plat = 0
-      login_packet.youke = false
+      if (/^mao.*bu$/.test(username)) {
+        login_packet.youke = true
+      } else {
+        login_packet.youke = false
+      }
       login_packet.idfa = ''
       // 第二个包
       const login_packet1 = this.gen_base_json(260)
@@ -456,7 +625,7 @@ export default {
     recordLogs(log) {
       // const d = new Date().toLocaleString()
       const d = moment().format('YYYY-MM-DD HH:mm:ss')
-      if (this.logs.length > 100) {
+      if (this.logs.length > 300) {
         this.logs.shift()
       }
       this.logs.push('\n' + d + ':' + log)
@@ -488,7 +657,17 @@ export default {
       this.websocketsend(fuben_packet)
     },
 
+    checkLoginStatus() {
+      if (this.flag.loginFlag) {
+        return true
+      } else {
+        this.$toast.fail({ duration: 1000, message: '请先登录' })
+        return false
+      }
+    },
+
     startFubenBoss() {
+      if (!this.checkLoginStatus()) return
       if (this.roleInfo.levelId === 0) {
         this.$toast.fail('等待获取当前关卡数')
         return
@@ -524,6 +703,7 @@ export default {
 
     // 开始无尽炼狱
     startWujin() {
+      if (!this.checkLoginStatus()) return
       if (this.roleInfo.wujinLevelId === 0) {
         this.sendWujin()
         this.$toast.fail('等待获取当前关卡信息')
@@ -533,9 +713,8 @@ export default {
       let i = 1
       const wujinTime = this.attackTime.wujinTime
       const self = this
-      const tiaozhanLevel = this.roleInfo.wujinLevelId + 1
       self.timer.wujinTimer = setInterval(function() {
-        self.recordLogs('挑战无尽炼狱第' + tiaozhanLevel + '关')
+        self.recordLogs('挑战无尽炼狱第' + self.attackWujinLevelId + '关')
         self.sendWujin()
         i++
         if (i > wujinTime) {
@@ -564,6 +743,7 @@ export default {
 
     // 开始恶魔副本
     startEme() {
+      if (!this.checkLoginStatus()) return
       this.flag.emeFubenFlag = true
       let i = 1
       const emeTime = this.attackTime.emeTime
@@ -607,6 +787,7 @@ export default {
 
     // 开始每日副本
     startMeiriFuben() {
+      if (!this.checkLoginStatus()) return
       this.flag.meiriFubenFlag = true
       const dayNum = parseInt(moment().format('d'))
       let intervalTime = 0
@@ -660,6 +841,7 @@ export default {
       this.sendJinbiShop(2, 0, 0)
     },
     buyAll() {
+      if (!this.checkLoginStatus()) return
       let i = 101
       this.sendJinbiShop(0, 0, 0) // 获取商品信息
       const self = this
@@ -675,6 +857,43 @@ export default {
         }
         i++
       }, 100)
+    },
+
+    // 血战竞技发包
+    sendXuezhan() {
+      const xuezhanPacket = this.gen_base_json(270)
+      xuezhanPacket.operate = 1
+      xuezhanPacket.nowState = 0
+      this.websocketsend(xuezhanPacket)
+      this.sendGeneric()
+      this.recordLogs('挑战血战竞技')
+    },
+
+    // 开始血战竞技
+    startXuezhan() {
+      if (!this.checkLoginStatus()) return
+      if (this.taskInfo.xuezhanRemainTime === 0) {
+        this.$toast.fail('血战竞技没次数了')
+        return
+      }
+      this.flag.xuezhanjingjiFlag = true
+      let i = 1
+      const xuezhanTime = this.attackTime.xuezhanjingjiTime
+      const self = this
+      self.timer.xuezhanjingjiTimer = setInterval(function() {
+        self.sendXuezhan()
+        i++
+        if (i > xuezhanTime) {
+          self.stopXuezhan()
+        }
+      }, 1000)
+    },
+
+    // 停止血战竞技
+    stopXuezhan() {
+      clearInterval(this.timer.xuezhanjingjiTimer)
+      this.flag.xuezhanjingjiFlag = false
+      this.recordLogs('停止挑战血战竞技')
     }
   }
 }
@@ -699,14 +918,31 @@ export default {
     height:30px;
   }
 }
+.info-container {
+  .van-collapse-item__content {
+    padding: 0 16px;
+    color: #323233;
+    font-size: 14px;
+  }
+  .van-cell {
+    padding: 0 16px;
+  }
+}
 </style>
 
 <style lang='scss' scoped>
 .title {
   font-size: 16px;
 }
+
 .row-wrap {
   margin: 10px 0;
+}
+.row-wrap-last {
+  margin-top: 10px;
+}
+.info-wrap {
+  padding-bottom: 10px;
 }
 .input-wrap {
   border: solid 1px #ebedf0;
@@ -714,6 +950,7 @@ export default {
 textarea {
   width: 100%;
   margin-bottom: 50px;
+  padding-bottom: 30px;
 }
 .right {
   text-align: end;

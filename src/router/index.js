@@ -31,19 +31,19 @@ import Layout from '@/layout'
  * all roles can be accessed
  */
 export const constantRoutes = [
-  {
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
-  {
-    path: '/searchPage',
-    name: 'searchPage',
-    component: () => import('@/views/search/searchPage'),
-    meta: {
-      title: '搜索'
-    }
-  },
+  // {
+  //   path: '/login',
+  //   component: () => import('@/views/login/index'),
+  //   hidden: true
+  // },
+  // {
+  //   path: '/searchPage',
+  //   name: 'searchPage',
+  //   component: () => import('@/views/search/searchPage'),
+  //   meta: {
+  //     title: '搜索'
+  //   }
+  // },
 
   {
     path: '*',
@@ -68,45 +68,46 @@ export const constantRoutes = [
       }
     },
     {
-      path: '/user',
-      name: 'user',
-      component: () => import('@/views/user/index'),
-      meta: {
-        title: '会员中心'
-      }
-    },
-    {
-      path: '/info',
-      name: 'info',
-      component: () => import('@/views/info/index'),
-      meta: {
-        title: '产品申请'
-      }
-    },
-    {
-      path: '/search',
-      name: 'search',
-      component: () => import('@/views/search/index'),
+      path: '/description',
+      name: 'description',
+      component: () => import('@/views/description/index'),
       meta: {
         title: '进度查询'
       }
-    },
-    {
-      path: '/waitPay',
-      name: 'waitPay',
-      component: () => import('@/views/user/waitPay'),
-      meta: {
-        title: '待付款'
-      }
-    },
-    {
-      path: '/myIntegral',
-      name: 'myIntegral',
-      component: () => import('@/views/user/myIntegral'),
-      meta: {
-        title: '我的积分'
-      }
-    }]
+    }
+    // {
+    //   path: '/user',
+    //   name: 'user',
+    //   component: () => import('@/views/user/index'),
+    //   meta: {
+    //     title: '会员中心'
+    //   }
+    // },
+    // {
+    //   path: '/info',
+    //   name: 'info',
+    //   component: () => import('@/views/info/index'),
+    //   meta: {
+    //     title: '产品申请'
+    //   }
+    // }
+    // {
+    //   path: '/waitPay',
+    //   name: 'waitPay',
+    //   component: () => import('@/views/user/waitPay'),
+    //   meta: {
+    //     title: '待付款'
+    //   }
+    // },
+    // {
+    //   path: '/myIntegral',
+    //   name: 'myIntegral',
+    //   component: () => import('@/views/user/myIntegral'),
+    //   meta: {
+    //     title: '我的积分'
+    //   }
+    // }
+    ]
   }
 
   // 404 page must be placed at the end !!!
