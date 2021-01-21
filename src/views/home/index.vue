@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.6.2</span>
+          <span>古代战争火箭辅助V1.6.3</span>
         </template>
       </Header>
     </div>
@@ -52,7 +52,9 @@
             <van-dropdown-item v-model="userInfo.server" :options="serverOption" />
           </van-dropdown-menu>
         </van-col>
-        <van-col span="4" />
+        <van-col span="4" class="right">
+          <van-button plain type="info" size="small" @click="copyId">复制</van-button>
+        </van-col>
       </van-row>
       <van-row gutter="0" type="flex" justify="space-between">
         <van-col span="9">
@@ -1650,7 +1652,7 @@ export default {
         if (i > bossTime) {
           self.stopFubenBoss()
         }
-      }, 1000)
+      }, 500)
     },
 
     // 停止打BOSS
@@ -1721,7 +1723,7 @@ export default {
         if (i > wujinTime) {
           self.stopWujin()
         }
-      }, 1000)
+      }, 500)
     },
 
     // 停止无尽炼狱
@@ -2600,7 +2602,21 @@ export default {
     // 远征迷宫帮助
     showYZMGHelp() {
       this.show.yzmgHelp = true
-    }
+    },
+
+    // 复制ID
+    copyId() {
+			if (!this.checkLoginStatus()) return
+			const cpText = this.userInfo.usernamePlatForm
+			this.$copyText(cpText).then(
+        res => {
+          this.$toast.success({ duration: 2000, message: '复制成功,可用于辅助续费充值' })
+        },
+        err => {
+          this.$toast.fail({ duration: 1000, message: '复制失败' })
+        }
+			)
+		},
   }
 }
 

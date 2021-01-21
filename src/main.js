@@ -11,6 +11,9 @@ Vue.use(Vant)
 import Mui from 'vue-awesome-mui' // 用于监听手机物理按键
 Vue.use(Mui)
 
+import VueClipboard from 'vue-clipboard2'
+Vue.use(VueClipboard)
+
 import App from './App'
 import store from './store'
 import router from './router'
