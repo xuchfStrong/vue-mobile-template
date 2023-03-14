@@ -8,7 +8,7 @@
           <van-icon name="arrow" @click="showHelp()" />
         </template>
         <template>
-          <span>古代战争火箭辅助V1.6.3</span>
+          <span>古代战争火箭辅助V1.6.4</span>
         </template>
       </Header>
     </div>
@@ -53,7 +53,7 @@
           </van-dropdown-menu>
         </van-col>
         <van-col span="4" class="right">
-          <van-button plain type="info" size="small" @click="copyId">复制</van-button>
+          <!-- <van-button plain type="info" size="small" @click="copyId">复制</van-button> -->
         </van-col>
       </van-row>
       <van-row gutter="0" type="flex" justify="space-between">
@@ -75,6 +75,16 @@
       <div v-else class="endtiem-wrap">
         辅助到期时间: {{ userInfo.endTime }}
       </div>
+      <van-row type="flex" align="center" justify="space-between" class="row-wrap">
+        <van-col span="18">
+          辅助续费ID: {{ userInfo.username }}
+        </van-col>
+        <van-col span="4" class="right">
+          <van-button plain type="info" size="small" @click="copyId">复制</van-button>
+        </van-col>
+      </van-row>
+
+      <div v-if="utils.showCommon" class="waring-wrap">{{ utils.common }}</div>
 
       <van-divider v-if="userRole.vh">云挂机</van-divider>
       <div v-if="userRole.vh" class="vip-wrap">
@@ -547,7 +557,7 @@ import { getGameLoginInfo, setGameLoginInfo, getSwitchInfo, setSwitchInfo } from
 import { wujin, boss, meiriFuben, emeFuben, guaji, hadBuyInfo } from '@/utils/response-parse'
 import { xuezhan, shijieboss, laxiangguanTaskReward, laxiangguan, shilianchou } from '@/utils/response-parse'
 import { calcZhanli, calcJjcInfo, calcZhuangbei, yzmgAddWeight, yzmgCalcPos, yzmgCalcParams, yzmgUpdateLineMaps } from '@/utils/response-parse'
-import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus } from '@/api/game'
+import { loginPlatform, getServer, startGuaji, stopGuaji, getGuajiLog, getGuajiStatus, getUtils } from '@/api/game'
 import { getWujingShop, getJingjiShop, getTaozhuangShop, getYuanzhengShop } from '@/api/game'
 import Header from '@/components/Header'
 import Help from './components/Help'
@@ -593,7 +603,7 @@ export default {
         yzmgHelp: false
       },
       url: {
-        serverTimeUrl: 'http://www.dgzz1.com:20002/ServerTime'
+        serverTimeUrl: 'http://login.dgzz1.com:20002/ServerTime'
       },
       roleInfo: {
         name: '',
@@ -773,7 +783,8 @@ export default {
       },
       platformOption: [],
       serverObj: {},
-      serverOption: []
+      serverOption: [],
+      utils: {}
     }
   },
 
@@ -917,6 +928,7 @@ export default {
   mounted() {
     this.getServerTime()
     this.getServerInfo()
+    this.handleGetUtils()
     this.handleGetWujingShop()
     this.handleGetJingjiShop()
     this.handleGetTaozhuangShop()
@@ -931,6 +943,14 @@ export default {
 
     showHelp() {
       this.show.helpInfo = true
+    },
+
+    handleGetUtils() {
+      getUtils().then(res => {
+        this.utils = res
+      }).catch(err => {
+        console.log(err)
+      })
     },
 
     // 登录平台
@@ -1020,6 +1040,7 @@ export default {
         server: base64Server,
         id: base64Username
       }
+      console.log(this.userInfo.username)
       startGuaji(params).then(res => {
         const code = res.code
         switch (code) {
@@ -1080,6 +1101,7 @@ export default {
       const params = {
         id: base64Username
       }
+      console.log('getguajilog', this.userInfo.username)
       const res = await getGuajiLog(params)
       this.remoteGuajiLog = res
       this.show.remoteGuajiLog = true
@@ -1676,7 +1698,7 @@ export default {
         if (i > xiaoguaiTime) {
           self.stopFubenXiaoguai()
         }
-      }, 1000)
+      }, 500)
     },
 
     // 停止小怪
@@ -2606,17 +2628,18 @@ export default {
 
     // 复制ID
     copyId() {
-			if (!this.checkLoginStatus()) return
-			const cpText = this.userInfo.usernamePlatForm
-			this.$copyText(cpText).then(
+      if (!this.checkLoginStatus()) return
+      const cpText = this.userInfo.username
+      this.$copyText(cpText).then(
         res => {
           this.$toast.success({ duration: 2000, message: '复制成功,可用于辅助续费充值' })
         },
         err => {
+          console.log(err)
           this.$toast.fail({ duration: 1000, message: '复制失败' })
         }
-			)
-		},
+      )
+    }
   }
 }
 
@@ -2681,6 +2704,12 @@ textarea {
 }
 .tansuo-item {
   line-height: 16px;
+}
+.waring-wrap {
+  color: red;
+  margin-top: 10upx;
+  white-space: pre-line;
+	user-select: text;
 }
 
 </style>
